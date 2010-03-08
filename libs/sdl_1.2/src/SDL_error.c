@@ -110,6 +110,12 @@ void SDL_SetError (const char *fmt, ...)
 	/* If we are in debug mode, print out an error message */
 #ifdef DEBUG_ERROR
 	fprintf(stderr, "SDL_SetError: %s\n", SDL_GetError());
+
+#ifdef ANDROID
+	#include <android/log.h>
+	__android_log_print(ANDROID_LOG_ERROR, "sdl_jni", "ERROR: %s", SDL_GetError());
+#endif //end ANDROID
+
 #endif
 }
 

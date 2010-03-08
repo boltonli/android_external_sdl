@@ -31,24 +31,24 @@
 #include <stdint.h>
 
 
-#define SDL_AUDIO_DRIVER_ANDROID	1
+#define SDL_AUDIO_DRIVER_ANDROID 1
 
-#define SDL_CDROM_DISABLED	1
+#define SDL_CDROM_DISABLED 1
 
-#define SDL_JOYSTICK_DISABLED	1
+#define SDL_JOYSTICK_DISABLED 1
 
-#define SDL_LOADSO_DISABLED	1
+#define SDL_LOADSO_DISABLED 1
 
-#define SDL_THREAD_PTHREAD	1
-#define SDL_THREAD_PTHREAD_RECURSIVE_MUTEX	1
+#define SDL_THREAD_PTHREAD 1
+#define SDL_THREAD_PTHREAD_RECURSIVE_MUTEX 1
 
-#define SDL_TIMER_UNIX	1
+#define SDL_TIMER_UNIX 1
 
-#define SDL_VIDEO_DRIVER_ANDROID	1
+#define SDL_VIDEO_DRIVER_ANDROID 1
 
-#define HAVE_STDIO_H	1
+#define HAVE_STDIO_H 1
 
-#define NO_SDL_GLEXT	1
+#define NO_SDL_GLEXT 1
 
 /* FireSlash found that SDL native memcpy crashes sometimes, these defines fix it */
 #define HAVE_MEMSET 1

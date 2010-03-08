@@ -15,7 +15,7 @@ SDL_SRCS := \
 	src/thread/*.c \
 	src/timer/*.c \
 	src/video/*.c \
-	src/audio/dummy/*.c \
+	src/audio/android/*.c \
 	src/video/android/*.cpp \
 	src/joystick/dummy/*.c \
 	src/cdrom/dummy/*.c \
@@ -31,7 +31,7 @@ LOCAL_SRC_FILES := $(foreach F, $(SDL_SRCS), $(addprefix $(dir $(F)),$(notdir $(
 LOCAL_MODULE := libsdl_jni
 
 LOCAL_CFLAGS := \
-	-DNO_MALLINFO=1
+	-DNO_MALLINFO=1 -DANDROID=1 -DDEBUG_ERROR=1
 
 LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/../../include \

@@ -35,9 +35,7 @@
 #include "SDL_mutex.h"
 #include "SDL_thread.h"
 
-#include <jni.h>
 #include <android/log.h>
-#include <string.h> // for memset()
 
 #define ANDROIDAUD_DRIVER_NAME         "android"
 
@@ -87,7 +85,7 @@ static SDL_AudioDevice *ANDROIDAUD_CreateDevice(int devindex)
 	this->GetAudioBuf = ANDROIDAUD_GetAudioBuf;
 	this->CloseAudio = ANDROIDAUD_CloseAudio;
 
-	this->free = ANDROIDAUD_DeleteDevice
+	this->free = ANDROIDAUD_DeleteDevice;
 
 	return this;
 }
@@ -97,7 +95,7 @@ AudioBootStrap ANDROIDAUD_bootstrap = {
 	ANDROIDAUD_Available, ANDROIDAUD_CreateDevice
 };
 
-
+/*
 static SDL_mutex * audioMutex = NULL;
 static SDL_cond * audioCond = NULL;
 static SDL_cond * audioCond2 = NULL;
@@ -107,7 +105,7 @@ static SDL_AudioSpec *audioFormat = NULL;
 static int audioInitialized = 0;
 static int audioPlayed = 0;
 static jbyteArray audioBufferJNI = NULL;
-static JNIEnv * jniEnv = NULL;
+static JNIEnv * jniEnv = NULL;*/
 
 static Uint8 *ANDROIDAUD_GetAudioBuf(_THIS)
 {
@@ -116,6 +114,7 @@ static Uint8 *ANDROIDAUD_GetAudioBuf(_THIS)
 
 static void ANDROIDAUD_CloseAudio(_THIS)
 {
+/*
 	SDL_mutex * audioMutex1;
 
 	/*	
@@ -123,7 +122,7 @@ static void ANDROIDAUD_CloseAudio(_THIS)
 		SDL_FreeAudioMem(this->hidden->mixbuf);
 		this->hidden->mixbuf = NULL;
 	}
-	*/
+	*
 	if( audioMutex != NULL )
 	{
 		audioMutex1 = audioMutex;
@@ -141,7 +140,7 @@ static void ANDROIDAUD_CloseAudio(_THIS)
 		/*
 		(*jniEnv)->ReleaseByteArrayElements(jniEnv, audioBufferJNI, (jbyte *)audioBuffer, 0);
 		(*jniEnv)->DeleteGlobalRef(jniEnv, audioBufferJNI);
-		*/
+		*
 		jniEnv = NULL;
 		audioBufferJNI = NULL;
 		audioBuffer = NULL;
@@ -149,11 +148,12 @@ static void ANDROIDAUD_CloseAudio(_THIS)
 		SDL_mutexV(audioMutex1);
 		SDL_DestroyMutex(audioMutex1);
 		
-	}
+	}*/
 }
 
 static int ANDROIDAUD_OpenAudio(_THIS, SDL_AudioSpec *spec)
 {
+/*
 	if( ! (spec->format == AUDIO_S8 || spec->format == AUDIO_S16) )
 		return (-1); // TODO: enable format conversion? Don't know how to do that in SDL
 	
@@ -185,7 +185,7 @@ static int ANDROIDAUD_OpenAudio(_THIS, SDL_AudioSpec *spec)
 
 	audioFormat = NULL;
 	
-	SDL_mutexV(audioMutex);
+	SDL_mutexV(audioMutex);*/
 
 	return(0);
 }
@@ -198,6 +198,7 @@ static void ANDROIDAUD_WaitAudio(_THIS)
 
 static void ANDROIDAUD_PlayAudio(_THIS)
 {
+/*
 	SDL_mutexP(audioMutex);
 
 	//audioBuffer = this->hidden->mixbuf;
@@ -210,9 +211,10 @@ static void ANDROIDAUD_PlayAudio(_THIS)
 
 	this->hidden->mixbuf = audioBuffer;
 	
-	SDL_mutexV(audioMutex);
+	SDL_mutexV(audioMutex);*/
 }
 
+/*
 #ifndef SDL_JAVA_PACKAGE_PATH
 #error You have to define SDL_JAVA_PACKAGE_PATH to your package path with dots replaced with underscores, for example "com_example_SanAngeles"
 #endif
@@ -258,7 +260,7 @@ extern jobject JAVA_EXPORT_NAME(AudioThread_nativeAudioInit2) (JNIEnv * env, job
 	
 	if( audioInitialized == 0 )
 	{
-		/* Allocate mixing buffer */
+		/* Allocate mixing buffer 
 		audioBufferJNI = (jbyteArray*)(*env)->NewGlobalRef(env, buf);
 		audioBufferSize = (*env)->GetArrayLength(env, audioBufferJNI);
 		jboolean isCopy = JNI_TRUE;
@@ -284,7 +286,7 @@ extern jobject JAVA_EXPORT_NAME(AudioThread_nativeAudioInit2) (JNIEnv * env, job
 		}
 		
 		ret = (*env)->NewDirectByteBuffer(env, audioBuffer, audioBufferSize);
-		*/
+		*
 
 		audioInitialized = 1;
 		SDL_CondSignal(audioCond);
@@ -342,5 +344,5 @@ extern jint JAVA_EXPORT_NAME(AudioThread_nativeAudioBufferUnlock) ( JNIEnv * env
 	SDL_CondSignal(audioCond);
 
 	return 0;
-}
+}*/
 
