@@ -323,7 +323,7 @@ void ANDROID_SetCaption(_THIS, const char *title, const char *icon)
 void ANDROID_InitOSKeymap(_THIS)
 {
 	//__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "initzializing key map");
-	int i;
+	unsigned int i;
 
 	/* Initialize the DirectFB key translation table */
 	for (i = 0; i < SDL_arraysize(keymap); ++i)
@@ -638,18 +638,17 @@ void processKey(JNIEnv*  env, jobject  thiz, jint key, jint action)
 static
 void processMouse(JNIEnv*  env, jobject  thiz, jint x, jint y, jint action)
 {
-	double horizontalMultiplicant = (double) screenBitmap.width() / 480;
-	double verticalMultiplicant = (double) screenBitmap.height() / 320;
+	double _x = (screenBitmap.width() * x) / 480;
+	double _y = (screenBitmap.height() * y) / 320;
 
 	if( action == MOUSE_EVENT_ACTION_DOWN || action == MOUSE_EVENT_ACTION_UP )
 	{
-		SDL_PrivateMouseButton( (action == MOUSE_EVENT_ACTION_DOWN) ? SDL_PRESSED : SDL_RELEASED, 1, 
-							x * horizontalMultiplicant, y * verticalMultiplicant );
+		SDL_PrivateMouseButton( (action == MOUSE_EVENT_ACTION_DOWN) ? SDL_PRESSED : SDL_RELEASED, 1, _x, _y);
 	}
 	
 	if( action == MOUSE_EVENT_ACTION_MOVE )
 	{
-		SDL_PrivateMouseMotion(0, 0, x * horizontalMultiplicant, y *verticalMultiplicant );
+		SDL_PrivateMouseMotion(0, 0, _x, _y);
 	}
 }
 
