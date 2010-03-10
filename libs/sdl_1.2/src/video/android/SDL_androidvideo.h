@@ -24,20 +24,16 @@
 #ifndef _SDL_androidvideo_h
 #define _SDL_androidvideo_h
 
+extern "C" {
+	
 #include "../SDL_sysvideo.h"
-
-#include <ui/Surface.h>
-#include <ui/SurfaceComposerClient.h>
-
-using namespace android;
 
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *self
 
-extern "C" {
-	extern void ANDROID_InitOSKeymap(_THIS);
-	extern void ANDROID_PumpEvents(_THIS);
-}
+extern void ANDROID_InitOSKeymap(_THIS);
+extern void ANDROID_PumpEvents(_THIS);
+
 
 #define SDL_NUMMODES 3
 
@@ -206,5 +202,7 @@ KEYCODE_MUTE = 91,
 
 KEYCODE_LAST = KEYCODE_MUTE
 };
+
+} //end of extern C
 
 #endif /* _SDL_androidvideo_h */

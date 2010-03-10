@@ -15,7 +15,7 @@ SDL_SRCS := \
 	src/thread/*.c \
 	src/timer/*.c \
 	src/video/*.c \
-	src/audio/android/*.c \
+	src/audio/android/*.cpp \
 	src/video/android/*.cpp \
 	src/joystick/dummy/*.c \
 	src/cdrom/dummy/*.c \
@@ -45,6 +45,7 @@ LOCAL_STATIC_LIBRARIES := libsdlmixer
 LOCAL_SHARED_LIBRARIES := \
 	libskia \
 	libui \
+	libmedia \
 	libutils \
 	liblog
 

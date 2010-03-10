@@ -24,15 +24,20 @@
 #ifndef _SDL_androidaudio_h
 #define _SDL_androidaudio_h
 
+extern "C" 
+{
+	
 #include "../SDL_sysaudio.h"
 
 /* Hidden "this" pointer for the video functions */
-#define _THIS	SDL_AudioDevice *this
-
+#define _THIS	SDL_AudioDevice *self
+	
 struct SDL_PrivateAudioData {
 	/* The file descriptor for the audio device */
 	Uint8 *mixbuf;
 	Uint32 mixlen;
 };
+	
+}
 
 #endif /* _SDL_androidaudio_h */

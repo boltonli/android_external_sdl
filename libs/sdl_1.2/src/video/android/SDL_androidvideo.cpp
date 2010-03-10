@@ -49,35 +49,30 @@ extern "C" {
 
 #include "SDL_androidvideo.h"
 
-#include <ui/DisplayInfo.h>
-#include <ui/Surface.h>
-#include <ui/SurfaceComposerClient.h>
-
 #include <SkBitmap.h>
 #include <SkCanvas.h>
+#include <ui/Surface.h>
+
+using namespace android;
 
 #include <jni.h>
 
 static const char* CLASS_PATH = "SDL_androidvideo.cpp";
 
-JavaVM *mVM = NULL;
-JNIEnv *mEnv = NULL;
-
-//surface in my surface view
-jfieldID FID_surface;
-
-//android native surface
-jfieldID FID_Surface_surface;
-
-jmethodID MID_onWindowTitle;
-
-//-- surface java object
-jobject surface;
+struct fields_t {
+    	// these fields provide access from C++ to the...
+	JavaVM *mVM;
+	jfieldID FID_surface;		//surface in my surface view
+	jfieldID FID_Surface_surface;	//android native surface
+	jmethodID MID_onWindowTitle;
+	jobject surface; 		//-- surface java object
+};
+static fields_t javaSDLSurfaceViewFields;
 
 //-- native surface, which is mirror of java class (android do this for us) 
 Surface *nativeSurface;
 
-SkBitmap screenBitmap;
+SkBitmap sdlBitmap;
 
 static
 void setTitle(const char *title);
@@ -87,8 +82,6 @@ void *createSDLBitmap(int format, int width, int height);
 
 static
 void updateScreen(Surface::SurfaceInfo *surface_info);
-
-using namespace android;
 
 extern "C" {
 
@@ -463,7 +456,7 @@ void ANDROID_VideoQuit(_THIS)
 
 }//end extern C
 
-/* Called by SDL for setting window title string */
+/* Called by SDL for setting window title */
 static
 void setTitle(const char *title)
 {
@@ -483,40 +476,48 @@ void setTitle(const char *title)
 }
 
 static
+void setBitmapConfig(SkBitmap *bitmap, int format, int width, int height)
+{
+	switch (format) 
+	{
+		case PIXEL_FORMAT_RGBA_8888:
+			bitmap->setConfig(SkBitmap::kARGB_8888_Config,
+								   width, height);
+			break;
+			
+		case PIXEL_FORMAT_RGBA_4444:
+			bitmap->setConfig(SkBitmap::kARGB_4444_Config,
+								   width, height);
+			break;
+			
+        case PIXEL_FORMAT_RGB_565:
+			bitmap->setConfig(SkBitmap::kRGB_565_Config,
+								   width, height);
+			break;
+			
+        case PIXEL_FORMAT_A_8:
+			bitmap->setConfig(SkBitmap::kA8_Config,
+								   width, height);
+			break;
+			
+        default:
+			bitmap->setConfig(SkBitmap::kNo_Config,
+								   width, height);
+			break;
+	}
+}
+
+static
 void *createSDLBitmap(int format, int width, int height)
 {
 	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "creating sdl bitmap");
 
-	switch (format) 
-	{
-	case PIXEL_FORMAT_RGBA_8888:
-		screenBitmap.setConfig(SkBitmap::kARGB_8888_Config,
-			       width, height);
-		break;
+	//-- set screen bitmap(sdl) config based on format
+	setBitmapConfig(&sdlBitmap, format, width, height);
+	sdlBitmap.setIsOpaque(true);
 
-	case PIXEL_FORMAT_RGBA_4444:
-		screenBitmap.setConfig(SkBitmap::kARGB_4444_Config,
-			       width, height);
-		break;
-
-        case PIXEL_FORMAT_RGB_565:
-		screenBitmap.setConfig(SkBitmap::kRGB_565_Config,
-			       width, height);
-		break;
-
-        case PIXEL_FORMAT_A_8:
-		screenBitmap.setConfig(SkBitmap::kA8_Config,
-			       width, height);
-		break;
-
-        default:
-		screenBitmap.setConfig(SkBitmap::kNo_Config,
-			       width, height);
-		break;
-	}
-
-	screenBitmap.setIsOpaque(true);
-	if(!screenBitmap.allocPixels())
+	//-- alloc array of pixels
+	if(!sdlBitmap.allocPixels())
 	{
 		__android_log_print(ANDROID_LOG_INFO, CLASS_PATH,
 							"Failed to alloc bitmap pixels");
@@ -524,57 +525,32 @@ void *createSDLBitmap(int format, int width, int height)
 		return NULL;
 	}
 
-	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "width: %i, height: %i, bpp: %i", screenBitmap.width(), 
-											    screenBitmap.height(), 
-											    screenBitmap.bytesPerPixel());
+	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "width: %i, height: %i, bpp: %i", sdlBitmap.width(), 
+											    sdlBitmap.height(), 
+											    sdlBitmap.bytesPerPixel());
 
 	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "sdl bitmap created");
-	return screenBitmap.getPixels();
+	return sdlBitmap.getPixels();
 }
  
 static
 void updateScreen(Surface::SurfaceInfo *surface_info)
 {
 	//__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "updating screen");
-	SkBitmap bitmap;
-	switch (surface_info->format) 
-	{
-	case PIXEL_FORMAT_RGBA_8888:
-		bitmap.setConfig(SkBitmap::kARGB_8888_Config,
-			       surface_info->w, surface_info->h);
-		break;
+	//-- set screen androidBitmap config based on format
+	SkBitmap androidBitmap;
+	setBitmapConfig(&androidBitmap, surface_info->format, surface_info->w, surface_info->h);
+	androidBitmap.setPixels(surface_info->bits);
 
-	case PIXEL_FORMAT_RGBA_4444:
-		bitmap.setConfig(SkBitmap::kARGB_4444_Config,
-			       surface_info->w, surface_info->h);
-		break;
-
-        case PIXEL_FORMAT_RGB_565:
-		bitmap.setConfig(SkBitmap::kRGB_565_Config,
-			       surface_info->w, surface_info->h);
-		break;
-
-        case PIXEL_FORMAT_A_8:
-		bitmap.setConfig(SkBitmap::kA8_Config,
-			       surface_info->w, surface_info->h);
-		break;
-
-        default:
-		bitmap.setConfig(SkBitmap::kNo_Config,
-			       surface_info->w, surface_info->h);
-		break;
-	}
-	bitmap.setPixels(surface_info->bits);
-
-	SkCanvas canvas(bitmap);
+	SkCanvas canvas(androidBitmap);
 	SkRect surface_sdl;
 	SkRect surface_android;
 	SkMatrix matrix;
 	surface_android.set(0, 0, surface_info->w, surface_info->h);
-	surface_sdl.set(0, 0, screenBitmap.width(), screenBitmap.height());
+	surface_sdl.set(0, 0, sdlBitmap.width(), sdlBitmap.height());
 	matrix.setRectToRect(surface_sdl, surface_android, SkMatrix::kFill_ScaleToFit);
 
-	canvas.drawBitmapMatrix(screenBitmap, matrix);
+	canvas.drawBitmapMatrix(sdlBitmap, matrix);
 	//__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "screen updated");
 }
 
@@ -582,6 +558,11 @@ static
 void surfaceCreated(JNIEnv *env, jobject thiz)
 {
 	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "creating surface");
+
+	jobject surface = javaSDLSurfaceViewFields.surface;
+	jfieldID FID_surface = javaSDLSurfaceViewFields.FID_surface;
+	jfieldID FID_Surface_surface = javaSDLSurfaceViewFields.FID_Surface_surface;
+
 	if (surface != NULL)
 	{
 		__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "deleting old surface");
@@ -607,7 +588,6 @@ static
 void surfaceChanged(JNIEnv *env, jobject thiz, int format, int width, int height)
 {
 	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "changing surface");
-	//SDL_SetVideoMode(width, height, 16, SDL_FULLSCREEN);
 	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "surface changed");
 }
 
@@ -638,8 +618,8 @@ void processKey(JNIEnv*  env, jobject  thiz, jint key, jint action)
 static
 void processMouse(JNIEnv*  env, jobject  thiz, jint x, jint y, jint action)
 {
-	double _x = (screenBitmap.width() * x) / 480;
-	double _y = (screenBitmap.height() * y) / 320;
+	double _x = (sdlBitmap.width() * x) / 480;
+	double _y = (sdlBitmap.height() * y) / 320;
 
 	if( action == MOUSE_EVENT_ACTION_DOWN || action == MOUSE_EVENT_ACTION_UP )
 	{
@@ -700,7 +680,7 @@ JNI_OnLoad(JavaVM* vm, void* reserved)
 	
     __android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "loading library");
 	
-	mVM = vm;
+	javaSDLSurfaceViewFields.mVM = vm;
 
     if (vm->GetEnv((void**) &env, JNI_VERSION_1_4) != JNI_OK) {
     	__android_log_print(ANDROID_LOG_ERROR, CLASS_PATH, "Bad version");
@@ -727,22 +707,22 @@ JNI_OnLoad(JavaVM* vm, void* reserved)
 		goto bail;
     }
 	
-	FID_surface = env->GetFieldID(cls, "mSurface", "Landroid/view/Surface;");
-  	if(FID_surface == NULL)
+	javaSDLSurfaceViewFields.FID_surface = env->GetFieldID(cls, "mSurface", "Landroid/view/Surface;");
+  	if(javaSDLSurfaceViewFields.FID_surface == NULL)
   	{
 		__android_log_print(ANDROID_LOG_ERROR, CLASS_PATH, "can't load java mSurface");
   	  	goto bail;
   	}
 	
-	MID_onWindowTitle = env->GetMethodID(cls, "onWindowTitle", "(Ljava/lang/String;)V");
-	if(MID_onWindowTitle == NULL)
+	javaSDLSurfaceViewFields.MID_onWindowTitle = env->GetMethodID(cls, "onWindowTitle", "(Ljava/lang/String;)V");
+	if(javaSDLSurfaceViewFields.MID_onWindowTitle == NULL)
   	{
 		__android_log_print(ANDROID_LOG_ERROR, CLASS_PATH, "can't load onWindowTitle callback");
   	  	goto bail;
   	}
 	
-  	FID_Surface_surface = env->GetFieldID(CLS_surface, "mSurface", "I");
-  	if(FID_Surface_surface == NULL)
+  	javaSDLSurfaceViewFields.FID_Surface_surface = env->GetFieldID(CLS_surface, "mSurface", "I");
+  	if(javaSDLSurfaceViewFields.FID_Surface_surface == NULL)
   	{
 		__android_log_print(ANDROID_LOG_ERROR, CLASS_PATH, "can't load native mSurface");
   	  	goto bail;
