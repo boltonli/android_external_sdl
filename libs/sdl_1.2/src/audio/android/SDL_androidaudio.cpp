@@ -42,6 +42,8 @@ static const char *CLASS_PATH = "SDL_androidaudio.cpp";
 
 #include "SDL_androidaudio.h"
 
+#include <stdio.h>
+#include <stdlib.h>
 #include <media/AudioSystem.h>
 #include <media/AudioTrack.h>
 #include <utils/Errors.h>
@@ -209,7 +211,6 @@ int startAudioTrack(int rate, int channels, int encoding, int size)
 		goto end;
 	}
 
-	//__android_log_print(ANDROID_LOG_ERROR, CLASS_PATH, "starting audio track");
 	audioTrack.start();
 	
 end:
@@ -219,5 +220,19 @@ end:
 static
 void playAudioTrack(void *buffer, int length)
 {
-	audioTrack.write(buffer, length);
+	void *temp = buffer;
+	while(length > 0)
+	{
+		int r = audioTrack.write(temp, length);
+		if(r > 0)
+		{
+			length -= r;
+			temp += r;			
+		}
+		else
+		{
+			__android_log_print(ANDROID_LOG_ERROR, CLASS_PATH, "Can't play audio buffer from %i", r);
+			return;
+		}
+	}
 }

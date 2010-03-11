@@ -24,12 +24,12 @@
 #ifndef _SDL_androidvideo_h
 #define _SDL_androidvideo_h
 
+/* Hidden "this" pointer for the video functions */
+#define _THIS	SDL_VideoDevice *self
+
 extern "C" {
 	
 #include "../SDL_sysvideo.h"
-
-/* Hidden "this" pointer for the video functions */
-#define _THIS	SDL_VideoDevice *self
 
 extern void ANDROID_InitOSKeymap(_THIS);
 extern void ANDROID_PumpEvents(_THIS);

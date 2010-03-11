@@ -69,6 +69,13 @@ struct fields_t {
 };
 static fields_t javaSDLSurfaceViewFields;
 
+struct fields_a
+{
+	int width;
+	int height;
+};
+static fields_a androidScreen;
+
 //-- native surface, which is mirror of java class (android do this for us) 
 Surface *nativeSurface;
 
@@ -117,9 +124,10 @@ static int ANDROID_Available(void)
 static void ANDROID_DeleteDevice(SDL_VideoDevice *device)
 {
 	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "deleting device");
-	free(device->hidden->buffer);
+	
 	SDL_free(device->hidden);
     SDL_free(device);
+	
 	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "device deleted");
 }
 
@@ -537,7 +545,11 @@ static
 void updateScreen(Surface::SurfaceInfo *surface_info)
 {
 	//__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "updating screen");
-	//-- set screen androidBitmap config based on format
+	
+	androidScreen.width = surface_info->w;
+	androidScreen.height = surface_info->h;
+	
+	//bitmap which is drawed on android surfaceview
 	SkBitmap androidBitmap;
 	setBitmapConfig(&androidBitmap, surface_info->format, surface_info->w, surface_info->h);
 	androidBitmap.setPixels(surface_info->bits);
@@ -618,8 +630,8 @@ void processKey(JNIEnv*  env, jobject  thiz, jint key, jint action)
 static
 void processMouse(JNIEnv*  env, jobject  thiz, jint x, jint y, jint action)
 {
-	double _x = (sdlBitmap.width() * x) / 480;
-	double _y = (sdlBitmap.height() * y) / 320;
+	double _x = (sdlBitmap.width() * x) / androidScreen.width;
+	double _y = (sdlBitmap.height() * y) / androidScreen.height;
 
 	if( action == MOUSE_EVENT_ACTION_DOWN || action == MOUSE_EVENT_ACTION_UP )
 	{
