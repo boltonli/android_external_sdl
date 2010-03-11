@@ -223,7 +223,7 @@ void playAudioTrack(void *buffer, int length)
 	void *temp = buffer;
 	while(length > 0)
 	{
-		int r = audioTrack.write(temp, length);
+		int r = audioTrack.write(buffer, length);
 		if(r > 0)
 		{
 			length -= r;

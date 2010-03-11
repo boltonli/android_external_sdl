@@ -81,17 +81,14 @@ Surface *nativeSurface;
 
 SkBitmap sdlBitmap;
 
-static
-void setTitle(const char *title);
+static void setTitle(const char *title);
 
-static
-void *createSDLBitmap(int format, int width, int height);
+static void *createSDLBitmap(int format, int width, int height);
 
-static
-void updateScreen(Surface::SurfaceInfo *surface_info);
+static void updateScreen(Surface::SurfaceInfo *surface_info);
 
 extern "C" {
-
+//static SDL_mutex* lock;
 static SDLKey keymap[KEYCODE_LAST+1];
 
 #define ANDROIDVID_DRIVER_NAME "android"
@@ -178,6 +175,8 @@ static SDL_VideoDevice *ANDROID_CreateDevice(int devindex)
     device->PumpEvents = ANDROID_PumpEvents;
 
     device->free = ANDROID_DeleteDevice;
+    
+    //lock = SDL_CreateMutex();
 
 	//__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "device created");
 	
@@ -219,11 +218,6 @@ SDL_Surface *ANDROID_SetVideoMode(_THIS, SDL_Surface *current, int width, int he
 		return NULL;
 	}
 	
-	if(self->hidden->buffer != NULL)
-	{
-		free(self->hidden->buffer);
-	}
-
     /* Allocate the new pixel format for the screen */
     if (!SDL_ReallocFormat(current, bpp, 0, 0, 0, 0)) {
     	__android_log_print(ANDROID_LOG_ERROR, CLASS_PATH, "couldn't allocate new pixel format for requested mode");
@@ -518,7 +512,7 @@ void setBitmapConfig(SkBitmap *bitmap, int format, int width, int height)
 static
 void *createSDLBitmap(int format, int width, int height)
 {
-	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "creating sdl bitmap");
+	//__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "creating sdl bitmap");
 
 	//-- set screen bitmap(sdl) config based on format
 	setBitmapConfig(&sdlBitmap, format, width, height);
@@ -537,7 +531,8 @@ void *createSDLBitmap(int format, int width, int height)
 											    sdlBitmap.height(), 
 											    sdlBitmap.bytesPerPixel());
 
-	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "sdl bitmap created");
+	//__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "sdl bitmap created");
+		
 	return sdlBitmap.getPixels();
 }
  
@@ -563,6 +558,7 @@ void updateScreen(Surface::SurfaceInfo *surface_info)
 	matrix.setRectToRect(surface_sdl, surface_android, SkMatrix::kFill_ScaleToFit);
 
 	canvas.drawBitmapMatrix(sdlBitmap, matrix);
+	
 	//__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "screen updated");
 }
 
