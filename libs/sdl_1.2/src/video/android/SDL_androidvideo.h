@@ -34,15 +34,6 @@ extern "C" {
 extern void ANDROID_InitOSKeymap(_THIS);
 extern void ANDROID_PumpEvents(_THIS);
 
-
-#define SDL_NUMMODES 3
-
-/* Private display data */
-/*
-struct SDL_PrivateVideoData {
-SDL_Rect *SDL_modelist[SDL_NUMMODES+1];
-};*/
-
 /* Private display data */
 struct SDL_PrivateVideoData {
     int w, h, bytesPerPixel;

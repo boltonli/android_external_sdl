@@ -122,7 +122,7 @@ static void ANDROID_DeleteDevice(SDL_VideoDevice *device)
 {
 	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "deleting device");
 	
-	SDL_free(device->hidden);
+	//SDL_free(device->hidden);
     SDL_free(device);
 	
 	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "device deleted");
