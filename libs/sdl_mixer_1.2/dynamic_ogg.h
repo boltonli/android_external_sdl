@@ -22,7 +22,11 @@
 
 #ifdef OGG_MUSIC
 #ifdef OGG_USE_TREMOR
+#ifdef ANDROID
+#include <Tremor/ivorbisfile.h>
+#else
 #include <tremor/ivorbisfile.h>
+#endif
 #else
 #include <vorbis/vorbisfile.h>
 #endif

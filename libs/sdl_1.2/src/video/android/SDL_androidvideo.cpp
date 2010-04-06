@@ -62,10 +62,10 @@ static const char* CLASS_PATH = "SDL_androidvideo.cpp";
 struct fields_t {
     	// these fields provide access from C++ to the...
 	JavaVM *mVM;
-	jfieldID FID_surface;		//surface in my surface view
-	jfieldID FID_Surface_surface;	//android native surface
-	jmethodID MID_onWindowTitle;
-	jobject surface; 		//-- surface java object
+	jfieldID FID_surface;			// surface in my surface view
+	jfieldID FID_Surface_surface;	// android native surface
+	jmethodID MID_onWindowTitle;	// java method for setting window title
+	jobject surface;				// surface java object
 };
 static fields_t javaSDLSurfaceViewFields;
 
@@ -79,12 +79,10 @@ static fields_a androidScreen;
 //-- native surface, which is mirror of java class (android do this for us) 
 Surface *nativeSurface;
 
-SkBitmap sdlBitmap;
+SkBitmap sdlBitmap;	// bitmap which represents screen rendered by sdl
 
 static void setTitle(const char *title);
-
 static void *createSDLBitmap(int format, int width, int height);
-
 static void updateScreen(Surface::SurfaceInfo *surface_info);
 
 extern "C" {
@@ -220,7 +218,6 @@ SDL_Surface *ANDROID_SetVideoMode(_THIS, SDL_Surface *current, int width, int he
 	
     /* Allocate the new pixel format for the screen */
     if (!SDL_ReallocFormat(current, bpp, 0, 0, 0, 0)) {
-    	__android_log_print(ANDROID_LOG_ERROR, CLASS_PATH, "couldn't allocate new pixel format for requested mode");
         SDL_SetError("Couldn't allocate new pixel format for requested mode");
         return NULL;
     }
@@ -285,8 +282,6 @@ void ANDROID_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 	
 	if (nativeSurface->lock(&surf_info) < 0)
 	{
-		__android_log_print(ANDROID_LOG_INFO, CLASS_PATH,
-							"Failed to lock surface");
 		SDL_SetError("Failed to lock surface");
 		return;
 	}
@@ -295,8 +290,6 @@ void ANDROID_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 	updateScreen(&surf_info);
 
 	if (nativeSurface->unlockAndPost() < 0) {
-		__android_log_print(ANDROID_LOG_INFO, CLASS_PATH,
-							"Failed to unlock surface");
 		SDL_SetError("Failed to unlock surface");
 		return;
 	}
@@ -521,8 +514,6 @@ void *createSDLBitmap(int format, int width, int height)
 	//-- alloc array of pixels
 	if(!sdlBitmap.allocPixels())
 	{
-		__android_log_print(ANDROID_LOG_INFO, CLASS_PATH,
-							"Failed to alloc bitmap pixels");
 		SDL_SetError("Failed to alloc bitmap pixels");
 		return NULL;
 	}

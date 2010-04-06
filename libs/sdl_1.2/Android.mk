@@ -21,7 +21,7 @@ SDL_SRCS := \
 	src/cdrom/dummy/*.c \
 	src/thread/pthread/*.c \
 	src/timer/unix/*.c \
-	src/loadso/dummy/*.c \
+	src/loadso/dlopen/*.c \
  
 LOCAL_CPP_EXTENSION := .cpp
  
@@ -31,7 +31,7 @@ LOCAL_SRC_FILES := $(foreach F, $(SDL_SRCS), $(addprefix $(dir $(F)),$(notdir $(
 LOCAL_MODULE := libsdl_jni
 
 LOCAL_CFLAGS := \
-	-DNO_MALLINFO=1 -DANDROID=1 -DDEBUG_ERROR=1
+	-DNO_MALLINFO=1 -DANDROID=1 -DDEBUG_ERROR=1 -DSDL_LOADSO_DLOPEN
 
 LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/../../include \
@@ -47,7 +47,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libui \
 	libmedia \
 	libutils \
-	liblog
+	liblog \
+	libdl
 
 TARGET_PRELINK_MODULE := false
 
