@@ -1,43 +1,53 @@
-/*
-    SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2009 Sam Lantinga
-
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
-
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-    Sam Lantinga
-    slouken@libsdl.org
-*/
-#include "SDL_config.h"
 
 #ifndef _SDL_androidaudio_h
 #define _SDL_androidaudio_h
 
-extern "C" 
-{
-	
-#include "../SDL_sysaudio.h"
+#include "SDL_config.h"
 
-/* Hidden "this" pointer for the video functions */
-#define _THIS	SDL_AudioDevice *self
-	
-struct SDL_PrivateAudioData {
-	/* The file descriptor for the audio device */
-	Uint8 *mixbuf;
-	Uint32 mixlen;
-};
-	
+extern "C" {
+#include "SDL_audio.h"
+#include "../SDL_sysaudio.h"
 }
+
+#include <media/AudioSystem.h>
+#include <media/AudioTrack.h>
+#include <utils/Errors.h>
+
+using namespace android;
+
+#define _THIS	SDL_AudioDevice *self
+
+class SDLAudioDriver {
+
+public:
+    SDLAudioDriver();
+    static SDL_AudioDevice *onCreateDevice(int devindex);
+    static int onAvailable();
+
+    static const char *getDriverName() {
+        return "Android";
+    }
+
+    static const char *getDriverDescription() {
+        return "SDL android audio driver";
+    }
+
+private:
+    AudioTrack mAudioTrack;
+    Uint8 *mBuffer;
+    Uint32 mBufferSize;
+
+    status_t initAudioTrack(int rate, int channels, int encoding, int size);
+
+    static void onDeleteDevice(SDL_AudioDevice *device);
+
+    /* Audio driver functions */
+    static int onOpenAudio(_THIS, SDL_AudioSpec *spec);
+    static void onWaitAudio(_THIS);
+    static void onPlayAudio(_THIS);
+    static Uint8 *onGetAudioBuf(_THIS);
+    static void onCloseAudio(_THIS);
+
+};
 
 #endif /* _SDL_androidaudio_h */

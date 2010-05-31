@@ -27,6 +27,10 @@
 #include "SDL_mutex.h"
 #include "SDL_thread.h"
 
+//#ifdef __cplusplus
+//extern "C" {
+//#endif
+
 /* The SDL audio driver */
 typedef struct SDL_AudioDevice SDL_AudioDevice;
 
@@ -183,5 +187,9 @@ extern AudioBootStrap EPOCAudio_bootstrap;
 
 /* This is the current audio device */
 extern SDL_AudioDevice *current_audio;
+
+//#ifdef __cplusplus
+//}
+//#endif
 
 #endif /* _SDL_sysaudio_h */
