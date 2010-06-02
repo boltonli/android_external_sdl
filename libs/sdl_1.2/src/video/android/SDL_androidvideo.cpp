@@ -94,61 +94,67 @@ void SDLVideoDriver::initBitmap(int format, int width, int height) {
 
 /* Initialization/Query functions */
 SDL_VideoDevice *SDLVideoDriver::onCreateDevice(int devindex) {
+    // if class isn't yet initzialized, we will do it
+    getInstance();
+
     /* Initialize all variables that we clean on shutdown */
-    SDL_VideoDevice *device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
-    if (device) {
-        SDL_memset(device, 0, (sizeof *device));
+    thiz->device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
+    if (thiz->device) {
+        SDL_memset(thiz->device, 0, (sizeof *thiz->device));
     }
-    if (device == NULL) {
+    if (thiz->device == NULL) {
         SDL_OutOfMemory();
-        if ( device ) {
-            SDL_free(device);
+        if (thiz->device ) {
+            SDL_free(thiz->device);
         }
         return 0;
     }
-
-    // if class isn't yet initzialized, we will do it
-    getInstance();
 	
     /* Set the function pointers */
-    device->VideoInit = SDLVideoDriver::onVideoInit;
-    device->ListModes = SDLVideoDriver::onListModes;
-    device->SetVideoMode = SDLVideoDriver::onSetVideoMode;
-    device->CreateYUVOverlay = NULL;
-    device->SetColors = SDLVideoDriver::onSetColors;
-    device->UpdateRects = SDLVideoDriver::onUpdateRects;
-    device->VideoQuit = SDLVideoDriver::onVideoQuit;
-    device->AllocHWSurface = SDLVideoDriver::onAllocHWSurface;
-    device->CheckHWBlit = NULL;
-    device->FillHWRect = NULL;
-    device->SetHWColorKey = NULL;
-    device->SetHWAlpha = NULL;
-    device->LockHWSurface = SDLVideoDriver::onLockHWSurface;
-    device->UnlockHWSurface = SDLVideoDriver::onUnlockHWSurface;
-    device->FlipHWSurface = NULL;
-    device->FreeHWSurface = SDLVideoDriver::onFreeHWSurface;
-    device->SetCaption = SDLVideoDriver::onSetCaption;
-    device->SetIcon = NULL;
-    device->IconifyWindow = NULL;
-    device->GrabInput = NULL;
-    device->GetWMInfo = NULL;
-    device->InitOSKeymap = SDLVideoDriver::onInitOSKeymap;
-    device->PumpEvents = SDLVideoDriver::onPumpEvents;
-    device->free = SDLVideoDriver::onDeleteDevice;
+    thiz->device->VideoInit = SDLVideoDriver::onVideoInit;
+    thiz->device->ListModes = SDLVideoDriver::onListModes;
+    thiz->device->SetVideoMode = SDLVideoDriver::onSetVideoMode;
+    thiz->device->CreateYUVOverlay = NULL;
+    thiz->device->SetColors = SDLVideoDriver::onSetColors;
+    thiz->device->UpdateRects = SDLVideoDriver::onUpdateRects;
+    thiz->device->VideoQuit = SDLVideoDriver::onVideoQuit;
+    thiz->device->AllocHWSurface = SDLVideoDriver::onAllocHWSurface;
+    thiz->device->CheckHWBlit = NULL;
+    thiz->device->FillHWRect = NULL;
+    thiz->device->SetHWColorKey = NULL;
+    thiz->device->SetHWAlpha = NULL;
+    thiz->device->LockHWSurface = SDLVideoDriver::onLockHWSurface;
+    thiz->device->UnlockHWSurface = SDLVideoDriver::onUnlockHWSurface;
+    thiz->device->FlipHWSurface = NULL;
+    thiz->device->FreeHWSurface = SDLVideoDriver::onFreeHWSurface;
+    thiz->device->SetCaption = SDLVideoDriver::onSetCaption;
+    thiz->device->SetIcon = NULL;
+    thiz->device->IconifyWindow = NULL;
+    thiz->device->GrabInput = NULL;
+    thiz->device->GetWMInfo = NULL;
+    thiz->device->InitOSKeymap = SDLVideoDriver::onInitOSKeymap;
+    thiz->device->PumpEvents = SDLVideoDriver::onPumpEvents;
+    thiz->device->free = SDLVideoDriver::onDeleteDevice;
+
+    __android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "device created");
 	
-    return device;
+    return thiz->device;
 }
 
 int SDLVideoDriver::onVideoInit(_THIS, SDL_PixelFormat *vformat) {
     /* TODO: we only support RGB565 for now */
     vformat->BitsPerPixel = 16;
     vformat->BytesPerPixel = 2;
+
+    __android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "video initzialized: bpp=%i, Bpp=%i",
+                        vformat->BitsPerPixel,
+                        vformat->BytesPerPixel);
     /* We're done! */
     return 0;	
 }
 
 SDL_Rect **SDLVideoDriver::onListModes(_THIS, SDL_PixelFormat *format, Uint32 flags) {
-    __android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "list modes");
+    //__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "list modes");
     return (SDL_Rect **) -1;
 }
 
@@ -172,7 +178,7 @@ SDL_Surface *SDLVideoDriver::onSetVideoMode(_THIS, SDL_Surface *current, int wid
     current->pitch = current->w * (bpp / 8);
     current->pixels = thiz->mBitmap.getPixels();
 
-    __android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "setting screen size to: %dx%d", width, height);
+    __android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "setting sdl bitmap size to: %dx%d", width, height);
     /* We're done */
     return current;
 }
@@ -224,11 +230,22 @@ int SDLVideoDriver::onAvailable() {
 }
 
 void SDLVideoDriver::onDeleteDevice(SDL_VideoDevice *device) {
-    SDL_free(device);	
+    int size = thiz->mListeners.size();
+    for(int i=0;i<size;i++) {
+        SDLVideoDriverListener *listener = thiz->mListeners.itemAt(i);
+        listener->onDeleteDevice();
+    }
+
+    SDL_free(thiz->device);
     __android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "device deleted");
 }
 
 void SDLVideoDriver::onPumpEvents(_THIS) {
+    int size = thiz->mListeners.size();
+    for(int i=0;i<size;i++) {
+        SDLVideoDriverListener *listener = thiz->mListeners.itemAt(i);
+        listener->onProcessEvents();
+    }
 }
 
 void SDLVideoDriver::onInitOSKeymap(_THIS) {

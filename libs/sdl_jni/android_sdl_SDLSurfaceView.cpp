@@ -22,8 +22,6 @@ typedef struct {
     SDLAudioDriver *audioDriver;
 } SDLDrivers;
 
-static void *library;
-
 namespace android {
 
 /**
@@ -77,15 +75,15 @@ private:
         Surface::SurfaceInfo mSurfaceInfo;
         SkBitmap mAndroidBitmap;
         SkBitmap *mSdlBitmap;
-	
-        void processEvents();
 
 public:
     SDLSurfaceView();
     static SDLSurfaceView *getInstance();
 
     // periodically called by libsdl, which pass rendered sdl bitmap
+    void onProcessEvents();
     void onUpdateScreen(SkBitmap *bitmap);
+    void onDeleteDevice();
 
     // this is jni callbacks from java SDLSurfaceView
     static void release(JNIEnv *env, jobject obj);
@@ -105,6 +103,9 @@ SDLSurfaceView *SDLSurfaceView::getInstance() {
     return thiz;
 }
 
+/**
+  initzialize this our sdl listener
+**/
 void SDLSurfaceView::init(JNIEnv *env, jobject obj, jobject surface) {
     __android_log_print(ANDROID_LOG_INFO, TAG, "creating surface");
     if(thiz == NULL) {
@@ -123,30 +124,50 @@ void SDLSurfaceView::init(JNIEnv *env, jobject obj, jobject surface) {
     __android_log_print(ANDROID_LOG_INFO, TAG, "surface created");
 }
 
+/**
+  release this our sdl listener
+**/
 void SDLSurfaceView::release(JNIEnv *env, jobject obj) {
     __android_log_print(ANDROID_LOG_INFO, TAG, "destroying surface");
+    thiz->drivers.videoDriver->unregisterListener(thiz);
     thiz->mEventBuffer.clear();
     free(thiz->drivers.audioDriver);
     free(thiz->drivers.videoDriver);
     __android_log_print(ANDROID_LOG_INFO, TAG, "surface destroyed");
 }
 
+/**
+  add android key event into buffer, for later processing
+**/
 void SDLSurfaceView::onKeyEvent(JNIEnv *env, jobject obj, jint key, jint action) {
     Mutex::Autolock _l(thiz->mLock);
     KeyEvent *e = new KeyEvent(key, action);
     thiz->mEventBuffer.add((Event *) e);
 }
 
+/**
+  add android motion event into buffer, for later processing
+**/
 void SDLSurfaceView::onMouseEvent(JNIEnv *env, jobject obj, jint x, jint y, jint action) {
     Mutex::Autolock _l(thiz->mLock);
     MotionEvent *e = new MotionEvent(x, y, action);
     thiz->mEventBuffer.add((Event *) e);
 }
 
-void SDLSurfaceView::processEvents() {
-    Mutex::Autolock _l(mLock);
-    while(!mEventBuffer.isEmpty()) {
-        Event *e = mEventBuffer.top();
+/**
+  called by sdl to process system events
+**/
+void SDLSurfaceView::onProcessEvents() {
+    // get all events from buffer
+    mLock.lock();
+    int length = mEventBuffer.size();
+    Event **events = mEventBuffer.editArray();
+    mEventBuffer.clear();
+    mLock.unlock();
+
+    // execute this events
+    for(int i=0;i<length;i++) {
+        Event *e = events[i];
         switch(e->type) {
             case EVENT_KEY:
             {
@@ -165,11 +186,13 @@ void SDLSurfaceView::processEvents() {
             default:
             __android_log_print(ANDROID_LOG_ERROR, TAG, "Failed to encode event type: %i", e->type);
         }
-		free(e);
-        mEventBuffer.pop();
+        free(e);
     }
 }
 
+/**
+  called by sdl for update screen pixels
+**/
 void SDLSurfaceView::onUpdateScreen(SkBitmap *bitmap) {
         mSdlBitmap = bitmap;
 
@@ -182,8 +205,6 @@ void SDLSurfaceView::onUpdateScreen(SkBitmap *bitmap) {
             __android_log_print(ANDROID_LOG_ERROR, TAG, "Failed to lock surface");
             return;
         }
-
-        processEvents();
 
         //bitmap which is drawed on android surfaceview
         SDLVideoDriver::setBitmapConfig(&mAndroidBitmap, mSurfaceInfo.format, mSurfaceInfo.w, mSurfaceInfo.h);
@@ -202,6 +223,13 @@ void SDLSurfaceView::onUpdateScreen(SkBitmap *bitmap) {
         if (mSurface->unlockAndPost() < 0) {
             __android_log_print(ANDROID_LOG_ERROR, TAG, "Failed to unlock surface");
         }
+}
+
+/**
+  called by sdl before sdl device is deleted
+**/
+void SDLSurfaceView::onDeleteDevice() {
+
 }
 
 /*

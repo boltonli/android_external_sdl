@@ -24,10 +24,12 @@ class SDLVideoDriver {
 public:
         class SDLVideoDriverListener
         {
-		protected:
-			~SDLVideoDriverListener();
+        protected:
+            ~SDLVideoDriverListener();
         public:
-			virtual void onUpdateScreen(SkBitmap *bitmap);
+            virtual void onProcessEvents();
+            virtual void onUpdateScreen(SkBitmap *bitmap);
+            virtual void onDeleteDevice();
         };
 
         SDLVideoDriver();
@@ -53,6 +55,7 @@ public:
         }
 
 private:
+        SDL_VideoDevice *device;
         SkBitmap mBitmap;
         Vector<SDLVideoDriverListener*> mListeners;
 
