@@ -5,12 +5,24 @@
 static SDLVideoDriver *thiz = NULL;
 static SDLKey keymap[SDLVideoDriver::KEYCODE_LAST+1];
 
-SDLVideoDriver::SDLVideoDriver(SDLVideoDriverListener *listener) {
-        thiz = this;
-        mListener = listener;
+SDLVideoDriver::SDLVideoDriver() {
 }
 
 SDLVideoDriver::~SDLVideoDriver() {
+    mListeners.clear();
+}
+
+SDLVideoDriver *SDLVideoDriver::getInstance() {
+    if(thiz == NULL) thiz = new SDLVideoDriver();
+    return thiz;
+}
+
+void SDLVideoDriver::registerListener(SDLVideoDriverListener *listener) {
+    mListeners.add(listener);
+}
+
+void SDLVideoDriver::unregisterListener(SDLVideoDriverListener *listener) {
+    mListeners.pop();
 }
 
 void SDLVideoDriver::processKey(int key, int action) {
@@ -32,13 +44,10 @@ void SDLVideoDriver::processKey(int key, int action) {
         keysym.unicode = key;
     }
 
-    SDL_PrivateKeyboard( (action == KEY_EVENT_ACTION_DOWN) ? SDL_PRESSED : SDL_RELEASED, &keysym);
+    SDL_PrivateKeyboard((action == KEY_EVENT_ACTION_DOWN) ? SDL_PRESSED : SDL_RELEASED, &keysym);
 }
 
 void SDLVideoDriver::processMouse(double x, double y, int action) {
-    //double _x = (mBitmap.width() * x) / screen.width();
-    //double _y = (mBitmap.height() * y) / screen.height();
-
     if( action == MOUSE_EVENT_ACTION_DOWN || action == MOUSE_EVENT_ACTION_UP ) {
         SDL_PrivateMouseButton( (action == MOUSE_EVENT_ACTION_DOWN) ? SDL_PRESSED : SDL_RELEASED, 1, x, y);
     }
@@ -97,6 +106,9 @@ SDL_VideoDevice *SDLVideoDriver::onCreateDevice(int devindex) {
         }
         return 0;
     }
+
+    // if class isn't yet initzialized, we will do it
+    getInstance();
 	
     /* Set the function pointers */
     device->VideoInit = SDLVideoDriver::onVideoInit;
@@ -199,12 +211,16 @@ void SDLVideoDriver::onUpdateRects(_THIS, int numrects, SDL_Rect *rects) {
         return;
     }
 
-    thiz->mListener->onUpdateScreen(&thiz->mBitmap);
+    int size = thiz->mListeners.size();
+    for(int i=0;i<size;i++) {
+        SDLVideoDriverListener *listener = thiz->mListeners.itemAt(i);
+        listener->onUpdateScreen(&thiz->mBitmap);
+    }
 }
 
 /* ANDROID driver bootstrap functions */
 int SDLVideoDriver::onAvailable() {
-    return (thiz != NULL) ? 1 : 0;
+    return 1;
 }
 
 void SDLVideoDriver::onDeleteDevice(SDL_VideoDevice *device) {

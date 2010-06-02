@@ -4,6 +4,7 @@ include $(CLEAR_VARS)
 LOCAL_CPP_EXTENSION := .cpp
 
 LOCAL_SRC_FILES := \
+        onload.cpp \
         android_sdl_SDLSurfaceView.cpp \
 	android_sdl_LibraryLoader.cpp
 

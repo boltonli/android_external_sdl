@@ -30,12 +30,15 @@ public:
 			virtual void onUpdateScreen(SkBitmap *bitmap);
         };
 
-        SDLVideoDriver(SDLVideoDriverListener *listener);
+        SDLVideoDriver();
         ~SDLVideoDriver();
 
+        void registerListener(SDLVideoDriverListener *listener);
+        void unregisterListener(SDLVideoDriverListener *listener);
         void processKey(int key, int action);
         void processMouse(double x, double y, int action);
 
+        static SDLVideoDriver *getInstance();
         static void setBitmapConfig(SkBitmap *bitmap, int format, int width, int height);
         /* ANDROID driver bootstrap functions */
         static SDL_VideoDevice *onCreateDevice(int devindex);
@@ -51,7 +54,7 @@ public:
 
 private:
         SkBitmap mBitmap;
-        SDLVideoDriverListener *mListener;
+        Vector<SDLVideoDriverListener*> mListeners;
 
         void initBitmap(int format, int width, int height);
 	

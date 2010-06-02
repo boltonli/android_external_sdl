@@ -7,8 +7,6 @@
 
 #include <utils/Vector.h>
 
-#include "android_sdl_LibraryLoader.h"
-
 #define TAG "android_sdl_SDLSurfaceView.cpp"
 
 #define EVENT_KEY 1
@@ -25,6 +23,8 @@ typedef struct {
 } SDLDrivers;
 
 static void *library;
+
+namespace android {
 
 /**
   * This is implementation of SDL video listener, where is periodically called
@@ -118,7 +118,8 @@ void SDLSurfaceView::init(JNIEnv *env, jobject obj, jobject surface) {
     }
 
     thiz->drivers.audioDriver = new SDLAudioDriver();
-    thiz->drivers.videoDriver = new SDLVideoDriver(thiz);
+    thiz->drivers.videoDriver = SDLVideoDriver::getInstance();
+    thiz->drivers.videoDriver->registerListener(thiz);
     __android_log_print(ANDROID_LOG_INFO, TAG, "surface created");
 }
 
@@ -207,18 +208,33 @@ void SDLSurfaceView::onUpdateScreen(SkBitmap *bitmap) {
  * JNI registration.
  */
 static JNINativeMethod methods[] = {
-        { "nativeOnSurfaceCreated", "(Landroid/view/Surface;)V", (void*) SDLSurfaceView::init },
-        { "nativeOnSurfaceDestroyed", "()V", (void*) SDLSurfaceView::release },
-        { "nativeLoadLibrary", "(Ljava/lang/String;)I", (void*) LibraryLoader::load },
-        { "nativeCallMain", "()I", (void*) LibraryLoader::callMain },
-        { "nativeCloseLibrary", "()V", (void*) LibraryLoader::close },
+        { "nativeInit", "(Landroid/view/Surface;)V", (void*) SDLSurfaceView::init },
+        { "nativeRelease", "()V", (void*) SDLSurfaceView::release },
         { "nativeOnKeyEvent", "(II)V", (void*) SDLSurfaceView::onKeyEvent },
         { "nativeOnMouseEvent", "(III)V", (void*) SDLSurfaceView::onMouseEvent }
 };
 
+int register_android_sdl_SDLSurfaceView(JNIEnv* env) {
+    jclass clazz = env->FindClass("android/view/Surface");
+    if(clazz == NULL) {
+        __android_log_print(ANDROID_LOG_ERROR, TAG, "can't load native surface");
+        return JNI_ERR;
+    }
+
+    fields.surface = env->GetFieldID(clazz, "mSurface", "I");
+    if(fields.surface == NULL) {
+        __android_log_print(ANDROID_LOG_ERROR, TAG, "can't load native mSurface");
+        return JNI_ERR;
+    }
+
+    return jniRegisterNativeMethods(env, "android/sdl/SDLSurfaceView", methods, NELEM(methods));
+}
+
+} // end of android namespace
+
 /*
  * This is called by the VM when the shared library is first loaded.
- */
+ *
 JNIEXPORT jint JNICALL
 JNI_OnLoad(JavaVM* vm, void* reserved)
 {
@@ -256,3 +272,4 @@ JNI_OnLoad(JavaVM* vm, void* reserved)
 bail:
     return result;
 }
+*/
