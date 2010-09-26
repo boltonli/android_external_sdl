@@ -21,7 +21,7 @@ LOCAL_C_INCLUDES := \
         
 LOCAL_SHARED_LIBRARIES := \
 	libskia \
-	libui \
+	libsurfaceflinger_client \
 	libmedia \
 	liblog \
         libdl \

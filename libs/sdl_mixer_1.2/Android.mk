@@ -8,7 +8,7 @@ LOCAL_CFLAGS := -DANDROID -DWAV_MUSIC -DOGG_USE_TREMOR -DOGG_MUSIC
 
 LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/../../include \
-	external/tremor
+	external/tremolo
 		
 LOCAL_CPP_EXTENSION := .cpp
 

@@ -12,7 +12,7 @@ extern "C" {
 #include "../../events/SDL_events_c.h"
 }
 
-#include <ui/Surface.h>
+#include <surfaceflinger/Surface.h>
 #include <SkBitmap.h>
 
 using namespace android;

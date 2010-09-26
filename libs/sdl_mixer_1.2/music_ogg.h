@@ -28,7 +28,7 @@
 
 #ifdef OGG_USE_TREMOR
 #ifdef ANDROID
-#include <Tremor/ivorbisfile.h>
+#include <Tremolo/ivorbisfile.h>
 #else
 #include <tremor/ivorbisfile.h>
 #endif
