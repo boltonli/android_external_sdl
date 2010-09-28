@@ -17,49 +17,58 @@ extern "C" {
 
 using namespace android;
 
+enum sdl_native_events {
+    SDL_NATIVE_VIDEO_CREATE_DEVICE = 1,
+	SDL_NATIVE_VIDEO_DELETE_DEVICE = 2,
+	SDL_NATIVE_VIDEO_PROCESS_EVENTS = 3,
+	SDL_NATIVE_VIDEO_INIT = 4,
+	SDL_NATIVE_VIDEO_SET_SURFACE = 5,
+	SDL_NATIVE_VIDEO_PUMP_EVENTS = 6,
+};
+
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *self
 
 class SDLVideoDriver {
 public:
-        class SDLVideoDriverListener
-        {
+	class SDLVideoDriverListener
+	{
         protected:
             ~SDLVideoDriverListener();
         public:
             virtual void onProcessEvents();
             virtual void onUpdateScreen(SkBitmap *bitmap);
             virtual void onDeleteDevice();
-        };
+	};
 
-        SDLVideoDriver();
-        ~SDLVideoDriver();
+	SDLVideoDriver();
+	~SDLVideoDriver();
 
-        void registerListener(SDLVideoDriverListener *listener);
-        void unregisterListener(SDLVideoDriverListener *listener);
-        void processKey(int key, int action);
-        void processMouse(double x, double y, int action);
+	void registerListener(SDLVideoDriverListener *listener);
+	void unregisterListener(SDLVideoDriverListener *listener);
+	void processKey(int key, int action);
+	void processMouse(double x, double y, int action);
 
-        static SDLVideoDriver *getInstance();
-        static void setBitmapConfig(SkBitmap *bitmap, int format, int width, int height);
-        /* ANDROID driver bootstrap functions */
-        static SDL_VideoDevice *onCreateDevice(int devindex);
-        static int onAvailable();
+	static SDLVideoDriver *getInstance();
+	static void setBitmapConfig(SkBitmap *bitmap, int format, int width, int height);
+	/* ANDROID driver bootstrap functions */
+	static SDL_VideoDevice *onCreateDevice(int devindex);
+	static int onAvailable();
 
-        static const char *getDriverName() {
-            return "Android";
-        }
+	static const char *getDriverName() {
+		return "Android";
+	}
 
-        static const char *getDriverDescription() {
-            return "SDL android video driver";
-        }
+	static const char *getDriverDescription() {
+		return "SDL android video driver";
+	}
 
 private:
-        SDL_VideoDevice *device;
-        SkBitmap mBitmap;
-        Vector<SDLVideoDriverListener*> mListeners;
+	SDL_VideoDevice *device;
+	SkBitmap mBitmap;
+	Vector<SDLVideoDriverListener*> mListeners;
 
-        void initBitmap(int format, int width, int height);
+	void initBitmap(int format, int width, int height);
 	
 	/* Initialization/Query functions */
 	static int onVideoInit(_THIS, SDL_PixelFormat *vformat);
@@ -80,10 +89,10 @@ private:
 	/* etc. */
 	static void onUpdateRects(_THIS, int numrects, SDL_Rect *rects);
 	
-        static void onDeleteDevice(SDL_VideoDevice *device);
+	static void onDeleteDevice(SDL_VideoDevice *device);
 
-        static void onPumpEvents(_THIS);
-        static void onInitOSKeymap(_THIS);
+	static void onPumpEvents(_THIS);
+	static void onInitOSKeymap(_THIS);
 
 public:
         enum KEY_EVENTS_ANDROID {
