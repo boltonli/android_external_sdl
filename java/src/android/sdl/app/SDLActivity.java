@@ -17,25 +17,23 @@
 
 package android.sdl.app;
 
-import android.sdl.SDLVideo.SDLVideoSetSurfaceHandler;
-
 import android.os.Bundle;
-import android.view.SurfaceView;
 import android.app.Activity;
+
+import android.sdl.impl.SDLImpl;
 
 public class SDLActivity extends Activity {
 	
-	private SurfaceView mView;
-	
-	public static SDLVideoSetSurfaceHandler mSetSurfaceClb = new SDLVideoSetSurfaceHandler() {
-		public void onSetSurface(SDLSurface surface) {
-			//SurfaceView v = new SurfaceView();
-			//setContentView(v);
-		}
-	};
+	// we must call main entry point of java lib for loading jni lib
+	// this must be here because user overrides this class when using
+	// sdl library
+	static {
+		SDLImpl.load();
+	}
 	
 	@Override
-    public void onCreate(Bundle bundle) {
+    protected void onCreate(Bundle bundle) {
+		super.onCreate(bundle);
 	}
 	
 }

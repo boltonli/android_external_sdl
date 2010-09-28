@@ -18,8 +18,10 @@
 package android.sdl.impl;
 
 import android.sdl.SDLVideo;
+import android.util.Log;
 
-public class SDLImpl {
+public final class SDLImpl {
+	private static final String TAG = "SDLImpl";
 	
 	/** @name SDL_Surface Flags
 	 *  These are the currently supported flags for the SDL_surface
@@ -54,15 +56,23 @@ public class SDLImpl {
 	public static int SDL_SRCALPHA = 0x00010000; 	/**< Blit uses source alpha blending */
 	public static int SDL_PREALLOC = 0x01000000; 	/**< Surface uses preallocated memory */
 	
-    static {
-		System.loadLibrary("sdl_jni.so");
+    private SDLImpl() {
+    }
+	
+	/**
+	 * Main entry point of java lib
+	 */
+	public static boolean load() {
+		Log.d(TAG, "loading java sdl library");
+		
+		System.loadLibrary("sdl_jni");
 		
 		InitHandler initClb = SDLVideo.sInitCallback;
 		initClb.onInit();
-    }
-	
-    private SDLImpl() {
-    }
+		
+		Log.d(TAG, "java sdl library loaded");
+		return true;
+	}
 	
 	public interface InitHandler {
 		public void onInit();

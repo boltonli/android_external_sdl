@@ -17,22 +17,22 @@
 
 package android.sdl;
 
-import android.sdl.impl.SDLImpl;
-//import android.sdl.app.SDLActivity;
+import android.sdl.impl.SDLImpl.InitHandler;
+import android.util.Log;
 
 import java.lang.ref.WeakReference;
 
 public class SDLVideo {
+	private static final String TAG = "SDLVideo";
 	
 	// must equals with libsdl/src/video/android/SDL_androidvideo.h -> sdl_native_events
 	private static class SDLNativeEvents {
 	    private static final int SDL_NATIVE_VIDEO_CREATE_DEVICE = 1;
 	    private static final int SDL_NATIVE_VIDEO_DELETE_DEVICE = 2;
-	    private static final int SDL_NATIVE_VIDEO_PROCESS_EVENTS = 3;
+	    private static final int SDL_NATIVE_VIDEO_PUMP_EVENTS = 3;
 		private static final int SDL_NATIVE_VIDEO_INIT = 4;
 		private static final int SDL_NATIVE_VIDEO_SET_SURFACE = 5;
-		private static final int SDL_NATIVE_VIDEO_PUMP_EVENTS = 6;
-		private static final int SDL_NATIVE_VIDEO_UPDATE_RECTS = 7;
+		private static final int SDL_NATIVE_VIDEO_UPDATE_RECTS = 6;
 	}
 	
 	// registers fields and methods
@@ -41,12 +41,16 @@ public class SDLVideo {
     private native final void native_finalize();
 	
 	// handle static initzialization of sdl library
-	public static SDLImpl.InitHandler sInitCallback = new SDLImpl.InitHandler() {
+	public static InitHandler sInitCallback = new InitHandler() {
 	    public void onInit() {
+			Log.d(TAG, "loading java SDLVideo");
+	
 	        native_init();
 	
 			// create our SDLVideo driver
 			sInstance = new SDLVideo();
+	
+			Log.d(TAG, "java SDLVideo loaded");
 		}
 	};
 
@@ -71,9 +75,6 @@ public class SDLVideo {
 			case SDLNativeEvents.SDL_NATIVE_VIDEO_DELETE_DEVICE:
                 sInstance.handleVideoDeviceDelete();
 				break;
-			case SDLNativeEvents.SDL_NATIVE_VIDEO_PROCESS_EVENTS:
-                sInstance.handleVideoDeviceProcessEvents();
-                break;
 			case SDLNativeEvents.SDL_NATIVE_VIDEO_INIT:
 				SDLPixelFormat pformat = (SDLPixelFormat) obj;
 				sInstance.handleVideoDeviceInit(pformat);
@@ -96,9 +97,6 @@ public class SDLVideo {
     }
 	
     private void handleVideoDeviceDelete() {
-    }
- 
-    private void handleVideoDeviceProcessEvents() {
     }
 
     private void handleVideoDeviceInit(SDLPixelFormat pformat) {
