@@ -20,6 +20,9 @@ package android.sdl.impl;
 import android.sdl.SDLVideo;
 import android.util.Log;
 
+import java.lang.SecurityException;
+import java.lang.UnsatisfiedLinkError;
+
 public final class SDLImpl {
 	private static final String TAG = "SDLImpl";
 	
@@ -65,7 +68,17 @@ public final class SDLImpl {
 	public static boolean load() {
 		Log.d(TAG, "loading java sdl library");
 		
-		System.loadLibrary("sdl_jni");
+		try {
+			System.loadLibrary("sdl_jni");
+		}
+		catch (SecurityException ex) {
+			Log.d(TAG, "couldn't load sdl native lib due to security exception");
+			return false;
+		}
+		catch (UnsatisfiedLinkError ex) {
+			Log.d(TAG, "native sdl library doesn't exists");
+			return false;
+		}
 		
 		InitHandler initClb = SDLVideo.sInitCallback;
 		initClb.onInit();

@@ -15,12 +15,12 @@ using namespace android;
  */
 extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
+	LOGV("loading . . .");
+	
 	SDLRuntime::setJavaVM(vm);
 	JNIEnv* env = SDLRuntime::getJNIEnv();
 	
 	LOG_ASSERT(env, "Could not retrieve the env!");
-	
-	LOGV("loading . . .");
 	
 	if(register_android_sdl_SDLVideo(env) != JNI_OK) {
 		LOGE("can't load android_sdl_SDLVideo");
