@@ -23,49 +23,64 @@
 
 #include <SDL_androidvideo.h>
 
+/*
+ B=byte
+ C=char
+ D=double
+ F=float
+ I=int
+ J=long
+ S=short
+ V=void
+ Z=boolean
+ Lfully-qualified-class=fully qualified class
+ [type=array of type>
+ (argument types)return type=method type. If no arguments, use empty argument types: (). If return type is void (or constructor) use (argument types)V.
+ */
+
 void sdlJniUtils_PixelFormat_ToJava(JNIEnv* env, jclass clazz, jobject obj, SDL_PixelFormat* pformat) {
-	env->SetIntField(obj,
-					 env->GetFieldID(clazz, "mBitsPerPixel", "I"),
-					 (jint)0);
-	env->SetIntField(obj,
-					 env->GetFieldID(clazz, "mBytesPerPixel", "I"),
-					 (jint)0);
-	env->SetIntField(obj,
-					 env->GetFieldID(clazz, "mRloss", "I"),
-					 (jint)0);
-	env->SetIntField(obj,
-					 env->GetFieldID(clazz, "mGloss", "I"),
-					 (jint)0);
-	env->SetIntField(obj,
-					 env->GetFieldID(clazz, "mBloss", "I"),
-					 (jint)0);
-	env->SetIntField(obj,
-					 env->GetFieldID(clazz, "mAloss", "I"),
-					 (jint)0);
-	env->SetIntField(obj,
-					 env->GetFieldID(clazz, "mRshift", "I"),
-					 (jint)0);
-	env->SetIntField(obj,
-					 env->GetFieldID(clazz, "mGshift", "I"),
-					 (jint)0);
-	env->SetIntField(obj,
-					 env->GetFieldID(clazz, "mBshift", "I"),
-					 (jint)0);
-	env->SetIntField(obj,
-					 env->GetFieldID(clazz, "mAshift", "I"),
-					 (jint)0);
-	env->SetIntField(obj,
-					 env->GetFieldID(clazz, "mRmask", "L"),
-					 (jint)0);
-	env->SetIntField(obj,
-					 env->GetFieldID(clazz, "mGmask", "L"),
-					 (jint)0);
-	env->SetIntField(obj,
-					 env->GetFieldID(clazz, "mBmask", "L"),
-					 (jint)0);
-	env->SetIntField(obj,
-					 env->GetFieldID(clazz, "mAmask", "L"),
-					 (jint)0);
+	env->SetShortField(obj,
+					 env->GetFieldID(clazz, "mBitsPerPixel", "S"),
+					 (jshort)pformat->BitsPerPixel);
+	env->SetShortField(obj,
+					 env->GetFieldID(clazz, "mBytesPerPixel", "S"),
+					 (jshort)pformat->BytesPerPixel);
+	env->SetShortField(obj,
+					 env->GetFieldID(clazz, "mRloss", "S"),
+					 (jshort)pformat->Rloss);
+	env->SetShortField(obj,
+					 env->GetFieldID(clazz, "mGloss", "S"),
+					 (jshort)pformat->Gloss);
+	env->SetShortField(obj,
+					 env->GetFieldID(clazz, "mBloss", "S"),
+					 (jshort)pformat->Bloss);
+	env->SetShortField(obj,
+					 env->GetFieldID(clazz, "mAloss", "S"),
+					 (jshort)pformat->Aloss);
+	env->SetShortField(obj,
+					 env->GetFieldID(clazz, "mRshift", "S"),
+					 (jshort)pformat->Rshift);
+	env->SetShortField(obj,
+					 env->GetFieldID(clazz, "mGshift", "S"),
+					 (jshort)pformat->Gshift);
+	env->SetShortField(obj,
+					 env->GetFieldID(clazz, "mBshift", "S"),
+					 (jshort)pformat->Bshift);
+	env->SetShortField(obj,
+					 env->GetFieldID(clazz, "mAshift", "S"),
+					 (jshort)pformat->Ashift);
+	env->SetLongField(obj,
+					 env->GetFieldID(clazz, "mRmask", "J"),
+					 (jlong)pformat->Rmask);
+	env->SetLongField(obj,
+					 env->GetFieldID(clazz, "mGmask", "J"),
+					 (jlong)pformat->Gmask);
+	env->SetLongField(obj,
+					 env->GetFieldID(clazz, "mBmask", "J"),
+					 (jlong)pformat->Bmask);
+	env->SetLongField(obj,
+					 env->GetFieldID(clazz, "mAmask", "J"),
+					 (jlong)pformat->Amask);
 };
 
 void sdlJniUtils_PixelFormat_ToNative(JNIEnv* env, jclass clazz, jobject obj, SDL_PixelFormat* pformat) {

@@ -59,6 +59,8 @@ public final class SDLImpl {
 	public static int SDL_SRCALPHA = 0x00010000; 	/**< Blit uses source alpha blending */
 	public static int SDL_PREALLOC = 0x01000000; 	/**< Surface uses preallocated memory */
 	
+	private static SDLVideo sVideo;
+	
     private SDLImpl() {
     }
 	
@@ -80,8 +82,7 @@ public final class SDLImpl {
 			return false;
 		}
 		
-		InitHandler initClb = SDLVideo.sInitCallback;
-		initClb.onInit();
+		sVideo = new SDLVideo();
 		
 		Log.d(TAG, "java sdl library loaded");
 		return true;

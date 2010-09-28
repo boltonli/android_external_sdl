@@ -35,7 +35,7 @@ enum sdl_native_events {
 class SDLVideoDriverListener : virtual public RefBase
 {
 public:
-    virtual void notify(int arg0, int arg1, void* data) = 0;
+    virtual void notify(int what, int arg1, int arg2, void* data) = 0;
 };
 
 class SDLVideoDriver {

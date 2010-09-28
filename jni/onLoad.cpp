@@ -13,7 +13,7 @@ using namespace android;
 /**
  * Used by LoadClass to register native functions.
  */
-extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved)
+jint JNI_OnLoad(JavaVM* vm, void* reserved)
 {
 	LOGV("loading . . .");
 	

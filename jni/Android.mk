@@ -24,7 +24,6 @@ LOCAL_SHARED_LIBRARIES := \
 	libsurfaceflinger_client \
 	libmedia \
 	liblog \
-        libdl \
         libsdl \
         libnativehelper \
         libutils

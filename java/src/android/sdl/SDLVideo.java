@@ -18,8 +18,12 @@
 package android.sdl;
 
 import android.sdl.impl.SDLImpl.InitHandler;
-import android.util.Log;
 
+import android.util.Log;
+import android.os.Handler;
+import android.os.Message;
+
+import java.lang.Thread;
 import java.lang.ref.WeakReference;
 
 public class SDLVideo {
@@ -40,77 +44,116 @@ public class SDLVideo {
     private native final void native_setup(Object mediaplayer_this);
     private native final void native_finalize();
 	
-	// handle static initzialization of sdl library
-	public static InitHandler sInitCallback = new InitHandler() {
-	    public void onInit() {
-			Log.d(TAG, "loading java SDLVideo");
+	static {
+		Log.d(TAG, "loading java SDLVideo");
+		
+		native_init();
+		
+		Log.d(TAG, "java SDLVideo loaded");
+	}
 	
-	        native_init();
-	
-			// create our SDLVideo driver
-			sInstance = new SDLVideo();
-	
-			Log.d(TAG, "java SDLVideo loaded");
+	private Handler mEventHandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			handleNativeMessage(msg);
 		}
 	};
 
-    private static SDLVideo sInstance;
+	private Thread mOurThread;
 	
-    private SDLVideo() {
+    public SDLVideo() {
 		/* Native setup requires a weak reference to our object.
 		 * It's easier to create it here than in C++.
 		 */
 		native_setup(new WeakReference<SDLVideo>(this));
+		mOurThread = Thread.currentThread();
+		mOurThread.setName(TAG);
     }
+
+	@Override
+	protected void finalize() {
+		Log.d(TAG, "finalizing");
+		native_finalize(); 
+	}
 	
 	/**
 	 * native callback
 	 **/
-	private static void postEventFromNative(int arg0, int arg1, Object obj) {
-		switch (arg0) {
+	private static void postEventFromNative(Object sdlvideo_ref, int what, int arg1, int arg2, Object obj) {
+		Log.d(TAG, "on native event: " + what);
+		SDLVideo ref = (SDLVideo)((WeakReference)sdlvideo_ref).get();
+		if (ref == null) {
+			Log.e(TAG, "SDLVideo ref is null");
+			return;
+		}
+
+		String origThread = ref.mOurThread.getName();
+		String curThread = Thread.currentThread().getName();
+
+		Message m = ref.mEventHandler.obtainMessage(what, arg1, arg2, obj);
+		if(origThread.matches(curThread)) {
+			//Log.e(TAG, "Running in current thread");
+			ref.handleNativeMessage(m);
+		}
+		else {
+			//Log.e(TAG, "Running in another thread so use event handler");
+			ref.mEventHandler.sendMessage(m);
+		}
+	}
+
+	private void handleNativeMessage(Message msg) {
+		switch(msg.what) {
 			case SDLNativeEvents.SDL_NATIVE_VIDEO_CREATE_DEVICE:
-                SDLVideoDevice device = (SDLVideoDevice) obj;
-                sInstance.handleVideoDeviceCreate(device);
+				SDLVideoDevice device = (SDLVideoDevice) msg.obj;
+				handleVideoDeviceCreate(device);
 				break;
 			case SDLNativeEvents.SDL_NATIVE_VIDEO_DELETE_DEVICE:
-                sInstance.handleVideoDeviceDelete();
+				handleVideoDeviceDelete();
 				break;
 			case SDLNativeEvents.SDL_NATIVE_VIDEO_INIT:
-				SDLPixelFormat pformat = (SDLPixelFormat) obj;
-				sInstance.handleVideoDeviceInit(pformat);
+				SDLPixelFormat pformat = (SDLPixelFormat) msg.obj;
+				handleVideoDeviceInit(pformat);
 				break;
 			case SDLNativeEvents.SDL_NATIVE_VIDEO_SET_SURFACE:
-				SDLSurface surface = (SDLSurface) obj;
-				sInstance.handleVideoDeviceSetSurface(surface);
+				SDLSurface surface = (SDLSurface) msg.obj;
+				handleVideoDeviceSetSurface(surface);
 				break;
 			case SDLNativeEvents.SDL_NATIVE_VIDEO_PUMP_EVENTS:
-				sInstance.handleVideoDevicePumpEvents();
+				handleVideoDevicePumpEvents();
 				break;
 			case SDLNativeEvents.SDL_NATIVE_VIDEO_UPDATE_RECTS:
-				SDLRect[] rects = (SDLRect[]) obj; 
-				sInstance.handleVideoDeviceUpdateRects(rects);
+				SDLRect[] rects = (SDLRect[]) msg.obj; 
+				handleVideoDeviceUpdateRects(rects);
+				break;
+			default:
+				Log.e(TAG, "undefined event");
 				break;
 		}
 	}
 
     private void handleVideoDeviceCreate(SDLVideoDevice device) {
+		Log.d(TAG, "handleVideoDeviceCreate");
     }
 	
     private void handleVideoDeviceDelete() {
+		Log.d(TAG, "handleVideoDeviceDelete");
     }
 
     private void handleVideoDeviceInit(SDLPixelFormat pformat) {
+		Log.d(TAG, "handleVideoDeviceInit");
     }
 
 	private void handleVideoDeviceSetSurface(SDLSurface surface) {
-		//SDLActivity.onSetSurface(surface);
+		Log.d(TAG, "handleVideoDeviceSetSurface");
 	}
 
 	private void handleVideoDevicePumpEvents() {
+		Log.d(TAG, "handleVideoDevicePumpEvents");
 	}
 
 	// this event isn't invoked into java and drawing is written in c++
 	private void handleVideoDeviceUpdateRects(SDLRect[] rects) {
+		Log.d(TAG, "handleVideoDeviceUpdateRects");
 	}
 
 	public interface SDLVideoSetSurfaceHandler {

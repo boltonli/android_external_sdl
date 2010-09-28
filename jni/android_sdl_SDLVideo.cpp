@@ -165,7 +165,7 @@ class JNISDLVideoDriverListener: public SDLVideoDriverListener
 public:
     JNISDLVideoDriverListener(JNIEnv* env, jobject thiz, jobject weak_thiz);
     ~JNISDLVideoDriverListener();
-    void notify(int arg0, int arg1, void* data);
+    void notify(int what, int arg1, int arg2, void* data);
 private:
     jclass      mClass;     // Reference to MediaPlayer class
     jobject     mObject;    // Weak ref to MediaPlayer Java object to call on
@@ -185,7 +185,7 @@ JNISDLVideoDriverListener::JNISDLVideoDriverListener(JNIEnv* env, jobject thiz, 
 	
     // We use a weak reference so the MediaPlayer object can be garbage collected.
     // The reference is only used as a proxy for callbacks.
-    mObject  = env->NewGlobalRef(weak_thiz);
+    mObject = env->NewGlobalRef(weak_thiz);
 }
 
 JNISDLVideoDriverListener::~JNISDLVideoDriverListener()
@@ -197,19 +197,19 @@ JNISDLVideoDriverListener::~JNISDLVideoDriverListener()
 }
 
 // callback from libsdl which notify us about situation in sdl video driver
-void JNISDLVideoDriverListener::notify(int arg0, int arg1, void* data)
+void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
 {
 	JNIEnv *env;
 	jobject obj;
 	
-	if (arg0 == SDL_NATIVE_VIDEO_UPDATE_RECTS) {
+	if (what == SDL_NATIVE_VIDEO_UPDATE_RECTS) {
 		return;
 	}
 	
     env = SDLRuntime::getJNIEnv();
 	
 	// we create java representation of native structs
-	switch (arg0) {
+	switch (what) {
 		case SDL_NATIVE_VIDEO_CREATE_DEVICE:
 			obj = createJavaSDLVideoDevice((SDL_VideoDevice*) data);
 			break;
@@ -228,10 +228,10 @@ void JNISDLVideoDriverListener::notify(int arg0, int arg1, void* data)
 	}
 	
 	// than call java to process class represents sdl struct
-    env->CallStaticVoidMethod(mClass, fields.post_event, mObject, arg0, arg1, obj);
+    env->CallStaticVoidMethod(mClass, fields.post_event, mObject, what, arg1, arg2, obj);
 	
 	// and update sdl struct against java class representation
-	switch (arg0) {
+	switch (what) {
 		case SDL_NATIVE_VIDEO_CREATE_DEVICE:
 			createNativeSDLVideoDevice(obj, (SDL_VideoDevice*) data);
 			break;
@@ -254,9 +254,9 @@ void JNISDLVideoDriverListener::notify(int arg0, int arg1, void* data)
 static void
 android_sdl_SDLVideo_native_init(JNIEnv *env)
 {
-    jclass clazz;
-
-    clazz = env->FindClass(kClassPathName);
+	LOGV("native_init");
+	
+    jclass clazz = env->FindClass(kClassPathName);
     if (clazz == NULL) {
         SDLRuntime::doThrow(env, "java/lang/RuntimeException", 
 							"Can't find android/sdl/SDLVideo");
@@ -272,7 +272,7 @@ android_sdl_SDLVideo_native_init(JNIEnv *env)
 	*/
 	 
     fields.post_event = env->GetStaticMethodID(clazz, "postEventFromNative",
-                                               "(IILjava/lang/Object;)V");
+                                               "(Ljava/lang/Object;IIILjava/lang/Object;)V");
     if (fields.post_event == NULL) {
         SDLRuntime::doThrow(env, "java/lang/RuntimeException", 
 							"Can't find SDLVideo.postEventFromNative");

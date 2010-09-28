@@ -19,6 +19,7 @@ SDLVideoDriver *SDLVideoDriver::getInstance() {
 
 void SDLVideoDriver::registerListener(SDLVideoDriverListener *listener) {
     mListener = listener;
+	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "listener registred");
 }
 
 void SDLVideoDriver::unregisterListener() {
@@ -141,7 +142,7 @@ SDL_VideoDevice *SDLVideoDriver::onCreateDevice(int devindex) {
     thiz->device->PumpEvents = SDLVideoDriver::onPumpEvents;
     thiz->device->free = SDLVideoDriver::onDeleteDevice;
 	
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_CREATE_DEVICE, 0, (void*) thiz->device);
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_CREATE_DEVICE, 0, 0, (void*) thiz->device);
 
     __android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "device created");
 	
@@ -153,7 +154,7 @@ int SDLVideoDriver::onVideoInit(_THIS, SDL_PixelFormat *vformat) {
     vformat->BitsPerPixel = 16;
     vformat->BytesPerPixel = 2;
 	
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_INIT, 0, (void*) vformat);
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_INIT, 0, 0, (void*) vformat);
 	
 	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "video initzialized: bpp=%i, Bpp=%i",
                         vformat->BitsPerPixel,
@@ -187,7 +188,7 @@ SDL_Surface *SDLVideoDriver::onSetVideoMode(_THIS, SDL_Surface *current, int wid
     current->pitch = current->w * (bpp / 8);
     current->pixels = thiz->mBitmap.getPixels();
 	
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_SET_SURFACE, 0, (void*) current);
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_SET_SURFACE, 0, 0, (void*) current);
 
     __android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "setting sdl bitmap size to: %dx%d", width, height);
     /* We're done */
@@ -250,7 +251,7 @@ void SDLVideoDriver::onDeleteDevice(SDL_VideoDevice *device) {
         listener->onDeleteDevice();
     }
 	*/
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_DELETE_DEVICE, 0, (void*) device);
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_DELETE_DEVICE, 0, 0, (void*) device);
 	
     SDL_free(thiz->device);
     __android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "device deleted");
@@ -264,7 +265,7 @@ void SDLVideoDriver::onPumpEvents(_THIS) {
         listener->onProcessEvents();
     }
 	*/
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_PUMP_EVENTS, 0, NULL);
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_PUMP_EVENTS, 0, 0, NULL);
 }
 
 void SDLVideoDriver::onInitOSKeymap(_THIS) {
