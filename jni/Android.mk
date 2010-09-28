@@ -4,9 +4,9 @@ include $(CLEAR_VARS)
 LOCAL_CPP_EXTENSION := .cpp
 
 LOCAL_SRC_FILES := \
+	onLoad.cpp \
 	SDLRuntime.cpp \
-        android_sdl_SDLSurfaceView.cpp \
-	android_sdl_LibraryLoader.cpp
+        android_sdl_SDLVideo.cpp
 
 LOCAL_MODULE := libsdl_jni
 

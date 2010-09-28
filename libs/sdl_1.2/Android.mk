@@ -45,6 +45,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libskia \
 	libmedia \
 	libutils \
+	libbinder \
 	liblog \
 	libdl
 

@@ -33,7 +33,6 @@
 
 namespace android {
 
-extern int register_android_sdl_LibraryLoader(JNIEnv* env);
 extern int register_android_sdl_SDLSurfaceView(JNIEnv* env);
 
 static SDLRuntime* gCurRuntime = NULL;
@@ -123,32 +122,6 @@ JNIEnv* SDLRuntime::getJNIEnv()
     if (result != JNI_OK)
         LOGE("ERROR: thread detach failed\n");
     return result;
-}
-
-/**
- * Used by LoadClass to register native functions.
- */
-extern "C" jint JNI_OnLoad(JavaVM* vm, void* reserved)
-{
-	SDLRuntime::setJavaVM(vm);
-	JNIEnv* env = SDLRuntime::getJNIEnv();
-	
-	LOG_ASSERT(env, "Could not retrieve the env!");
-		
-	LOGV("loading . . .");
-		
-	if(register_android_sdl_LibraryLoader(env) != JNI_OK) {
-		LOGE("can't load LibraryLoader");
-		return JNI_ERR;
-	}
-		
-	if(register_android_sdl_SDLSurfaceView(env) != JNI_OK) {
-		LOGE("can't load SDLSurfaceView");
-		return JNI_ERR;
-	}
-	
-	LOGV("loaded");
-	return JNI_VERSION_1_4;
 }
 
 }   // namespace android

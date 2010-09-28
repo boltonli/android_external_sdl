@@ -12,6 +12,7 @@ extern "C" {
 #include "../../events/SDL_events_c.h"
 }
 
+#include <binder/IMemory.h>
 #include <surfaceflinger/Surface.h>
 #include <SkBitmap.h>
 
@@ -24,28 +25,27 @@ enum sdl_native_events {
 	SDL_NATIVE_VIDEO_INIT = 4,
 	SDL_NATIVE_VIDEO_SET_SURFACE = 5,
 	SDL_NATIVE_VIDEO_PUMP_EVENTS = 6,
+	SDL_NATIVE_VIDEO_UPDATE_RECTS = 7,
 };
 
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *self
 
+// ----------------------------------------------------------------------------
+// ref-counted object for callbacks
+class SDLVideoDriverListener : virtual public RefBase
+{
+public:
+    virtual void notify(int arg0, int arg1, void* data) = 0;
+};
+
 class SDLVideoDriver {
 public:
-	class SDLVideoDriverListener
-	{
-        protected:
-            ~SDLVideoDriverListener();
-        public:
-            virtual void onProcessEvents();
-            virtual void onUpdateScreen(SkBitmap *bitmap);
-            virtual void onDeleteDevice();
-	};
-
 	SDLVideoDriver();
 	~SDLVideoDriver();
 
 	void registerListener(SDLVideoDriverListener *listener);
-	void unregisterListener(SDLVideoDriverListener *listener);
+	void unregisterListener();
 	void processKey(int key, int action);
 	void processMouse(double x, double y, int action);
 
@@ -66,7 +66,7 @@ public:
 private:
 	SDL_VideoDevice *device;
 	SkBitmap mBitmap;
-	Vector<SDLVideoDriverListener*> mListeners;
+	SDLVideoDriverListener* mListener;
 
 	void initBitmap(int format, int width, int height);
 	

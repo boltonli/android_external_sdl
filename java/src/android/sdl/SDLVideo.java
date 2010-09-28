@@ -20,6 +20,8 @@ package android.sdl;
 import android.sdl.impl.SDLImpl;
 //import android.sdl.app.SDLActivity;
 
+import java.lang.ref.WeakReference;
+
 public class SDLVideo {
 	
 	// must equals with libsdl/src/video/android/SDL_androidvideo.h -> sdl_native_events
@@ -30,28 +32,37 @@ public class SDLVideo {
 		private static final int SDL_NATIVE_VIDEO_INIT = 4;
 		private static final int SDL_NATIVE_VIDEO_SET_SURFACE = 5;
 		private static final int SDL_NATIVE_VIDEO_PUMP_EVENTS = 6;
+		private static final int SDL_NATIVE_VIDEO_UPDATE_RECTS = 7;
 	}
 	
 	// registers fields and methods
 	private static native final void native_init();
+    private native final void native_setup(Object mediaplayer_this);
+    private native final void native_finalize();
 	
 	// handle static initzialization of sdl library
 	public static SDLImpl.InitHandler sInitCallback = new SDLImpl.InitHandler() {
 	    public void onInit() {
 	        native_init();
+	
+			// create our SDLVideo driver
+			sInstance = new SDLVideo();
 		}
 	};
 
     private static SDLVideo sInstance;
 	
     private SDLVideo() {
-        sInstance = this;
+		/* Native setup requires a weak reference to our object.
+		 * It's easier to create it here than in C++.
+		 */
+		native_setup(new WeakReference<SDLVideo>(this));
     }
 	
 	/**
 	 * native callback
 	 **/
-	private static void handleNotify(int arg0, int arg1, Object obj) {
+	private static void postEventFromNative(int arg0, int arg1, Object obj) {
 		switch (arg0) {
 			case SDLNativeEvents.SDL_NATIVE_VIDEO_CREATE_DEVICE:
                 SDLVideoDevice device = (SDLVideoDevice) obj;
@@ -74,6 +85,10 @@ public class SDLVideo {
 			case SDLNativeEvents.SDL_NATIVE_VIDEO_PUMP_EVENTS:
 				sInstance.handleVideoDevicePumpEvents();
 				break;
+			case SDLNativeEvents.SDL_NATIVE_VIDEO_UPDATE_RECTS:
+				SDLRect[] rects = (SDLRect[]) obj; 
+				sInstance.handleVideoDeviceUpdateRects(rects);
+				break;
 		}
 	}
 
@@ -94,6 +109,10 @@ public class SDLVideo {
 	}
 
 	private void handleVideoDevicePumpEvents() {
+	}
+
+	// this event isn't invoked into java and drawing is written in c++
+	private void handleVideoDeviceUpdateRects(SDLRect[] rects) {
 	}
 
 	public interface SDLVideoSetSurfaceHandler {
