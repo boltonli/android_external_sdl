@@ -55,7 +55,23 @@ SDLRuntime::~SDLRuntime()
 	if (jniThrowException(env, exc, msg) != 0)
 		assert(false);
 }
-
+	
+/*static*/ jobject SDLRuntime::createObject(JNIEnv* env, jclass clazz) 
+{
+	jmethodID constructor = env->GetMethodID(clazz, "<init>", "()V");
+	if (constructor == NULL) {
+		doThrow(env, "java/lang/RuntimeException", "Can't find constructor");
+		return NULL;
+	}
+		
+	jobject obj = env->NewObject(clazz, constructor);
+	if (obj == NULL) {
+		doThrow(env, "java/lang/RuntimeException", "Can't invoke constructor");
+		return NULL;
+	}
+	return obj;
+}
+	
 /*
  * Register native methods using JNI.
  */

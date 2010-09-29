@@ -74,22 +74,30 @@ public final class SDLImpl {
 			System.loadLibrary("sdl_jni");
 		}
 		catch (SecurityException ex) {
-			Log.d(TAG, "couldn't load sdl native lib due to security exception");
+			Log.e(TAG, "couldn't load sdl native lib due to security exception");
 			return false;
 		}
 		catch (UnsatisfiedLinkError ex) {
-			Log.d(TAG, "native sdl library doesn't exists");
+			Log.e(TAG, "native sdl library doesn't exists");
 			return false;
 		}
 		
-		sVideo = new SDLVideo();
+		if(!loadDrivers()) {
+			Log.e(TAG, "couldn't load sdl java drivers");
+			return false;
+		}
 		
 		Log.d(TAG, "java sdl library loaded");
 		return true;
 	}
 	
+	private static boolean loadDrivers() {
+		sVideo = new SDLVideo();
+		return true;
+	}
+	
     public static SDLVideo getVideoDriver() {
-	return sVideo;
+	    return sVideo;
     }
 	
 }

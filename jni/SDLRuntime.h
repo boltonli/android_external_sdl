@@ -38,6 +38,8 @@ public:
 	
 	static void doThrow(JNIEnv* env, const char* exc, const char* msg = NULL);
 	
+	static jobject createObject(JNIEnv* env, jclass clazz);
+	
 	static int javaDetachThread(void);
 	
 	static int javaAttachThread(const char* threadName, JNIEnv** pEnv);

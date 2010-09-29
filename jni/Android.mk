@@ -6,7 +6,10 @@ LOCAL_CPP_EXTENSION := .cpp
 LOCAL_SRC_FILES := \
 	onLoad.cpp \
 	SDLRuntime.cpp \
-        android_sdl_SDLVideo.cpp
+        android_sdl_SDLVideo.cpp \
+	android_sdl_SDLPixelFormat.cpp \
+	android_sdl_SDLVideoDevice.cpp \
+	android_sdl_SDLSurface.cpp
 
 LOCAL_MODULE := libsdl_jni
 

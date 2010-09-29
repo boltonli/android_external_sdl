@@ -41,120 +41,16 @@ static fields_t fields;
 
 static const char* const kClassPathName = "android/sdl/SDLVideo";
 
-
 //-- helper methods for creating java classes representing SDL native structs
 
-static jobject createObject(JNIEnv* env, jclass clazz) {	
-	jmethodID constructor = env->GetMethodID(clazz, "<init>", "()V");
-	if (constructor == NULL) {
-		SDLRuntime::doThrow(env, "java/lang/RuntimeException", "Can't find constructor");
-        return NULL;
-    }
-	
-	jobject obj = env->NewObject(clazz, constructor);
-	if (obj == NULL) {
-		SDLRuntime::doThrow(env, "java/lang/RuntimeException", "Can't invoke constructor");
-        return NULL;
-    }
-	return obj;
-}
+extern jobject
+android_sdl_SDLPixelFormat_create(SDL_PixelFormat* pformat);
 
-static jobject createJavaSDLSurface(SDL_Surface* surface) {
-	jobject obj;
-	JNIEnv* env = SDLRuntime::getJNIEnv();
-	
-	jclass clazz = env->FindClass("android/sdl/SDLSurface");
-	if (clazz == NULL) {
-            SDLRuntime::doThrow(env, "java/lang/RuntimeException", "android/sdl/SDLSurface");
-            return NULL;
-        }
-	
-	if((obj = createObject(env, clazz)) == NULL) {
-		return NULL;
-	}
-	
-	sdlJniUtils_Surface_ToJava(env, clazz, obj, surface);
-	
-	return obj;
-}
+extern jobject
+android_sdl_SDLVideoDevice_create(SDL_VideoDevice* device);
 
-static jobject createJavaSDLPixelFormat(SDL_PixelFormat* pformat) {
-	jobject obj;
-	JNIEnv* env = SDLRuntime::getJNIEnv();
-	
-	jclass clazz = env->FindClass("android/sdl/SDLPixelFormat");
-	if (clazz == NULL) {
-		SDLRuntime::doThrow(env, "java/lang/RuntimeException", "android/sdl/SDLPixelFormat");
-        return NULL;
-    }
-	
-	if((obj = createObject(env, clazz)) == NULL) {
-		return NULL;
-	}
-	
-	sdlJniUtils_PixelFormat_ToJava(env, clazz, obj, pformat);
-	
-	return obj;
-}
-
-static jobject createJavaSDLVideoDevice(SDL_VideoDevice* device) {
-	jobject obj;
-	JNIEnv* env = SDLRuntime::getJNIEnv();
-	
-	jclass clazz = env->FindClass("android/sdl/SDLVideoDevice");
-	if (clazz == NULL) {
-            SDLRuntime::doThrow(env, "java/lang/RuntimeException", "android/sdl/SDLVideoDevice");
-            return NULL;
-        }
-	
-	if((obj = createObject(env, clazz)) == NULL) {
-		return NULL;
-	}
-	
-	sdlJniUtils_VideoDevice_ToJava(env, clazz, obj, device);
-	
-	return obj;
-}
-
-static jboolean createNativeSDLSurface(jobject jniSurface, SDL_Surface* surface) {
-	JNIEnv* env = SDLRuntime::getJNIEnv();
-	
-	jclass clazz = env->FindClass("android/sdl/SDLSurface");
-	if (clazz == NULL) {
-            SDLRuntime::doThrow(env, "java/lang/RuntimeException", "android/sdl/SDLSurface");
-            return JNI_FALSE;
-        }
-	
-	sdlJniUtils_Surface_ToNative(env, clazz, jniSurface, surface);
-	
-	return JNI_TRUE;
-}
-
-static jboolean createNativeSDLPixelFormat(jobject jniPFormat, SDL_PixelFormat* pformat) {
-	JNIEnv* env = SDLRuntime::getJNIEnv();
-	
-	jclass clazz = env->FindClass("android/sdl/SDLPixelFormat");
-	if (clazz == NULL) {
-            SDLRuntime::doThrow(env, "java/lang/RuntimeException", "android/sdl/SDLPixelFormat");
-            return JNI_FALSE;
-        }
-	
-	sdlJniUtils_PixelFormat_ToNative(env, clazz, jniPFormat, pformat);
-	return JNI_TRUE;
-}
-
-static jboolean createNativeSDLVideoDevice(jobject jniDevice, SDL_VideoDevice* device) {
-	JNIEnv* env = SDLRuntime::getJNIEnv();
-	
-	jclass clazz = env->FindClass("android/sdl/SDLVideoDevice");
-	if (clazz == NULL) {
-            SDLRuntime::doThrow(env, "java/lang/RuntimeException", "android/sdl/SDLVideoDevice");
-            return JNI_FALSE;
-        }
-	
-	sdlJniUtils_VideoDevice_ToNative(env, clazz, jniDevice, device);
-	return JNI_TRUE;
-}
+extern jobject
+android_sdl_SDLSurface_create(SDL_Surface* surface);
 
 // ----------------------------------------------------------------------------
 
@@ -258,15 +154,15 @@ void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
     // we create java representation of native structs
     switch (what) {
         case SDL_NATIVE_VIDEO_CREATE_DEVICE:
-            obj = createJavaSDLVideoDevice((SDL_VideoDevice*) data);
+            obj = android_sdl_SDLVideoDevice_create((SDL_VideoDevice*) data);
             break;
         case SDL_NATIVE_VIDEO_DELETE_DEVICE:
             break;
         case SDL_NATIVE_VIDEO_INIT:
-            obj = createJavaSDLPixelFormat((SDL_PixelFormat*) data);
+            obj = android_sdl_SDLPixelFormat_create((SDL_PixelFormat*) data);
             break;
         case SDL_NATIVE_VIDEO_SET_SURFACE:
-            obj = createJavaSDLSurface((SDL_Surface*) data);
+            obj = android_sdl_SDLSurface_create((SDL_Surface*) data);
             break;
         case SDL_NATIVE_VIDEO_PUMP_EVENTS:
             break;
@@ -276,27 +172,12 @@ void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
 	
 	// than call java to process class represents sdl struct
     env->CallStaticVoidMethod(mClass, fields.post_event, mObject, what, arg1, arg2, obj);
-	
-	// and update sdl struct against java class representation
-	switch (what) {
-		case SDL_NATIVE_VIDEO_CREATE_DEVICE:
-			createNativeSDLVideoDevice(obj, (SDL_VideoDevice*) data);
-			break;
-		case SDL_NATIVE_VIDEO_DELETE_DEVICE:
-			break;
-		case SDL_NATIVE_VIDEO_INIT:
-			createNativeSDLPixelFormat(obj, (SDL_PixelFormat*) data);
-			break;
-		case SDL_NATIVE_VIDEO_SET_SURFACE:
-			createNativeSDLSurface(obj, (SDL_Surface*) data);
-			break;
-	}
 }
 
 // ----------------------------------------------------------------------------
 
 // This function gets some field IDs, which in turn causes class initialization.
-// It is called from a static block in MediaPlayer, which won't run until the
+// It is called from a static block, which won't run until the
 // first time an instance of this class is used.
 static void
 android_sdl_SDLVideo_native_init(JNIEnv *env)

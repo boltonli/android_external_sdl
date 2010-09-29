@@ -22,7 +22,22 @@ package android.sdl;
  */
 public class SDLSurface {
 	
+	private int mNativePointer;
+	
+	// registers fields and methods
+    private static native final void native_init();
+	static {
+	    native_init();
+    }
+	
     private SDLSurface() {
+    }
+	
+	
+	private native final void native_finalize();
+	@Override
+    protected void finalize() {
+	    native_finalize(); 
     }
 	
 }

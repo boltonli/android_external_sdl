@@ -21,6 +21,8 @@ import android.os.Bundle;
 
 import android.sdl.app.SDLActivity;
 
+import java.lang.Thread;
+
 public class SimpleTestActivity extends SDLActivity {
 
     private static final String TAG = "SimpleTestActivity";
@@ -29,7 +31,11 @@ public class SimpleTestActivity extends SDLActivity {
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 		
-		nativeStart();
+		new Thread() {
+			public void run() {
+		        nativeStart();
+			}
+		}.start();
     }
 	
 	static {

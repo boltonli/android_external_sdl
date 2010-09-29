@@ -19,6 +19,8 @@ package android.sdl;
 
 public class SDLPixelFormat {
 	
+	private int mNativePointer;
+	
 	private SDLPalette mPalette;
 	private short mBitsPerPixel;
 	private short mBytesPerPixel;
@@ -39,8 +41,21 @@ public class SDLPixelFormat {
 	private long mColorKey;
 	/** Alpha value information (per-surface alpha) */
 	private short mAlpha;
+	
+	// registers fields and methods
+    private static native final void native_init();
+    private native final void native_finalize();
+	
+	static {
+	    native_init();
+    }
 
     private SDLPixelFormat() {
+    }
+	
+	@Override
+    protected void finalize() {
+	    native_finalize(); 
     }
 
 }

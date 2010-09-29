@@ -19,6 +19,8 @@ package android.sdl;
 
 public class SDLVideoDevice {
 	
+	private int mNativePointer;
+	
 	/* The name of this video driver */
 	private String mName;
 	/* Gamma support */
@@ -34,8 +36,20 @@ public class SDLVideoDevice {
 	/* Driver information flags */
 	private int mHandlesAnySize;	/* Driver handles any size video mode */
 	
+	// registers fields and methods
+    private static native final void native_init();
+    private native final void native_finalize();
+	
+	static {
+	    native_init();
+    }	
+	
     private SDLVideoDevice() {
     }
 	
+	@Override
+    protected void finalize() {
+	    native_finalize(); 
+    }
 	
 }
