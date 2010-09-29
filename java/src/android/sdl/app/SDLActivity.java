@@ -19,21 +19,49 @@ package android.sdl.app;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.view.SurfaceView;
 
 import android.sdl.impl.SDLImpl;
+import android.sdl.SDLVideo;
+import android.sdl.SDLSurface;
+import android.sdl.SDLRect;
 
 public class SDLActivity extends Activity {
 	
-	// we must call main entry point of java lib for loading jni lib
-	// this must be here because user overrides this class when using
-	// sdl library
-	static {
-		SDLImpl.load();
+    // we must call main entry point of java lib for loading jni lib
+    // this must be here because user overrides this class when using
+    // sdl library
+    static {
+	SDLImpl.load();
+    }
+
+    private SDLVideo.SDLVideoSetSurfaceClb mSurfaceClb = new SDLVideo.SDLVideoSetSurfaceClb() {
+	public void onSetSurface(SDLSurface surface) {
+	    mView = new SurfaceView(SDLActivity.this);
+	    SDLActivity.this.setContentView(mView);
 	}
+    };
+
+    private SDLVideo.SDLVideoPumpEventsClb mEventsClb = new SDLVideo.SDLVideoPumpEventsClb() {
+	public void onPumpEvents() {
+	}
+    };
+
+    private SDLVideo.SDLVideoUpdateRectsClb mUpdateClb = new SDLVideo.SDLVideoUpdateRectsClb() {
+	public void onUpdateRects(SDLRect[] rects) {
+	}
+    };
+
+    private SurfaceView mView;
 	
-	@Override
+    @Override
     protected void onCreate(Bundle bundle) {
-		super.onCreate(bundle);
-	}
+	super.onCreate(bundle);
+
+	SDLVideo vdriver = SDLImpl.getVideoDriver();
+	vdriver.registerCallback(mSurfaceClb);
+	vdriver.registerCallback(mEventsClb);
+	vdriver.registerCallback(mUpdateClb);
+    }
 	
 }

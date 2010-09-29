@@ -88,8 +88,8 @@ public final class SDLImpl {
 		return true;
 	}
 	
-	public interface InitHandler {
-		public void onInit();
-	}
+    public static SDLVideo getVideoDriver() {
+	return sVideo;
+    }
 	
 }
