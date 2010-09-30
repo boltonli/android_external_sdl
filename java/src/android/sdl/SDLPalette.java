@@ -18,11 +18,13 @@
 package android.sdl;
 
 public class SDLPalette {
-	
-	private int mNColors;
-	private SDLColor[] mColors;
+
+    private int mNativePointer;
+//    private SDLColor[] mColors;
 
     private SDLPalette() {
     }
-	
+
+//    public native SDLColor[] getColors();
+
 }

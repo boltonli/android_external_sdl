@@ -119,11 +119,23 @@ public class SDLVideo {
 
     private void handleVideoDeviceInit(SDLPixelFormat pformat) {
 	    Log.d(TAG, "handleVideoDeviceInit");
+            Log.d(TAG, "bits per pixel: " + pformat.getBitsPerPixel());
+            Log.d(TAG, "bytes per pixel: " + pformat.getBytesPerPixel());
     }
 
     private Surface handleVideoDeviceSetSurface(SDLSurface surface) {
 	    Log.d(TAG, "handleVideoDeviceSetSurface");
-	    if(mSurfaceClb != null) {
+            Log.d(TAG, "surface w: " + surface.getW());
+            Log.d(TAG, "surface h: " + surface.getH());
+            SDLRect rect = surface.getClipRect();
+            Log.d(TAG, "surface rect x: " + rect.getX());
+            Log.d(TAG, "surface rect y: " + rect.getY());
+            Log.d(TAG, "surface rect w: " + rect.getW());
+            Log.d(TAG, "surface rect h: " + rect.getH());
+            SDLPixelFormat pformat = surface.getPixelFormat();
+            Log.d(TAG, "bits per pixel: " + pformat.getBitsPerPixel());
+            Log.d(TAG, "bytes per pixel: " + pformat.getBytesPerPixel());
+            if(mSurfaceClb != null) {
 	        return mSurfaceClb.onSetSurface(surface);
 	    }
         return null;

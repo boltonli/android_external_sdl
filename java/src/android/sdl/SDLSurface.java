@@ -22,22 +22,42 @@ package android.sdl;
  */
 public class SDLSurface {
 	
-	private int mNativePointer;
+    private int mNativePointer;
 	
-	// registers fields and methods
+    // registers fields and methods
     private static native final void native_init();
-	static {
-	    native_init();
+    static {
+        native_init();
     }
 	
     private SDLSurface() {
     }
 	
 	
-	private native final void native_finalize();
-	@Override
+    private native final void native_finalize();
+    @Override
     protected void finalize() {
-	    native_finalize(); 
+	native_finalize(); 
     }
+
+    public native int getFlags();
+
+    public native SDLPixelFormat getPixelFormat();
+
+    public native int getW();
+
+    public native int getH();
+
+    public native int getPitch();
+
+    public native int getOffset();
+
+    public native SDLRect getClipRect();
+
+    /** Reference count -- used when freeing surface */
+    public native int getRefCount();
+
+    /** format version, bumped at every change to invalidate blit maps */
+    public native long getFormatVersion();
 	
 }

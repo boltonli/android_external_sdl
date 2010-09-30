@@ -19,28 +19,29 @@ package android.sdl;
 
 public class SDLRect {
 	
-	private int mX;
-	private int mY;
-	private int mW;
-	private int mH;
+    private int mNativePointer;
 
     private SDLRect() {
     }
+
+    // registers fields and methods
+    private static native final void native_init();
+    static {
+        native_init();
+    }	
+
+    private native final void native_finalize();
+    @Override
+    protected void finalize() {
+        native_finalize(); 
+    }
 	
-	public int getX() {
-		return mX;
-	}
+    public native int getX();
 	
-	public int getY() {
-		return mY;
-	}
+    public native int getY();
 	
-	public int getW() {
-		return mW;
-	}
+    public native int getW();
 	
-	public int getH() {
-		return mH;
-	}
+    public native int getH();
 	
 }

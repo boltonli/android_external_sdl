@@ -19,8 +19,8 @@
 #define LOG_TAG "SDLImpl-JNI"
 
 #include "SDLRuntime.h"
-#include "SDLJNIUtils.h"
-
+#include <SDL_androidvideo.h>
+#include <SkBitmap.h>
 #include <utils/Log.h>
 
 // ----------------------------------------------------------------------------

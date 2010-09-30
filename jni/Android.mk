@@ -9,7 +9,9 @@ LOCAL_SRC_FILES := \
         android_sdl_SDLVideo.cpp \
 	android_sdl_SDLPixelFormat.cpp \
 	android_sdl_SDLVideoDevice.cpp \
-	android_sdl_SDLSurface.cpp
+	android_sdl_SDLSurface.cpp \
+	android_sdl_SDLColor.cpp \
+	android_sdl_SDLRect.cpp
 
 LOCAL_MODULE := libsdl_jni
 

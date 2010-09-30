@@ -9,6 +9,8 @@ extern int register_android_sdl_SDLVideo(JNIEnv* env);
 extern int register_android_sdl_SDLPixelFormat(JNIEnv *env);
 extern int register_android_sdl_SDLVideoDevice(JNIEnv *env);
 extern int register_android_sdl_SDLSurface(JNIEnv *env);
+extern int register_android_sdl_SDLColor(JNIEnv *env);
+extern int register_android_sdl_SDLRect(JNIEnv *env);
 };
 
 using namespace android;
@@ -39,6 +41,14 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 	}
 	if(register_android_sdl_SDLSurface(env) != JNI_OK) {
 		LOGE("can't load android_sdl_SDLSurface");
+		return JNI_ERR;
+	}
+        if(register_android_sdl_SDLColor(env) != JNI_OK) {
+		LOGE("can't load android_sdl_SDLColor");
+		return JNI_ERR;
+	}
+        if(register_android_sdl_SDLRect(env) != JNI_OK) {
+		LOGE("can't load android_sdl_SDLRect");
 		return JNI_ERR;
 	}
 	

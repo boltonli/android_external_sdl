@@ -17,30 +17,62 @@
 
 package android.sdl;
 
+/*
+** This class is only frontend of SDl_PixelFormat native struct
+*/
 public class SDLPixelFormat {
 	
 	private int mNativePointer;
 	
-	private SDLPalette mPalette;
-	private short mBitsPerPixel;
-	private short mBytesPerPixel;
-	private short mRloss;
-	private short mGloss;
-	private short mBloss;
-	private short mAloss;
-	private short mRshift;
-	private short mGshift;
-	private short mBshift;
-	private short mAshift;
-	private long mRmask;
-	private long mGmask;
-	private long mBmask;
-	private long mAmask;
+	//private SDLPalette mPalette;
+	public native void setBitsPerPixel(short value);
+	public native short getBitsPerPixel();
+
+	public native void setBytesPerPixel(short value);
+	public native short getBytesPerPixel();
+
+	public native void setRloss(short value);
+	public native short getRloss();
 	
+	public native void setGloss(short value);
+	public native short getGloss();
+
+	public native void setBloss(short value);
+	public native short getBloss();
+
+	public native void setAloss(short value);
+	public native short getAloss();
+
+	public native void setRshift(short value);
+	public native short getRshift();
+
+	public native void setGshift(short value);
+	public native short getGshift();
+
+	public native void setBshift(short value);
+	public native short getBshift();
+
+	public native void setAshift(short value);
+	public native short getAshift();
+
+	public native void setRmask(long value);
+	public native long getRmask();
+
+	public native void setGmask(long value);
+	public native long getGmask();
+
+	public native void setBmask(long value);
+	public native long getBmask();
+
+	public native void setAmask(long value);
+	public native long getAmask();
+
 	/** RGB color key information */
-	private long mColorKey;
+	public native void setColorKey(long value);
+	public native long getColorKey();
 	/** Alpha value information (per-surface alpha) */
-	private short mAlpha;
+	public native void setAlpha(short value);
+	public native short getAlpha();
 	
 	// registers fields and methods
     private static native final void native_init();

@@ -38,9 +38,9 @@ public class SDLActivity extends Activity {
 
     private SDLVideo.SDLVideoSetSurfaceClb mSurfaceClb = new SDLVideo.SDLVideoSetSurfaceClb() {
 	    public Surface onSetSurface(SDLSurface surface) {
-	        //SurfaceView view = new SurfaceView(SDLActivity.this);
+	        mView = new SurfaceView(SDLActivity.this);
 	        //SDLActivity.this.setContentView(view);
-	        return null;//view.getHolder().getSurface();
+	        return mView.getHolder().getSurface();
 	    }
     };
 
@@ -53,6 +53,8 @@ public class SDLActivity extends Activity {
 	    public void onUpdateRects(SDLRect[] rects) {
 	    }
     };
+
+    private SurfaceView mView;
 	
     @Override
     protected void onCreate(Bundle bundle) {

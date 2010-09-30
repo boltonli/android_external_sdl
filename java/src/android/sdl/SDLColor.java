@@ -18,29 +18,30 @@
 package android.sdl;
 
 public class SDLColor {
-	
-	private short mR;
-	private short mG;
-	private short mB;
-	private short mUnused;
+
+    private int mNativePointer;
 
     private SDLColor() {
     }
+
+    // registers fields and methods
+    private static native final void native_init();
+    static {
+        native_init();
+    }	
+
+    private native final void native_finalize();
+    @Override
+    protected void finalize() {
+        native_finalize(); 
+    }
 	
-	public short getR() {
-		return mR;
-	}
+    public native short getR();
 	
-	public short getG() {
-		return mG;
-	}
+    public native short getG();
 	
-	public short getB() {
-		return mB;
-	}
+    public native short getB();
 	
-	public short getUnused() {
-		return mUnused;
-	}
+    public native short getUnused();
 	
 }

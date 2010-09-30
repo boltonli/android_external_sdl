@@ -22,19 +22,21 @@ public class SDLVideoDevice {
 	private int mNativePointer;
 	
 	/* The name of this video driver */
-	private String mName;
+	public native String getName();
+
 	/* Gamma support */
-	private int mGamma;
-	private int mIs32bit;
+	public native int getGamma();
+	public native int getIs32bit();
 	
 	/* Data common to all drivers */
-	private String mWmTitle;
-	private String mWmIcon;
-	private int mOffsetX;
-	private int mOffsetY;
+	public native String getWmTitle();
+	public native String getWmIcon();
+
+	public native int getOffsetX();
+	public native int getOffsetY();
 	
 	/* Driver information flags */
-	private int mHandlesAnySize;	/* Driver handles any size video mode */
+	public native int getHandlesAnySize();	/* Driver handles any size video mode */
 	
 	// registers fields and methods
     private static native final void native_init();

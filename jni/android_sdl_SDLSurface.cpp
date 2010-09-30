@@ -28,47 +28,51 @@ using namespace android;
 // ----------------------------------------------------------------------------
 struct fields_t {
     jfieldID    mNativePointer;
-	jfieldID    mName;
-	jfieldID    mGamma;
-	jfieldID    mIs32bit;
-	jfieldID    mWmTitle;
-	jfieldID    mWmIcon;
-	jfieldID    mOffsetX;
-	jfieldID    mOffsetY;
-	jfieldID    mHandlesAnySize;
 };
 static fields_t fields;
 
 static const char* const kClassPathName = "android/sdl/SDLSurface";
 
+extern jobject
+android_sdl_SDLPixelFormat_create(SDL_PixelFormat* pformat);
+
+extern jobject
+android_sdl_SDLRect_create(SDL_Rect* color);
+
 static
 jfieldID checkFieldId(JNIEnv* env, jfieldID fieldId)
 {
-	if (fieldId == NULL) {
-		SDLRuntime::doThrow(env, "java/lang/RuntimeException", "SDLSurface field id is null");
+    if (fieldId == NULL) {
+	SDLRuntime::doThrow(env, "java/lang/RuntimeException", "SDLSurface field id is null");
     }
-	return fieldId;
+    return fieldId;
+}
+
+static 
+SDL_Surface* getNativeStruct(JNIEnv* env, jobject thiz)
+{
+    return (SDL_Surface*)env->GetIntField(thiz, fields.mNativePointer);
 }
 
 jobject
 android_sdl_SDLSurface_create(SDL_Surface* surface)
 {
-	jobject obj;
-	JNIEnv* env = SDLRuntime::getJNIEnv();
+    jobject obj;
+    JNIEnv* env = SDLRuntime::getJNIEnv();
 	
-	jclass clazz = env->FindClass(kClassPathName);
-	if (clazz == NULL) {
-		SDLRuntime::doThrow(env, "java/lang/RuntimeException", kClassPathName);
+    jclass clazz = env->FindClass(kClassPathName);
+    if (clazz == NULL) {
+	SDLRuntime::doThrow(env, "java/lang/RuntimeException", kClassPathName);
         return NULL;
     }
 	
-	if((obj = SDLRuntime::createObject(env, clazz)) == NULL) {
-		return NULL;
-	}
+    if((obj = SDLRuntime::createObject(env, clazz)) == NULL) {
+	return NULL;
+    }
 	
-	env->SetIntField(obj, fields.mNativePointer, (jint)surface);
+    env->SetIntField(obj, fields.mNativePointer, (jint)surface);
 	
-	return obj;
+    return obj;
 }
 
 // This function gets some field IDs, which in turn causes class initialization.
@@ -77,7 +81,7 @@ android_sdl_SDLSurface_create(SDL_Surface* surface)
 static void
 android_sdl_SDLSurface_native_init(JNIEnv *env)
 {
-	LOGV("native_init");
+    LOGV("native_init");
 	
     jclass clazz = env->FindClass(kClassPathName);
     if (clazz == NULL) {
@@ -86,7 +90,7 @@ android_sdl_SDLSurface_native_init(JNIEnv *env)
         return;
     }
 	
-	fields.mNativePointer = checkFieldId(env, env->GetFieldID(clazz, "mNativePointer", "I"));
+    fields.mNativePointer = checkFieldId(env, env->GetFieldID(clazz, "mNativePointer", "I"));
 }
 
 static void
@@ -97,10 +101,81 @@ android_sdl_SDLSurface_native_finalize(JNIEnv *env, jobject thiz)
 }
 
 // ----------------------------------------------------------------------------
+static jint
+android_sdl_SDLSurface_getFlags(JNIEnv *env, jobject thiz)
+{
+    SDL_Surface* surface = getNativeStruct(env, thiz);
+    return (jint)surface->flags;
+}
+
+static jobject
+android_sdl_SDLSurface_getPixelFormat(JNIEnv *env, jobject thiz)
+{
+    SDL_Surface* surface = getNativeStruct(env, thiz);
+    return android_sdl_SDLPixelFormat_create(surface->format);
+}
+
+static jint
+android_sdl_SDLSurface_getW(JNIEnv *env, jobject thiz)
+{
+    SDL_Surface* surface = getNativeStruct(env, thiz);
+    return (jint)surface->w;
+}
+
+static jint
+android_sdl_SDLSurface_getH(JNIEnv *env, jobject thiz)
+{
+    SDL_Surface* surface = getNativeStruct(env, thiz);
+    return (jint)surface->h;
+}
+
+static jint
+android_sdl_SDLSurface_getOffset(JNIEnv *env, jobject thiz)
+{
+    SDL_Surface* surface = getNativeStruct(env, thiz);
+    return (jint)surface->offset;
+}
+
+static jint
+android_sdl_SDLSurface_getPitch(JNIEnv *env, jobject thiz)
+{
+    SDL_Surface* surface = getNativeStruct(env, thiz);
+    return (jint)surface->pitch;
+}
+
+static jint
+android_sdl_SDLSurface_getRefCount(JNIEnv *env, jobject thiz)
+{
+    SDL_Surface* surface = getNativeStruct(env, thiz);
+    return (jint)surface->refcount;
+}
+
+static jlong
+android_sdl_SDLSurface_getFormatVersion(JNIEnv *env, jobject thiz)
+{
+    SDL_Surface* surface = getNativeStruct(env, thiz);
+    return (jlong)surface->format_version;
+}
+
+static jobject
+android_sdl_SDLSurface_getClipRect(JNIEnv *env, jobject thiz)
+{
+    SDL_Surface* surface = getNativeStruct(env, thiz);
+    return android_sdl_SDLRect_create(&surface->clip_rect);
+}
 
 static JNINativeMethod gMethods[] = {
     {"native_init",         "()V",                              (void *)android_sdl_SDLSurface_native_init},
     {"native_finalize",     "()V",                              (void *)android_sdl_SDLSurface_native_finalize},
+    {"getFlags",            "()I",                              (void *)android_sdl_SDLSurface_getFlags},
+    {"getPixelFormat",      "()Landroid/sdl/SDLPixelFormat;",   (void *)android_sdl_SDLSurface_getPixelFormat},
+    {"getW",                "()I",                              (void *)android_sdl_SDLSurface_getW},
+    {"getH",                "()I",                              (void *)android_sdl_SDLSurface_getH},
+    {"getPitch",            "()I",                              (void *)android_sdl_SDLSurface_getPitch},
+    {"getOffset",           "()I",                              (void *)android_sdl_SDLSurface_getOffset},
+    {"getClipRect",         "()Landroid/sdl/SDLRect;",          (void *)android_sdl_SDLSurface_getClipRect},
+    {"getRefCount",         "()I",                              (void *)android_sdl_SDLSurface_getRefCount},
+    {"getFormatVersion",    "()J",                              (void *)android_sdl_SDLSurface_getFormatVersion},
 };
 
 namespace android {
@@ -113,5 +188,3 @@ int register_android_sdl_SDLSurface(JNIEnv *env)
 }
 	
 } // end of android namespace
-
-// KTHXBYE
