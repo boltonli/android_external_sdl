@@ -111,6 +111,8 @@ public class SDLVideo {
 
     private void handleVideoDeviceCreate(SDLVideoDevice device) {
 	    Log.d(TAG, "handleVideoDeviceCreate");
+            Log.d(TAG, "device name: " + device.getName());
+            Log.d(TAG, "device title: " + device.getWmTitle());
     }
 	
     private void handleVideoDeviceDelete() {

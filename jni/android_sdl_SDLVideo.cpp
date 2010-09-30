@@ -169,8 +169,8 @@ void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
         case SDL_NATIVE_VIDEO_UPDATE_RECTS:
             break;
     }
-	
-	// than call java to process class represents sdl struct
+
+    // than call java to process class represents sdl struct
     env->CallStaticVoidMethod(mClass, fields.post_event, mObject, what, arg1, arg2, obj);
 }
 
@@ -270,5 +270,3 @@ int register_android_sdl_SDLVideo(JNIEnv *env)
 }
 	
 } // end of android namespace
-
-// KTHXBYE

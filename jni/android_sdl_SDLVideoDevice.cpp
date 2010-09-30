@@ -98,22 +98,27 @@ android_sdl_SDLVideoDevice_native_finalize(JNIEnv *env, jobject thiz)
     //android_sdl_SDLVideoDevice_release(env, thiz);
 }
 
+//--------------------------------------------
+
 static jstring
 android_sdl_SDLVideoDevice_getName(JNIEnv *env, jobject thiz)
 {
-    return NULL;
+    SDL_VideoDevice* dev = getNativeStruct(env, thiz);
+    return env->NewStringUTF(dev->name);
 }
 
 static jstring
 android_sdl_SDLVideoDevice_getWmTitle(JNIEnv *env, jobject thiz)
 {
-    return NULL;
+    SDL_VideoDevice* dev = getNativeStruct(env, thiz);
+    return env->NewStringUTF(dev->wm_title);
 }
 
 static jstring
 android_sdl_SDLVideoDevice_getWmIcon(JNIEnv *env, jobject thiz)
 {
-    return NULL;
+    SDL_VideoDevice* dev = getNativeStruct(env, thiz);
+    return env->NewStringUTF(dev->wm_icon);
 }
 
 static jint

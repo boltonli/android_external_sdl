@@ -50,10 +50,12 @@ int main(int argc, char* argv[])
     SDL_Event event;
 	
     int keypress = 0;
-    int h=0; 
+    int h=0;
+
+    SDL_WM_SetCaption("Window Title","Icon Title");
 	
     if (SDL_Init(SDL_INIT_VIDEO) < 0 ) return 1;
-	
+
     if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH, SDL_FULLSCREEN|SDL_HWSURFACE)))
     {
         SDL_Quit();
