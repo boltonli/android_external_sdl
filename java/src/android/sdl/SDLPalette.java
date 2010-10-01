@@ -20,11 +20,22 @@ package android.sdl;
 public class SDLPalette {
 
     private int mNativePointer;
-//    private SDLColor[] mColors;
 
     private SDLPalette() {
     }
 
-//    public native SDLColor[] getColors();
+    // registers fields and methods
+    private static native final void native_init();
+    static {
+        native_init();
+    }	
+
+    private native final void native_finalize();
+    @Override
+    protected void finalize() {
+        native_finalize(); 
+    }
+
+    public native SDLColor[] getColors();
 
 }

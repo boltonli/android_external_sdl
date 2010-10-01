@@ -15,7 +15,7 @@
 ** limitations under the License.
 */
 
-#define LOG_TAG "SDLColor-JNI"
+#define LOG_TAG "SDLPalette-JNI"
 
 #include "SDLRuntime.h"
 #include <SDL_androidvideo.h>
@@ -31,26 +31,28 @@ struct fields_t {
 };
 static fields_t fields;
 
-static const char* const kClassPathName = "android/sdl/SDLColor";
+static const char* const kClassPathName = "android/sdl/SDLPalette";
+
+extern jobject
+android_sdl_SDLColor_create(SDL_Color* color);
 
 static
 jfieldID checkFieldId(JNIEnv* env, jfieldID fieldId)
 {
 	if (fieldId == NULL) {
-		SDLRuntime::doThrow(env, "java/lang/RuntimeException", "SDLColor field id is null");
+		SDLRuntime::doThrow(env, "java/lang/RuntimeException", "SDLPalette field id is null");
     }
 	return fieldId;
 }
 
-
 static 
-SDL_Color* getNativeStruct(JNIEnv* env, jobject thiz)
+SDL_Palette* getNativeStruct(JNIEnv* env, jobject thiz)
 {
-    return (SDL_Color*)env->GetIntField(thiz, fields.mNativePointer);
+    return (SDL_Palette*)env->GetIntField(thiz, fields.mNativePointer);
 }
 
 jobject
-android_sdl_SDLColor_create(SDL_Color* color)
+android_sdl_SDLPalette_create(SDL_Palette* palette)
 {
     jobject obj;
     JNIEnv* env = SDLRuntime::getJNIEnv();
@@ -65,7 +67,7 @@ android_sdl_SDLColor_create(SDL_Color* color)
 	return NULL;
     }
 	
-    env->SetIntField(obj, fields.mNativePointer, (jint)color);
+    env->SetIntField(obj, fields.mNativePointer, (jint)palette);
 	
     return obj;
 }
@@ -74,14 +76,14 @@ android_sdl_SDLColor_create(SDL_Color* color)
 // It is called from a static block, which won't run until the
 // first time an instance of this class is used.
 static void
-android_sdl_SDLColor_native_init(JNIEnv *env)
+android_sdl_SDLPalette_native_init(JNIEnv *env)
 {
     LOGV("native_init");
 	
     jclass clazz = env->FindClass(kClassPathName);
     if (clazz == NULL) {
         SDLRuntime::doThrow(env, "java/lang/RuntimeException", 
-							"Can't find android/sdl/SDLColor");
+							"Can't find android/sdl/SDLPalette");
         return;
     }
 	
@@ -89,55 +91,47 @@ android_sdl_SDLColor_native_init(JNIEnv *env)
 }
 
 static void
-android_sdl_SDLColor_native_finalize(JNIEnv *env, jobject thiz)
+android_sdl_SDLPalette_native_finalize(JNIEnv *env, jobject thiz)
 {
     LOGV("native_finalize");
-    //android_sdl_SDLColor_release(env, thiz);
+    //android_sdl_SDLPalette_release(env, thiz);
 }
 
 // ----------------------------------------------------------------------------
 
-static jshort
-android_sdl_SDLColor_getR(JNIEnv *env, jobject thiz)
+static jobjectArray
+android_sdl_SDLPalette_getColors(JNIEnv *env, jobject thiz)
 {
-    SDL_Color* color = getNativeStruct(env, thiz);
-    return (jshort)color->r;
-}
+    jclass clazz;
+    SDL_Palette* palette;
+    jobjectArray jcolors;
 
-static jshort
-android_sdl_SDLColor_getG(JNIEnv *env, jobject thiz)
-{
-    SDL_Color* color = getNativeStruct(env, thiz);
-    return (jshort)color->g;
-}
+    clazz = env->FindClass("android/sdl/SDLColor");
+    if (clazz == NULL) {
+        SDLRuntime::doThrow(env, "java/lang/RuntimeException", 
+							"Can't find android/sdl/SDLColor");
+        return NULL;
+    }
 
-static jshort
-android_sdl_SDLColor_getB(JNIEnv *env, jobject thiz)
-{
-    SDL_Color* color = getNativeStruct(env, thiz);
-    return (jshort)color->b;
-}
-
-static jshort
-android_sdl_SDLColor_getUnused(JNIEnv *env, jobject thiz)
-{
-    SDL_Color* color = getNativeStruct(env, thiz);
-    return (jshort)color->unused;
+    palette = getNativeStruct(env, thiz);
+    jcolors = env->NewObjectArray(palette->ncolors, clazz, NULL);
+    for(int i=0;i<palette->ncolors;i++) {
+        jobject jcolor = android_sdl_SDLPalette_create(&palette[i]);
+        env->SetObjectArrayElement(jcolors, i, jcolor);
+    }
+    return jcolors;
 }
 
 static JNINativeMethod gMethods[] = {
-    {"native_init",         "()V",                              (void *)android_sdl_SDLColor_native_init},
-    {"native_finalize",     "()V",                              (void *)android_sdl_SDLColor_native_finalize},
-    {"getR",                "()S",                              (void *)android_sdl_SDLColor_getR},
-    {"getG",                "()S",                              (void *)android_sdl_SDLColor_getG},
-    {"getB",                "()S",                              (void *)android_sdl_SDLColor_getB},
-    {"getUnused",           "()S",                              (void *)android_sdl_SDLColor_getUnused},
+    {"native_init",         "()V",                              (void *)android_sdl_SDLPalette_native_init},
+    {"native_finalize",     "()V",                              (void *)android_sdl_SDLPalette_native_finalize},
+    {"getColors",           "()[Landroid/sdl/SDLColor;",        (void *)android_sdl_SDLPalette_getColors},
 };
 
 namespace android {
 	
 // This function only registers the native methods
-int register_android_sdl_SDLColor(JNIEnv *env)
+int register_android_sdl_SDLPalette(JNIEnv *env)
 {
     return SDLRuntime::registerNativeMethods(env,
                 kClassPathName, gMethods, NELEM(gMethods));
