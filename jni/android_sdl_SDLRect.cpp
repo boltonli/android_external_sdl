@@ -104,11 +104,25 @@ android_sdl_SDLRect_getX(JNIEnv *env, jobject thiz)
     return (jint)rect->x;
 }
 
+static void
+android_sdl_SDLRect_setX(JNIEnv *env, jobject thiz, jint value)
+{
+    SDL_Rect* rect = getNativeStruct(env, thiz);
+    rect->x = value;
+}
+
 static jint
 android_sdl_SDLRect_getY(JNIEnv *env, jobject thiz)
 {
     SDL_Rect* rect = getNativeStruct(env, thiz);
     return (jint)rect->y;
+}
+
+static void
+android_sdl_SDLRect_setY(JNIEnv *env, jobject thiz, jint value)
+{
+    SDL_Rect* rect = getNativeStruct(env, thiz);
+    rect->y = value;
 }
 
 static jint
@@ -118,11 +132,25 @@ android_sdl_SDLRect_getW(JNIEnv *env, jobject thiz)
     return (jint)rect->w;
 }
 
+static void
+android_sdl_SDLRect_setW(JNIEnv *env, jobject thiz, jint value)
+{
+    SDL_Rect* rect = getNativeStruct(env, thiz);
+    rect->w = value;
+}
+
 static jint
 android_sdl_SDLRect_getH(JNIEnv *env, jobject thiz)
 {
     SDL_Rect* rect = getNativeStruct(env, thiz);
     return (jint)rect->h;
+}
+
+static void
+android_sdl_SDLRect_setH(JNIEnv *env, jobject thiz, jint value)
+{
+    SDL_Rect* rect = getNativeStruct(env, thiz);
+    rect->h = value;
 }
 
 static JNINativeMethod gMethods[] = {
@@ -132,6 +160,10 @@ static JNINativeMethod gMethods[] = {
     {"getY",                "()I",                              (void *)android_sdl_SDLRect_getY},
     {"getW",                "()I",                              (void *)android_sdl_SDLRect_getW},
     {"getH",                "()I",                              (void *)android_sdl_SDLRect_getH},
+    {"setX",                "(I)V",                             (void *)android_sdl_SDLRect_setX},
+    {"setY",                "(I)V",                             (void *)android_sdl_SDLRect_setY},
+    {"setW",                "(I)V",                             (void *)android_sdl_SDLRect_setW},
+    {"setH",                "(I)V",                             (void *)android_sdl_SDLRect_setH},
 };
 
 namespace android {

@@ -43,5 +43,13 @@ public class SDLRect {
     public native int getW();
 	
     public native int getH();
+
+    public native void setX(int value);
+	
+    public native void setY(int value);
+	
+    public native void setW(int value);
+	
+    public native void setH(int value);
 	
 }

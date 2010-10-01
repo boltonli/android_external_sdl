@@ -109,7 +109,7 @@ android_sdl_SDLPalette_getColors(JNIEnv *env, jobject thiz)
     clazz = env->FindClass("android/sdl/SDLColor");
     if (clazz == NULL) {
         SDLRuntime::doThrow(env, "java/lang/RuntimeException", 
-							"Can't find android/sdl/SDLColor");
+                            "Can't find android/sdl/SDLColor");
         return NULL;
     }
 

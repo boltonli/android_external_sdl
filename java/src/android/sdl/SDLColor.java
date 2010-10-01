@@ -43,5 +43,13 @@ public class SDLColor {
     public native short getB();
 	
     public native short getUnused();
+
+    public native void setR(short value);
+	
+    public native void setG(short value);
+	
+    public native void setB(short value);
+	
+    public native void setUnused(short value);
 	
 }

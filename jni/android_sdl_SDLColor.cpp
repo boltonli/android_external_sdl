@@ -104,11 +104,25 @@ android_sdl_SDLColor_getR(JNIEnv *env, jobject thiz)
     return (jshort)color->r;
 }
 
+static void
+android_sdl_SDLColor_setR(JNIEnv *env, jobject thiz, jshort value)
+{
+    SDL_Color* color = getNativeStruct(env, thiz);
+    color->r = value;
+}
+
 static jshort
 android_sdl_SDLColor_getG(JNIEnv *env, jobject thiz)
 {
     SDL_Color* color = getNativeStruct(env, thiz);
     return (jshort)color->g;
+}
+
+static void
+android_sdl_SDLColor_setG(JNIEnv *env, jobject thiz, jshort value)
+{
+    SDL_Color* color = getNativeStruct(env, thiz);
+    color->g = value;
 }
 
 static jshort
@@ -118,11 +132,25 @@ android_sdl_SDLColor_getB(JNIEnv *env, jobject thiz)
     return (jshort)color->b;
 }
 
+static void
+android_sdl_SDLColor_setB(JNIEnv *env, jobject thiz, jshort value)
+{
+    SDL_Color* color = getNativeStruct(env, thiz);
+    color->b = value;
+}
+
 static jshort
 android_sdl_SDLColor_getUnused(JNIEnv *env, jobject thiz)
 {
     SDL_Color* color = getNativeStruct(env, thiz);
     return (jshort)color->unused;
+}
+
+static void
+android_sdl_SDLColor_setUnused(JNIEnv *env, jobject thiz, jshort value)
+{
+    SDL_Color* color = getNativeStruct(env, thiz);
+    color->unused = value;
 }
 
 static JNINativeMethod gMethods[] = {
@@ -132,6 +160,10 @@ static JNINativeMethod gMethods[] = {
     {"getG",                "()S",                              (void *)android_sdl_SDLColor_getG},
     {"getB",                "()S",                              (void *)android_sdl_SDLColor_getB},
     {"getUnused",           "()S",                              (void *)android_sdl_SDLColor_getUnused},
+    {"setR",                "(S)V",                             (void *)android_sdl_SDLColor_setR},
+    {"setG",                "(S)V",                             (void *)android_sdl_SDLColor_setG},
+    {"setB",                "(S)V",                             (void *)android_sdl_SDLColor_setB},
+    {"setUnused",           "(S)V",                             (void *)android_sdl_SDLColor_setUnused},
 };
 
 namespace android {
