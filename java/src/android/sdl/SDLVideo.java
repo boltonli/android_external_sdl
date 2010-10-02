@@ -35,14 +35,13 @@ public class SDLVideo {
 	private static final int SDL_NATIVE_VIDEO_UPDATE_RECTS = 6;
     }
 
-	private Surface mSurface;
     private SDLVideoSetSurfaceClb mSurfaceClb;
     private SDLVideoPumpEventsClb mEventsClb;
     private SDLVideoUpdateRectsClb mUpdateClb;
 	
     // registers fields and methods
     private static native final void native_init();
-    private native final void native_setup(Object mediaplayer_this);
+    private native final void native_setup(Object mediaplayer_this, Surface surface);
     private native final void native_finalize();
 	
     static {
@@ -53,11 +52,11 @@ public class SDLVideo {
 	    Log.d(TAG, "java SDLVideo loaded");
     }
 	
-    public SDLVideo() {
+    public SDLVideo(Surface surface) {
 	    /* Native setup requires a weak reference to our object.
 	     * It's easier to create it here than in C++.
 	     */
-	    native_setup(new WeakReference<SDLVideo>(this));
+	    native_setup(new WeakReference<SDLVideo>(this), surface);
     }
 
     @Override
@@ -65,10 +64,6 @@ public class SDLVideo {
 	    Log.d(TAG, "finalizing");
 	    native_finalize(); 
     }
-	
-	public void setSurface(Surface surface) {
-		mSurface = surface;
-	}
 	
     /**
      * native callback

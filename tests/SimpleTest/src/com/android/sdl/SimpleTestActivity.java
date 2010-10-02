@@ -28,14 +28,12 @@ public class SimpleTestActivity extends SDLActivity {
     private static final String TAG = "SimpleTestActivity";
 
     @Override
-    protected void onCreate(Bundle icicle) {
-        super.onCreate(icicle);
-		
-		//new Thread() {
-		//	public void run() {
+    protected void onSDLCreated() {
+        new Thread() {
+			public void run() {
 		        nativeStart();
-		//	}
-		//}.start();
+			}
+		}.start();
     }
 	
 	static {

@@ -32,7 +32,6 @@ using namespace android;
 // ----------------------------------------------------------------------------
 
 struct fields_t {
-	jfieldID    surface;
     /* actually in android.view.Surface XXX */
     jfieldID    surface_native;
     jmethodID   post_event;
@@ -59,7 +58,7 @@ android_sdl_SDLSurface_create(SDL_Surface* surface);
 class JNISDLVideoDriverListener: public SDLVideoDriverListener
 {
 public:
-    JNISDLVideoDriverListener(JNIEnv* env, jobject thiz, jobject weak_thiz);
+    JNISDLVideoDriverListener(JNIEnv* env, jobject thiz, jobject weak_thiz, jobject surface);
     ~JNISDLVideoDriverListener();
     void                    notify(int what, int arg1, int arg2, void* data);
 private:
@@ -69,7 +68,7 @@ private:
     Surface*                mSurface;   // Android surface class
 };
 
-JNISDLVideoDriverListener::JNISDLVideoDriverListener(JNIEnv* env, jobject thiz, jobject weak_thiz)
+JNISDLVideoDriverListener::JNISDLVideoDriverListener(JNIEnv* env, jobject thiz, jobject weak_thiz, jobject surface)
 {
     // Hold onto the MediaPlayer class for use in calling the static method
     // that posts events to the application thread.
@@ -84,6 +83,8 @@ JNISDLVideoDriverListener::JNISDLVideoDriverListener(JNIEnv* env, jobject thiz, 
     // We use a weak reference so the MediaPlayer object can be garbage collected.
     // The reference is only used as a proxy for callbacks.
     mObject = env->NewGlobalRef(weak_thiz);
+	
+	mSurface = (Surface *) env->GetIntField(surface, fields.surface_native);
 }
 
 JNISDLVideoDriverListener::~JNISDLVideoDriverListener()
@@ -112,7 +113,7 @@ void JNISDLVideoDriverListener::updateScreen(SkBitmap* bitmap)
         return;
     }
 	
-	__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "updating screen: %ix%i", surfaceInfo.w, surfaceInfo.h);
+	//__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "updating screen: %ix%i", surfaceInfo.w, surfaceInfo.h);
 
     //bitmap which is drawed on android surfaceview
     SDLVideoDriver::setBitmapConfig(&screen, surfaceInfo.format, surfaceInfo.w, surfaceInfo.h);
@@ -168,10 +169,12 @@ void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
     // than call java to process class represents sdl struct
 	env->CallStaticVoidMethod(mClass, fields.post_event, mObject, what, arg1, arg2, obj);
 	
+	/*
 	if(what == SDL_NATIVE_VIDEO_SET_SURFACE) {
 		obj = env->GetObjectField(mObject, fields.surface);
 		mSurface = (Surface *) env->GetIntField(obj, fields.surface_native);
 	}
+	*/
 }
 
 // ----------------------------------------------------------------------------
@@ -190,14 +193,6 @@ android_sdl_SDLVideo_native_init(JNIEnv *env)
 							"Can't find android/sdl/SDLVideo");
         return;
     }
-
-	/*
-    fields.context = env->GetFieldID(clazz, "mNativeContext", "I");
-    if (fields.context == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Can't find MediaPlayer.mNativeContext");
-        return;
-    }
-	*/
 	 
     fields.post_event = env->GetStaticMethodID(clazz, "postEventFromNative",
                                                "(Ljava/lang/Object;IIILjava/lang/Object;)V");
@@ -206,12 +201,6 @@ android_sdl_SDLVideo_native_init(JNIEnv *env)
 							"Can't find SDLVideo.postEventFromNative");
         return;
     }
-	
-	fields.surface = env->GetFieldID(clazz, "mSurface", "Landroid/view/Surface;");
-	if (fields.surface == NULL) {
-		__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Can't find SDLVideo.mSurface");
-		return;
-	}
 	
 	jclass surface_clazz = env->FindClass("android/view/Surface");
 	if (surface_clazz == NULL) {
@@ -228,7 +217,7 @@ android_sdl_SDLVideo_native_init(JNIEnv *env)
 
 // Register us into sdl video driver, so we can handle sdl video driver statuses
 static void
-android_sdl_SDLVideo_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
+android_sdl_SDLVideo_native_setup(JNIEnv *env, jobject thiz, jobject weak_this, jobject surface)
 {
     LOGV("native_setup");
 
@@ -239,7 +228,7 @@ android_sdl_SDLVideo_native_setup(JNIEnv *env, jobject thiz, jobject weak_this)
     }
 
     // create new listener and give it to MediaPlayer
-    JNISDLVideoDriverListener* listener = new JNISDLVideoDriverListener(env, thiz, weak_this);
+    JNISDLVideoDriverListener* listener = new JNISDLVideoDriverListener(env, thiz, weak_this, surface);
     vd->registerListener(listener);
 }
 
@@ -253,9 +242,9 @@ android_sdl_SDLVideo_native_finalize(JNIEnv *env, jobject thiz)
 // ----------------------------------------------------------------------------
 
 static JNINativeMethod gMethods[] = {
-    {"native_init",         "()V",                              (void *)android_sdl_SDLVideo_native_init},
-    {"native_setup",        "(Ljava/lang/Object;)V",            (void *)android_sdl_SDLVideo_native_setup},
-    {"native_finalize",     "()V",                              (void *)android_sdl_SDLVideo_native_finalize},
+    {"native_init",         "()V",                                                    (void *)android_sdl_SDLVideo_native_init},
+    {"native_setup",        "(Ljava/lang/Object;Landroid/view/Surface;)V",            (void *)android_sdl_SDLVideo_native_setup},
+    {"native_finalize",     "()V",                                                    (void *)android_sdl_SDLVideo_native_finalize},
 };
 
 namespace android {

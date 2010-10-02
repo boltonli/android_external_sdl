@@ -18,7 +18,7 @@
 package android.sdl.impl;
 
 import android.sdl.SDLSurface;
-import android.sdl.SDLVideo;
+//import android.sdl.SDLVideo;
 import android.util.Log;
 
 import java.lang.SecurityException;
@@ -75,7 +75,7 @@ public final class SDLImpl {
 	public static int SDL_SRCALPHA = 0x00010000; 	/**< Blit uses source alpha blending */
 	public static int SDL_PREALLOC = 0x01000000; 	/**< Surface uses preallocated memory */
 	
-	private static SDLVideo sVideo;
+	//private static SDLVideo sVideo;
 	
     private SDLImpl() {
     }
@@ -97,16 +97,17 @@ public final class SDLImpl {
 			Log.e(TAG, "native sdl library doesn't exists");
 			return false;
 		}
-		
+		/*
 		if(!loadDrivers()) {
 			Log.e(TAG, "couldn't load sdl java drivers");
 			return false;
 		}
-		
+		*/
 		Log.d(TAG, "java sdl library loaded");
 		return true;
 	}
 	
+	/*
 	private static boolean loadDrivers() {
 		sVideo = new SDLVideo();
 		return true;
@@ -115,7 +116,8 @@ public final class SDLImpl {
     public static SDLVideo getVideoDriver() {
 	    return sVideo;
     }
-
+	*/
+	
     /** 
     *  This function loads the SDL dynamically linked library and initializes 
     *  the subsystems specified by 'flags' (and those satisfying dependencies)

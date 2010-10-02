@@ -22,49 +22,26 @@ import android.app.Activity;
 import android.view.Surface;
 import android.view.SurfaceView;
 
-import android.sdl.impl.SDLImpl;
-import android.sdl.SDLVideo;
-import android.sdl.SDLSurface;
-import android.sdl.SDLRect;
+import android.sdl.view.SDLSurfaceView;
 
-public class SDLActivity extends Activity {
+public abstract class SDLActivity extends Activity {
 	
-    // we must call main entry point of java lib for loading jni lib
-    // this must be here because user overrides this class when using
-    // sdl library
-    static {
-	    SDLImpl.load();
-    }
-
-    private SDLVideo.SDLVideoSetSurfaceClb mSurfaceClb = new SDLVideo.SDLVideoSetSurfaceClb() {
-	    public void onSetSurface(SDLSurface surface) {
-	        mView = new SurfaceView(SDLActivity.this);
-	        SDLVideo vdriver = SDLImpl.getVideoDriver();
-	        vdriver.setSurface(mView.getHolder().getSurface());
-	        //SDLActivity.this.setContentView(view);
+    private SDLSurfaceView mView;
+	
+	private SDLSurfaceView.SDLSurfaceViewCreatedClb mViewClb = new SDLSurfaceView.SDLSurfaceViewCreatedClb() {
+	    public void onViewCreated() {
+	        onSDLCreated();
 	    }
-    };
-
-    private SDLVideo.SDLVideoPumpEventsClb mEventsClb = new SDLVideo.SDLVideoPumpEventsClb() {
-	    public void onPumpEvents() {
-	    }
-    };
-
-    private SDLVideo.SDLVideoUpdateRectsClb mUpdateClb = new SDLVideo.SDLVideoUpdateRectsClb() {
-	    public void onUpdateRects(SDLRect[] rects) {
-	    }
-    };
-
-    private SurfaceView mView;
+	};
 	
     @Override
     protected void onCreate(Bundle bundle) {
 	    super.onCreate(bundle);
-
-	    SDLVideo vdriver = SDLImpl.getVideoDriver();
-	    vdriver.registerCallback(mSurfaceClb);
-	    vdriver.registerCallback(mEventsClb);
-	    vdriver.registerCallback(mUpdateClb);
+		
+		mView = new SDLSurfaceView(this, mViewClb);
+		setContentView(mView);
     }
+	
+	protected abstract void onSDLCreated();
 	
 }
