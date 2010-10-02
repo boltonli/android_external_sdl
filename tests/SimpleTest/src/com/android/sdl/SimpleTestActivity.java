@@ -28,7 +28,7 @@ public class SimpleTestActivity extends SDLActivity {
     private static final String TAG = "SimpleTestActivity";
 
     @Override
-    protected void onSDLCreated() {
+    public void onSDLCreate() {
         new Thread() {
 			public void run() {
 		        nativeStart();

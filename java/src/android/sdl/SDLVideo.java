@@ -27,17 +27,19 @@ public class SDLVideo {
 	
     // must equals with libsdl/src/video/android/SDL_androidvideo.h -> sdl_native_events
     private static class SDLNativeEvents {
-	private static final int SDL_NATIVE_VIDEO_CREATE_DEVICE = 1;
-	private static final int SDL_NATIVE_VIDEO_DELETE_DEVICE = 2;
-	private static final int SDL_NATIVE_VIDEO_PUMP_EVENTS = 3;
-	private static final int SDL_NATIVE_VIDEO_INIT = 4;
-	private static final int SDL_NATIVE_VIDEO_SET_SURFACE = 5;
-	private static final int SDL_NATIVE_VIDEO_UPDATE_RECTS = 6;
+	    private static final int SDL_NATIVE_VIDEO_CREATE_DEVICE = 1;
+	    private static final int SDL_NATIVE_VIDEO_DELETE_DEVICE = 2;
+	    private static final int SDL_NATIVE_VIDEO_PUMP_EVENTS = 3;
+	    private static final int SDL_NATIVE_VIDEO_INIT = 4;
+	    private static final int SDL_NATIVE_VIDEO_SET_SURFACE = 5;
+	    private static final int SDL_NATIVE_VIDEO_UPDATE_RECTS = 6;
+		private static final int SDL_NATIVE_VIDEO_SET_CAPTION = 7;
     }
 
     private SDLVideoSetSurfaceClb mSurfaceClb;
     private SDLVideoPumpEventsClb mEventsClb;
     private SDLVideoUpdateRectsClb mUpdateClb;
+	private SDLVideoSetCaptionClb mCaptionClb;
 	
     // registers fields and methods
     private static native final void native_init();
@@ -103,9 +105,21 @@ public class SDLVideo {
 		    SDLRect[] rects = (SDLRect[]) obj; 
 		    handleVideoDeviceUpdateRects(rects);
 		    break;
+		case SDLNativeEvents.SDL_NATIVE_VIDEO_SET_CAPTION:
+			String caption = (String) obj; 
+			handleVideoDeviceSetCaption(caption);
+			break;
 	    default:
 		    Log.e(TAG, "undefined event");
         }
+    }
+	
+	private void handleVideoDeviceSetCaption(String caption) {
+	    Log.d(TAG, "handleVideoDeviceSetCaption");
+		Log.d(TAG, "caption: " + caption);
+		if (mCaptionClb != null) {
+			mCaptionClb.onSetCaption(caption);
+		}
     }
 
     private void handleVideoDeviceCreate(SDLVideoDevice device) {
@@ -172,6 +186,10 @@ public class SDLVideo {
 
     // callbacks definitions
     //---------------------------------------------------------------
+	public interface SDLVideoSetCaptionClb {
+	    public void onSetCaption(String caption);
+    }
+	
     public interface SDLVideoSetSurfaceClb {
 	    public void onSetSurface(SDLSurface surface);
     }

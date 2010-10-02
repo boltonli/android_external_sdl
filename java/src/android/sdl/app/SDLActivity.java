@@ -27,21 +27,27 @@ import android.sdl.view.SDLSurfaceView;
 public abstract class SDLActivity extends Activity {
 	
     private SDLSurfaceView mView;
-	
-	private SDLSurfaceView.SDLSurfaceViewCreatedClb mViewClb = new SDLSurfaceView.SDLSurfaceViewCreatedClb() {
-	    public void onViewCreated() {
-	        onSDLCreated();
-	    }
-	};
-	
+
+	/**
+	 * @hide
+	 */
     @Override
     protected void onCreate(Bundle bundle) {
 	    super.onCreate(bundle);
 		
-		mView = new SDLSurfaceView(this, mViewClb);
+		mView = new SDLSurfaceView(this);
 		setContentView(mView);
     }
+
+	/**
+	 * called by sdl to set title of window
+	 * @hide
+	 */
+	public void onSetCaption(String caption) {
+		setTitle(caption);
+	}
 	
-	protected abstract void onSDLCreated();
+	// called when sdl is prepared
+	public abstract void onSDLCreate();
 	
 }

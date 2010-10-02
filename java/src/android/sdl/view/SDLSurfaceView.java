@@ -26,11 +26,12 @@ import android.view.SurfaceView;
 import android.util.Log;
 
 import android.sdl.impl.SDLImpl;
+import android.sdl.app.SDLActivity;
 import android.sdl.SDLVideo;
 import android.sdl.SDLSurface;
 import android.sdl.SDLRect;
 
-public class SDLSurfaceView extends SurfaceView implements SurfaceHolder.Callback {
+public class SDLSurfaceView extends SurfaceView {
 	
 	private static final String TAG = "SDLSurfaceView";
 	
@@ -40,6 +41,12 @@ public class SDLSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
     static {
 	    SDLImpl.load();
     }
+	
+	private SDLVideo.SDLVideoSetCaptionClb mCaptionClb = new SDLVideo.SDLVideoSetCaptionClb() {
+		public void onSetCaption(String caption) {
+		    ((SDLActivity)mContext).onSetCaption(caption);
+	    }
+    };
 	
 	private SDLVideo.SDLVideoSetSurfaceClb mSurfaceClb = new SDLVideo.SDLVideoSetSurfaceClb() {
 	    public void onSetSurface(SDLSurface surface) {
@@ -55,38 +62,34 @@ public class SDLSurfaceView extends SurfaceView implements SurfaceHolder.Callbac
 	    public void onUpdateRects(SDLRect[] rects) {
 	    }
     };
+
+    private SurfaceHolder.Callback mSurfaceViewClb = new SurfaceHolder.Callback() {
+        public void surfaceChanged(SurfaceHolder holder, final int format, final int width, final int height) {}
+
+        public void surfaceCreated(SurfaceHolder holder) {
+            mVideoDriver = new SDLVideo(mSurfaceHolder.getSurface());
+            mVideoDriver.registerCallback(mSurfaceClb);
+            mVideoDriver.registerCallback(mEventsClb);
+		    mVideoDriver.registerCallback(mUpdateClb);
+            ((SDLActivity)mContext).onSDLCreate();
+        }
+
+        public void surfaceDestroyed(SurfaceHolder holder) {
+            mVideoDriver = null;
+        }
+    };
 	
 	private SurfaceHolder mSurfaceHolder;
 	private SDLVideo mVideoDriver;
-	private SDLSurfaceViewCreatedClb mCallback;
 	
-	public SDLSurfaceView(Context context, SDLSurfaceViewCreatedClb clb) {
+	public SDLSurfaceView(Context context) {
 		super(context);
-		mCallback = clb;
 		init();
 	}
 	
 	private void init() {
 		mSurfaceHolder = getHolder();
-		mSurfaceHolder.addCallback(this);
-	}
-	
-	public void surfaceChanged(SurfaceHolder holder, final int format, final int width, final int height) {}
-	
-	public void surfaceCreated(SurfaceHolder holder) {
-		mVideoDriver = new SDLVideo(mSurfaceHolder.getSurface());
-	    mVideoDriver.registerCallback(mSurfaceClb);
-	    mVideoDriver.registerCallback(mEventsClb);
-	    mVideoDriver.registerCallback(mUpdateClb);
-		mCallback.onViewCreated();
-	}
-	
-	public void surfaceDestroyed(SurfaceHolder holder) {
-		mVideoDriver = null;
-	}
-	
-	public interface SDLSurfaceViewCreatedClb {
-		public void onViewCreated();
+		mSurfaceHolder.addCallback(mSurfaceViewClb);
 	}
 
 }

@@ -25,6 +25,7 @@ enum sdl_native_events {
 	SDL_NATIVE_VIDEO_INIT = 4,
 	SDL_NATIVE_VIDEO_SET_SURFACE = 5,
 	SDL_NATIVE_VIDEO_UPDATE_RECTS = 6,
+	SDL_NATIVE_VIDEO_SET_CAPTION = 7,
 };
 
 /* Hidden "this" pointer for the video functions */

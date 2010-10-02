@@ -155,16 +155,11 @@ int SDLVideoDriver::onVideoInit(_THIS, SDL_PixelFormat *vformat) {
     vformat->BytesPerPixel = 2;
 	
 	thiz->mListener->notify(SDL_NATIVE_VIDEO_INIT, 0, 0, (void*) vformat);
-	
-	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "video initzialized: bpp=%i, Bpp=%i",
-                        vformat->BitsPerPixel,
-                        vformat->BytesPerPixel);
     /* We're done! */
     return 0;	
 }
 
 SDL_Rect **SDLVideoDriver::onListModes(_THIS, SDL_PixelFormat *format, Uint32 flags) {
-    //__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "list modes");
     return (SDL_Rect **) -1;
 }
 
@@ -189,8 +184,6 @@ SDL_Surface *SDLVideoDriver::onSetVideoMode(_THIS, SDL_Surface *current, int wid
     current->pixels = thiz->mBitmap.getPixels();
 	
 	thiz->mListener->notify(SDL_NATIVE_VIDEO_SET_SURFACE, 0, 0, (void*) current);
-
-    __android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "setting sdl bitmap size to: %dx%d", width, height);
     /* We're done */
     return current;
 }
@@ -219,6 +212,7 @@ void SDLVideoDriver::onFreeHWSurface(_THIS, SDL_Surface *surface) {
 
 /* on set window caption */
 void SDLVideoDriver::onSetCaption(_THIS, const char *title, const char *icon) {
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_SET_CAPTION, 0, 0, (void*) title);
 }
 
 /* etc. */
@@ -230,13 +224,6 @@ void SDLVideoDriver::onUpdateRects(_THIS, int numrects, SDL_Rect *rects) {
     }
 
 	thiz->mListener->notify(SDL_NATIVE_VIDEO_UPDATE_RECTS, 0, 0, (void*) &thiz->mBitmap);
-	/*
-    int size = thiz->mListeners.size();
-    for(int i=0;i<size;i++) {
-        SDLVideoDriverListener *listener = thiz->mListeners.itemAt(i);
-        listener->onUpdateScreen(&thiz->mBitmap);
-    }
-	*/
 }
 
 /* ANDROID driver bootstrap functions */
@@ -245,27 +232,11 @@ int SDLVideoDriver::onAvailable() {
 }
 
 void SDLVideoDriver::onDeleteDevice(SDL_VideoDevice *device) {
-	/*
-    int size = thiz->mListeners.size();
-    for(int i=0;i<size;i++) {
-        SDLVideoDriverListener *listener = thiz->mListeners.itemAt(i);
-        listener->onDeleteDevice();
-    }
-	*/
 	thiz->mListener->notify(SDL_NATIVE_VIDEO_DELETE_DEVICE, 0, 0, (void*) device);
-	
     SDL_free(thiz->device);
-    __android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "device deleted");
 }
 
 void SDLVideoDriver::onPumpEvents(_THIS) {
-	/*
-    int size = thiz->mListeners.size();
-    for(int i=0;i<size;i++) {
-        SDLVideoDriverListener *listener = thiz->mListeners.itemAt(i);
-        listener->onProcessEvents();
-    }
-	*/
 	thiz->mListener->notify(SDL_NATIVE_VIDEO_PUMP_EVENTS, 0, 0, NULL);
 }
 

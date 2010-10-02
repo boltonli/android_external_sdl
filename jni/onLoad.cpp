@@ -13,6 +13,7 @@ extern int register_android_sdl_SDLColor(JNIEnv *env);
 extern int register_android_sdl_SDLRect(JNIEnv *env);
 extern int register_android_sdl_SDLPalette(JNIEnv *env);
 extern int register_android_sdl_SDLImpl(JNIEnv *env);
+extern int register_android_sdl_events_SDLEvents(JNIEnv *env);
 };
 
 using namespace android;
@@ -57,8 +58,12 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 		LOGE("can't load android_sdl_SDLPalette");
 		return JNI_ERR;
 	}
-        if(register_android_sdl_SDLImpl(env) != JNI_OK) {
+    if(register_android_sdl_SDLImpl(env) != JNI_OK) {
 		LOGE("can't load android_sdl_SDLImpl");
+		return JNI_ERR;
+	}
+	if(register_android_sdl_events_SDLEvents(env) != JNI_OK) {
+		LOGE("can't load android_sdl_SDLEvents");
 		return JNI_ERR;
 	}
 	

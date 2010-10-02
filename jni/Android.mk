@@ -13,7 +13,8 @@ LOCAL_SRC_FILES := \
 	android_sdl_SDLColor.cpp \
 	android_sdl_SDLRect.cpp \
 	android_sdl_SDLPalette.cpp \
-        android_sdl_impl_SDLImpl.cpp
+        android_sdl_impl_SDLImpl.cpp \
+	android_sdl_events_SDLEvents.cpp
 
 LOCAL_MODULE := libsdl_jni
 
