@@ -37,10 +37,11 @@ public class SDLActivity extends Activity {
     }
 
     private SDLVideo.SDLVideoSetSurfaceClb mSurfaceClb = new SDLVideo.SDLVideoSetSurfaceClb() {
-	    public Surface onSetSurface(SDLSurface surface) {
+	    public void onSetSurface(SDLSurface surface) {
 	        mView = new SurfaceView(SDLActivity.this);
+	        SDLVideo vdriver = SDLImpl.getVideoDriver();
+	        vdriver.setSurface(mView.getHolder().getSurface());
 	        //SDLActivity.this.setContentView(view);
-	        return mView.getHolder().getSurface();
 	    }
     };
 

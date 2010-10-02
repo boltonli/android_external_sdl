@@ -28,7 +28,7 @@
 using namespace android;
 
 // ----------------------------------------------------------------------------
-static const char* const kClassPathName = "android/sdl/SDLImpl";
+static const char* const kClassPathName = "android/sdl/impl/SDLImpl";
 
 extern jobject
 android_sdl_SDLSurface_create(SDL_Surface* surface);
@@ -77,7 +77,7 @@ static JNINativeMethod gMethods[] = {
     {"InitSubSystem",        "(J)I",                              (void *)android_sdl_SDLImpl_InitSubSystem},
     {"QuitSubSystem",        "(J)V",                              (void *)android_sdl_SDLImpl_QuitSubSystem},
     {"WasInit",              "(J)J",                              (void *)android_sdl_SDLImpl_WasInit},
-    {"Quit",                 "(J)J",                              (void *)android_sdl_SDLImpl_Quit},
+    {"Quit",                 "()V",                               (void *)android_sdl_SDLImpl_Quit},
     {"SetVideoMode",         "(IIIJ)Landroid/sdl/SDLSurface;",    (void *)android_sdl_SDLImpl_SetVideoMode},
 };
 

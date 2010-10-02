@@ -35,6 +35,7 @@ public class SDLVideo {
 	private static final int SDL_NATIVE_VIDEO_UPDATE_RECTS = 6;
     }
 
+	private Surface mSurface;
     private SDLVideoSetSurfaceClb mSurfaceClb;
     private SDLVideoPumpEventsClb mEventsClb;
     private SDLVideoUpdateRectsClb mUpdateClb;
@@ -65,6 +66,10 @@ public class SDLVideo {
 	    native_finalize(); 
     }
 	
+	public void setSurface(Surface surface) {
+		mSurface = surface;
+	}
+	
     /**
      * native callback
     **/
@@ -73,13 +78,13 @@ public class SDLVideo {
 	    SDLVideo ref = (SDLVideo)((WeakReference)sdlvideo_ref).get();
 	    if (ref == null) {
 	        Log.e(TAG, "SDLVideo ref is null");
-		    return;
+			return;
 	    }
 
 		ref.handleNativeMessage(what, obj);
     }
 
-    private Object handleNativeMessage(int what, Object obj) {
+    private void handleNativeMessage(int what, Object obj) {
 	    switch(what) {
 	    case SDLNativeEvents.SDL_NATIVE_VIDEO_CREATE_DEVICE:
 		    SDLVideoDevice device = (SDLVideoDevice) obj;
@@ -94,8 +99,8 @@ public class SDLVideo {
 		    break;
 	    case SDLNativeEvents.SDL_NATIVE_VIDEO_SET_SURFACE:
 		    SDLSurface surface = (SDLSurface) obj;
-		    handleVideoDeviceSetSurface(surface);
-		    break;
+			handleVideoDeviceSetSurface(surface);
+			break;
 	    case SDLNativeEvents.SDL_NATIVE_VIDEO_PUMP_EVENTS:
 		    handleVideoDevicePumpEvents();
 			break;
@@ -106,7 +111,6 @@ public class SDLVideo {
 	    default:
 		    Log.e(TAG, "undefined event");
         }
-        return null;
     }
 
     private void handleVideoDeviceCreate(SDLVideoDevice device) {
@@ -125,7 +129,7 @@ public class SDLVideo {
             Log.d(TAG, "bytes per pixel: " + pformat.getBytesPerPixel());
     }
 
-    private Surface handleVideoDeviceSetSurface(SDLSurface surface) {
+    private void handleVideoDeviceSetSurface(SDLSurface surface) {
 	    Log.d(TAG, "handleVideoDeviceSetSurface");
             Log.d(TAG, "surface w: " + surface.getW());
             Log.d(TAG, "surface h: " + surface.getH());
@@ -137,10 +141,9 @@ public class SDLVideo {
             SDLPixelFormat pformat = surface.getPixelFormat();
             Log.d(TAG, "bits per pixel: " + pformat.getBitsPerPixel());
             Log.d(TAG, "bytes per pixel: " + pformat.getBytesPerPixel());
-            if(mSurfaceClb != null) {
-	        return mSurfaceClb.onSetSurface(surface);
+		if(mSurfaceClb != null) {
+	        mSurfaceClb.onSetSurface(surface);
 	    }
-        return null;
     }
 
     private void handleVideoDevicePumpEvents() {
@@ -175,7 +178,7 @@ public class SDLVideo {
     // callbacks definitions
     //---------------------------------------------------------------
     public interface SDLVideoSetSurfaceClb {
-	    public Surface onSetSurface(SDLSurface surface);
+	    public void onSetSurface(SDLSurface surface);
     }
 
     public interface SDLVideoDeviceCreateClb {

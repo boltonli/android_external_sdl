@@ -21,6 +21,8 @@
 #include "SDLRuntime.h"
 #include <SDL_androidvideo.h>
 #include <SkBitmap.h>
+#include <SkCanvas.h>
+#include <SkMatrix.h>
 #include <utils/Log.h>
 
 // ----------------------------------------------------------------------------
@@ -30,11 +32,9 @@ using namespace android;
 // ----------------------------------------------------------------------------
 
 struct fields_t {
-    //jfieldID    context;
-    //jfieldID    surface;
+	jfieldID    surface;
     /* actually in android.view.Surface XXX */
-    //jfieldID    surface_native;
-
+    jfieldID    surface_native;
     jmethodID   post_event;
 };
 static fields_t fields;
@@ -62,7 +62,6 @@ public:
     JNISDLVideoDriverListener(JNIEnv* env, jobject thiz, jobject weak_thiz);
     ~JNISDLVideoDriverListener();
     void                    notify(int what, int arg1, int arg2, void* data);
-    void                    setSurface(Surface* surface);
 private:
     void                    updateScreen(SkBitmap *bitmap);
     jclass                  mClass;     // Reference to MediaPlayer class
@@ -95,16 +94,12 @@ JNISDLVideoDriverListener::~JNISDLVideoDriverListener()
     env->DeleteGlobalRef(mClass);
 }
 
-void JNISDLVideoDriverListener::setSurface(Surface* surface)
-{
-    mSurface = surface;
-}
-
 /**
   * Method which handles native redrawing screen
   */
 void JNISDLVideoDriverListener::updateScreen(SkBitmap* bitmap)
 {
+	SkBitmap screen;
     Surface::SurfaceInfo surfaceInfo;
 
     if (!mSurface || !mSurface->isValid()) {
@@ -116,26 +111,26 @@ void JNISDLVideoDriverListener::updateScreen(SkBitmap* bitmap)
         __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Failed to lock surface");
         return;
     }
+	
+	__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "updating screen: %ix%i", surfaceInfo.w, surfaceInfo.h);
 
-    /*
     //bitmap which is drawed on android surfaceview
-    SDLVideoDriver::setBitmapConfig(&mAndroidBitmap, surfaceInfo.format, surfaceInfo.w, surfaceInfo.h);
-    mAndroidBitmap.setPixels(mSurfaceInfo.bits);
+    SDLVideoDriver::setBitmapConfig(&screen, surfaceInfo.format, surfaceInfo.w, surfaceInfo.h);
+    screen.setPixels(surfaceInfo.bits);
 
-    SkCanvas canvas(mAndroidBitmap);
+    SkCanvas canvas(screen);
     SkRect surface_sdl;
     SkRect surface_android;
     SkMatrix matrix;
-    surface_android.set(0, 0, mAndroidBitmap.width(), mAndroidBitmap.height());
-    surface_sdl.set(0, 0, mSdlBitmap->width(), mSdlBitmap->height());
+    surface_android.set(0, 0, screen.width(), screen.height());
+    surface_sdl.set(0, 0, bitmap->width(), bitmap->height());
     matrix.setRectToRect(surface_sdl, surface_android, SkMatrix::kFill_ScaleToFit);
 
-    canvas.drawBitmapMatrix(*mSdlBitmap, matrix);
+    canvas.drawBitmapMatrix(*bitmap, matrix);
 
     if (mSurface->unlockAndPost() < 0) {
-        __android_log_print(ANDROID_LOG_ERROR, TAG, "Failed to unlock surface");
+        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Failed to unlock surface");
     }
-    */
 }
 
 // callback from libsdl which notify us about situation in sdl video driver
@@ -171,7 +166,12 @@ void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
     }
 
     // than call java to process class represents sdl struct
-    env->CallStaticVoidMethod(mClass, fields.post_event, mObject, what, arg1, arg2, obj);
+	env->CallStaticVoidMethod(mClass, fields.post_event, mObject, what, arg1, arg2, obj);
+	
+	if(what == SDL_NATIVE_VIDEO_SET_SURFACE) {
+		obj = env->GetObjectField(mObject, fields.surface);
+		mSurface = (Surface *) env->GetIntField(obj, fields.surface_native);
+	}
 }
 
 // ----------------------------------------------------------------------------
@@ -206,26 +206,24 @@ android_sdl_SDLVideo_native_init(JNIEnv *env)
 							"Can't find SDLVideo.postEventFromNative");
         return;
     }
-
-	/*
-    fields.surface = env->GetFieldID(clazz, "mSurface", "Landroid/view/Surface;");
-    if (fields.surface == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Can't find MediaPlayer.mSurface");
-        return;
-    }
-
-    jclass surface = env->FindClass("android/view/Surface");
-    if (surface == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Can't find android/view/Surface");
-        return;
-    }
-
-    fields.surface_native = env->GetFieldID(surface, "mSurface", "I");
-    if (fields.surface_native == NULL) {
-        jniThrowException(env, "java/lang/RuntimeException", "Can't find Surface.mSurface");
-        return;
-    }
-	*/
+	
+	fields.surface = env->GetFieldID(clazz, "mSurface", "Landroid/view/Surface;");
+	if (fields.surface == NULL) {
+		__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Can't find SDLVideo.mSurface");
+		return;
+	}
+	
+	jclass surface_clazz = env->FindClass("android/view/Surface");
+	if (surface_clazz == NULL) {
+		__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Can't find android/view/Surface");
+		return;
+	}
+	
+	fields.surface_native = env->GetFieldID(surface_clazz, "mSurface", "I");
+	if (fields.surface_native == NULL) {
+		__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Can't find Surface.mSurface");
+		return;
+	}
 }
 
 // Register us into sdl video driver, so we can handle sdl video driver statuses

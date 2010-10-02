@@ -31,11 +31,11 @@ public class SimpleTestActivity extends SDLActivity {
     protected void onCreate(Bundle icicle) {
         super.onCreate(icicle);
 		
-		new Thread() {
-			public void run() {
+		//new Thread() {
+		//	public void run() {
 		        nativeStart();
-			}
-		}.start();
+		//	}
+		//}.start();
     }
 	
 	static {

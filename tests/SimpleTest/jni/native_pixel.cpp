@@ -3,85 +3,31 @@
 #include <jni.h>
 #include <utils/Log.h>
 
-#define WIDTH 480
-#define HEIGHT 320
-#define BPP 2
-#define DEPTH 16
+#define SCREEN_WIDTH 480
+#define SCREEN_HEIGHT 320
+#define SCREEN_DEPTH 16
 
-void setpixel(SDL_Surface *screen, int x, int y, Uint8 r, Uint8 g, Uint8 b)
-{
-    Uint32 *pixmem32;
-    Uint32 colour;  
+int main(int argc, char *argv[]) {
+	SDL_Surface *screen;
+	Uint8       *p;
+	int         x = 10; //x coordinate of our pixel
+	int         y = 20; //y coordinate of our pixel
 	
-    colour = SDL_MapRGB( screen->format, r, g, b );
+	/* Initialize SDL */
+	SDL_Init(SDL_INIT_VIDEO);
 	
-    pixmem32 = (Uint32*) screen->pixels  + y + x;
-    *pixmem32 = colour;
-}
-
-
-void DrawScreen(SDL_Surface* screen, int h)
-{ 
-    int x, y, ytimesw;
+	/* Initialize the screen / window */
+	screen = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_DEPTH, SDL_SWSURFACE);
 	
-    if(SDL_MUSTLOCK(screen)) 
-    {
-        if(SDL_LockSurface(screen) < 0) return;
-    }
+	/* Make p point to the place we want to draw the pixel */
+	p = (Uint8 *)screen->pixels + y * screen->pitch + x * screen->format->BytesPerPixel;
 	
-    for(y = 0; y < screen->h; y++ ) 
-    {
-        ytimesw = y*screen->pitch/BPP;
-        for( x = 0; x < screen->w; x++ ) 
-        {
-            setpixel(screen, x, ytimesw, (x*x)/256+3*y+h, (y*y)/256+x+h, h);
-        }
-    }
+	/* Draw the pixel! */
+	*p=0xff;
 	
-    if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
-	
-    SDL_Flip(screen); 
-}
-
-
-int main(int argc, char* argv[])
-{
-    SDL_Surface *screen;
-    SDL_Event event;
-	
-    int keypress = 0;
-    int h=0;
-
-    SDL_WM_SetCaption("Window Title","Icon Title");
-	
-    if (SDL_Init(SDL_INIT_VIDEO) < 0 ) return 1;
-
-    if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH, SDL_FULLSCREEN|SDL_HWSURFACE)))
-    {
-        SDL_Quit();
-        return 1;
-    }
-	
-    while(!keypress) 
-    {
-		DrawScreen(screen,h++);
-		while(SDL_PollEvent(&event)) 
-		{      
-			switch (event.type) 
-			{
-				case SDL_QUIT:
-					keypress = 1;
-					break;
-				case SDL_KEYDOWN:
-					keypress = 1;
-					break;
-			}
-		}
-    }
-	
-    SDL_Quit();
-	
-    return 0;
+	/* update the screen (aka double buffering) */
+	SDL_Flip(screen);
+	while(1);
 }
 
 static jint start(JNIEnv *env, jobject thiz) {

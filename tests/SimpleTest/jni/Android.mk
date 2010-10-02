@@ -11,7 +11,7 @@ LOCAL_C_INCLUDES := \
 
 LOCAL_SHARED_LIBRARIES := libsdl libutils
 
-LOCAL_SRC_FILES := native.cpp
+LOCAL_SRC_FILES := native_pixel.cpp
 
 # Don't prelink this library.  For more efficient code, you may want
 # to add this library to the prelink map and set this to true. However,

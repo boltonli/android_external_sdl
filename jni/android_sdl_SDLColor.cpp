@@ -57,7 +57,7 @@ android_sdl_SDLColor_create(SDL_Color* color)
 	
     jclass clazz = env->FindClass(kClassPathName);
     if (clazz == NULL) {
-	SDLRuntime::doThrow(env, "java/lang/RuntimeException", kClassPathName);
+	    SDLRuntime::doThrow(env, "java/lang/RuntimeException", kClassPathName);
         return NULL;
     }
 	
