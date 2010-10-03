@@ -55,6 +55,7 @@ public class SDLSurfaceView extends SurfaceView {
 	
     private SDLVideo.SDLVideoPumpEventsClb mEventsClb = new SDLVideo.SDLVideoPumpEventsClb() {
 	    public void onPumpEvents() {
+		    ((SDLActivity)mContext).onProcessEvents();
 	    }
     };
 	

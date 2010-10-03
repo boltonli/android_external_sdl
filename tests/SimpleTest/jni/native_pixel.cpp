@@ -9,6 +9,8 @@
 
 int main(int argc, char *argv[]) {
 	SDL_Surface *screen;
+	SDL_Event	event;
+	int			keypress = 0;
 	Uint8       *p;
 	int         x = 10; //x coordinate of our pixel
 	int         y = 20; //y coordinate of our pixel
@@ -25,9 +27,27 @@ int main(int argc, char *argv[]) {
 	/* Draw the pixel! */
 	*p=0xff;
 	
-	/* update the screen (aka double buffering) */
-	SDL_Flip(screen);
-	while(1);
+	while(!keypress) 
+    {
+		/* update the screen (aka double buffering) */
+		SDL_Flip(screen);
+		while(SDL_PollEvent(&event)) 
+		{      
+			switch (event.type) 
+			{
+				case SDL_QUIT:
+					keypress = 1;
+					break;
+				case SDL_KEYDOWN:
+					keypress = 1;
+					break;
+			}
+		}
+    }
+	
+    SDL_Quit();
+	
+    return 0;
 }
 
 static jint start(JNIEnv *env, jobject thiz) {

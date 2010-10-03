@@ -152,8 +152,6 @@ void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
         case SDL_NATIVE_VIDEO_CREATE_DEVICE:
             obj = android_sdl_SDLVideoDevice_create((SDL_VideoDevice*) data);
             break;
-        case SDL_NATIVE_VIDEO_DELETE_DEVICE:
-            break;
         case SDL_NATIVE_VIDEO_INIT:
             obj = android_sdl_SDLPixelFormat_create((SDL_PixelFormat*) data);
             break;
@@ -163,21 +161,10 @@ void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
 		case SDL_NATIVE_VIDEO_SET_CAPTION:
 			obj = (jobject)env->NewStringUTF((const char *)data);
             break;
-        case SDL_NATIVE_VIDEO_PUMP_EVENTS:
-            break;
-        case SDL_NATIVE_VIDEO_UPDATE_RECTS:
-            break;
     }
 
     // than call java to process class represents sdl struct
 	env->CallStaticVoidMethod(mClass, fields.post_event, mObject, what, arg1, arg2, obj);
-	
-	/*
-	if(what == SDL_NATIVE_VIDEO_SET_SURFACE) {
-		obj = env->GetObjectField(mObject, fields.surface);
-		mSurface = (Surface *) env->GetIntField(obj, fields.surface_native);
-	}
-	*/
 }
 
 // ----------------------------------------------------------------------------
