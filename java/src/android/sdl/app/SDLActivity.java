@@ -23,18 +23,45 @@ import android.view.Surface;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
-import android.util.Log;
 
+import android.sdl.SDLVideo;
 import android.sdl.events.SDLEvents;
 import android.sdl.events.SDLKeySym;
 import android.sdl.events.SDLKeySym.SDLMod;
-import android.sdl.view.SDLSurfaceView;
+import android.sdl.impl.SDLImpl;
 
 import java.util.ArrayList;
 
 public abstract class SDLActivity extends Activity {
 	
-    private SDLSurfaceView mView;
+	// we must call main entry point of java lib for loading jni lib
+    // this must be here because user overrides this class when using
+    // sdl library
+    static {
+	    SDLImpl.load();
+    }
+    
+    private SDLVideo.SDLVideoPreparedClb mSDLPreparedClb = new SDLVideo.SDLVideoPreparedClb() {
+		
+		public void onPrepared(Surface surface) {
+			onSDLCreate();
+		}
+	};
+	
+	private SDLVideo.SDLVideoPumpEventsClb mSDLPumpEvents = new SDLVideo.SDLVideoPumpEventsClb() {
+		
+		public void onPumpEvents() {
+			processEvents();
+		}
+	};
+	
+	private SDLVideo.SDLVideoSetCaptionClb mSDLSetCaptionClb = new SDLVideo.SDLVideoSetCaptionClb() {
+		
+		public void onSetCaption(String caption) {
+			setTitle(caption);
+		}
+	};
+    
 	private ArrayList<Object> mEvents;
 
 	/**
@@ -45,14 +72,25 @@ public abstract class SDLActivity extends Activity {
 	    super.onCreate(bundle);
 		
 		mEvents = new ArrayList<Object>();
-		mView = new SDLSurfaceView(this);
-		setContentView(mView);
+		SurfaceView view = new SurfaceView(this);
+		SDLVideo vdriver = SDLImpl.registerVideoDriver(view);
+		vdriver.registerCallback(mSDLPreparedClb);
+		vdriver.registerCallback(mSDLPumpEvents);
+		vdriver.registerCallback(mSDLSetCaptionClb);
+		setContentView(view);
     }
 	
-	private void addEvent(Object event) {
+	private boolean addEvent(Object event) {
+		if(event instanceof KeyEvent) {
+			int keyCode = ((KeyEvent)event).getKeyCode();
+			if(keyCode == KeyEvent.KEYCODE_MENU) {
+				return false;
+			}
+		}
 		synchronized (mEvents) {
 			mEvents.add(event);
 		}
+		return true;
 	}
 	
 	private Object[] getEvents() {
@@ -64,36 +102,7 @@ public abstract class SDLActivity extends Activity {
 		return events;
 	}
 	
-	public boolean onKeyUp(int keyCode, KeyEvent event) {
-		addEvent(event);
-		return true;
-	}
-	
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		addEvent(event);
-		return true;
-	}
-	
-	public boolean onTouchEvent(MotionEvent event) {
-		addEvent(event);
-		return true;
-	}
-	
-	@Override
-	public boolean onTrackballEvent(MotionEvent event) {
-		addEvent(event);
-		return true;
-	}
-
-	/**
-	 * called by sdl to set title of window
-	 * @hide
-	 */
-	public void onSetCaption(String caption) {
-		setTitle(caption);
-	}
-	
-	public void onProcessEvents() {
+	private void processEvents() {
 		Object[] events = getEvents();
 		for (int i=0; i<events.length; i++) {
 			Object event = events[i];
@@ -137,6 +146,26 @@ public abstract class SDLActivity extends Activity {
 								   keysym);
 			}
 		}
+	}
+	
+	/**
+	 * Override android motion and key event callbacks nad pass them to our event buffer
+	 */
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		return addEvent(event);
+	}
+	
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		return addEvent(event);
+	}
+	
+	public boolean onTouchEvent(MotionEvent event) {
+		return addEvent(event);
+	}
+	
+	@Override
+	public boolean onTrackballEvent(MotionEvent event) {
+		return addEvent(event);
 	}
 	
 	// called when sdl is prepared

@@ -19,8 +19,8 @@ package android.sdl;
 
 import android.util.Log;
 import android.view.Surface;
-
-import android.sdl.events.SDLEvents;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 
 import java.lang.ref.WeakReference;
 
@@ -38,7 +38,15 @@ public class SDLVideo {
 		private static final int SDL_NATIVE_VIDEO_SET_CAPTION = 7;
 		private static final int SDL_NATIVE_VIDEO_INIT_OS_KEYMAP = 8;
     }
-
+    
+    /****** Android surface information *******/
+    private SurfaceHolder mSurfaceHolder;
+    private int mSurfaceFormat;
+    private int mSurfaceWidth;
+    private int mSurfaceHeight;
+    
+    /****** Callbacks variables *******/
+    private SDLVideoPreparedClb mPreparedClb;
     private SDLVideoSetSurfaceClb mSurfaceClb;
     private SDLVideoPumpEventsClb mEventsClb;
     private SDLVideoUpdateRectsClb mUpdateClb;
@@ -56,12 +64,43 @@ public class SDLVideo {
 		
 	    Log.d(TAG, "java SDLVideo loaded");
     }
+    
+    /**
+     * Surface holder callback handler
+     * when we receive surface created event, than we call sdlPrepared listener 
+     * and SDL fun can start :-)
+     */
+    private SurfaceHolder.Callback mSurfaceHClb = new SurfaceHolder.Callback() {
+		
+    	// android surface holder implementation
+        public void surfaceDestroyed(SurfaceHolder holder) {
+    		Log.d(TAG, "surafce destroyed");
+    	}
+    	
+    	public void surfaceCreated(SurfaceHolder holder) {
+    		Log.d(TAG, "surface created");
+    		/* Native setup requires a weak reference to our object.
+    	     * It's easier to create it here than in C++.
+    	     */
+    		Surface surface = mSurfaceHolder.getSurface();
+    	    native_setup(new WeakReference<SDLVideo>(SDLVideo.this), surface);
+    	    if(mPreparedClb != null) {
+    	    	mPreparedClb.onPrepared(surface);
+    	    }
+    	}
+    	
+    	public void surfaceChanged(SurfaceHolder holder, int format, int width,
+    			int height) {
+    		Log.d(TAG, "surface changed: format=" + format + ", res=" + width + "x" + height);
+    		mSurfaceFormat = format;
+    		mSurfaceWidth = width;
+    		mSurfaceHeight = height;
+    	}
+	};
 	
-    public SDLVideo(Surface surface) {
-	    /* Native setup requires a weak reference to our object.
-	     * It's easier to create it here than in C++.
-	     */
-	    native_setup(new WeakReference<SDLVideo>(this), surface);
+    public SDLVideo(SurfaceView surface) {
+    	mSurfaceHolder = surface.getHolder();
+		mSurfaceHolder.addCallback(mSurfaceHClb);
     }
 
     @Override
@@ -111,17 +150,10 @@ public class SDLVideo {
 			String caption = (String) obj; 
 			handleVideoDeviceSetCaption(caption);
 			break;
-		case SDLNativeEvents.SDL_NATIVE_VIDEO_INIT_OS_KEYMAP:
-			break;
 	    default:
 		    Log.e(TAG, "undefined event");
         }
     }
-	
-	private void handleVideoDeviceInitOSKeymap() {
-		Log.d(TAG, "handleVideoDeviceInitOSKeymap");
-		SDLEvents.handleInitOSKeymap();
-	}
 	
 	private void handleVideoDeviceSetCaption(String caption) {
 	    Log.d(TAG, "handleVideoDeviceSetCaption");
@@ -191,9 +223,21 @@ public class SDLVideo {
     public void registerCallback(SDLVideoUpdateRectsClb clb) {
  	    mUpdateClb = clb;
     }
+    
+    public void registerCallback(SDLVideoPreparedClb clb) {
+ 	    mPreparedClb = clb;
+    }
+    
+    public void registerCallback(SDLVideoSetCaptionClb clb) {
+ 	    mCaptionClb = clb;
+    }
 
     // callbacks definitions
     //---------------------------------------------------------------
+    public interface SDLVideoPreparedClb {
+	    public void onPrepared(Surface surface);
+    }
+    
 	public interface SDLVideoSetCaptionClb {
 	    public void onSetCaption(String caption);
     }
