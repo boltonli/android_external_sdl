@@ -1,6 +1,6 @@
 /*
 **
-** Copyright 2010, Havlena Petr
+** Copyright 2010, Havlena Petr, havlenapetr@gmail.com
 **
 ** Licensed under the Apache License, Version 2.0 (the "License"); 
 ** you may not use this file except in compliance with the License. 
@@ -40,7 +40,6 @@ public class SDLVideo {
     }
     
     /****** Android surface information *******/
-    private SurfaceHolder mSurfaceHolder;
     private int mSurfaceFormat;
     private int mSurfaceWidth;
     private int mSurfaceHeight;
@@ -50,7 +49,7 @@ public class SDLVideo {
     private SDLVideoSetSurfaceClb mSurfaceClb;
     private SDLVideoPumpEventsClb mEventsClb;
     private SDLVideoUpdateRectsClb mUpdateClb;
-	private SDLVideoSetCaptionClb mCaptionClb;
+    private SDLVideoSetCaptionClb mCaptionClb;
 	
     // registers fields and methods
     private static native final void native_init();
@@ -74,33 +73,32 @@ public class SDLVideo {
 		
     	// android surface holder implementation
         public void surfaceDestroyed(SurfaceHolder holder) {
-    		Log.d(TAG, "surafce destroyed");
+            Log.d(TAG, "surafce destroyed");
     	}
     	
     	public void surfaceCreated(SurfaceHolder holder) {
-    		Log.d(TAG, "surface created");
-    		/* Native setup requires a weak reference to our object.
+            Log.d(TAG, "surface created");
+            /* Native setup requires a weak reference to our object.
     	     * It's easier to create it here than in C++.
     	     */
-    		Surface surface = mSurfaceHolder.getSurface();
+            Surface surface = holder.getSurface();
     	    native_setup(new WeakReference<SDLVideo>(SDLVideo.this), surface);
     	    if(mPreparedClb != null) {
     	    	mPreparedClb.onPrepared(surface);
     	    }
     	}
     	
-    	public void surfaceChanged(SurfaceHolder holder, int format, int width,
-    			int height) {
-    		Log.d(TAG, "surface changed: format=" + format + ", res=" + width + "x" + height);
-    		mSurfaceFormat = format;
-    		mSurfaceWidth = width;
-    		mSurfaceHeight = height;
+    	public void surfaceChanged(SurfaceHolder holder, int format, int width,	int height) {
+            Log.d(TAG, "surface changed: format=" + format + ", res=" + width + "x" + height);
+            mSurfaceFormat = format;
+            mSurfaceWidth = width;
+            mSurfaceHeight = height;
     	}
-	};
+    };
 	
     public SDLVideo(SurfaceView surface) {
-    	mSurfaceHolder = surface.getHolder();
-		mSurfaceHolder.addCallback(mSurfaceHClb);
+    	SurfaceHolder holder = surface.getHolder();
+	holder.addCallback(mSurfaceHClb);
     }
 
     @Override
@@ -113,13 +111,13 @@ public class SDLVideo {
      * native callback
     **/
     private static void postEventFromNative(Object sdlvideo_ref, int what, int arg1, int arg2, Object obj) {
-	    SDLVideo ref = (SDLVideo)((WeakReference)sdlvideo_ref).get();
-	    if (ref == null) {
-	        Log.e(TAG, "SDLVideo ref is null");
-			return;
-	    }
+        SDLVideo ref = (SDLVideo)((WeakReference)sdlvideo_ref).get();
+        if (ref == null) {
+            Log.e(TAG, "SDLVideo ref is null");
+            return;
+        }
 
-		ref.handleNativeMessage(what, obj);
+        ref.handleNativeMessage(what, obj);
     }
 
     private void handleNativeMessage(int what, Object obj) {
