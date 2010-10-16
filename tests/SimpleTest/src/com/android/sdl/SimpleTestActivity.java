@@ -29,11 +29,7 @@ public class SimpleTestActivity extends SDLActivity {
 
     @Override
     public void onSDLCreate() {
-        new Thread() {
-			public void run() {
-		        nativeStart();
-			}
-		}.start();
+        nativeStart();
     }
 	
 	static {

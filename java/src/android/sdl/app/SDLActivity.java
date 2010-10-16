@@ -30,6 +30,7 @@ import android.sdl.events.SDLKeySym;
 import android.sdl.events.SDLKeySym.SDLMod;
 import android.sdl.impl.SDLImpl;
 
+import java.lang.Thread;
 import java.util.ArrayList;
 
 public abstract class SDLActivity extends Activity {
@@ -44,7 +45,12 @@ public abstract class SDLActivity extends Activity {
     private SDLVideo.SDLVideoPreparedClb mSDLPreparedClb = new SDLVideo.SDLVideoPreparedClb() {
 		
 		public void onPrepared(Surface surface) {
-			onSDLCreate();
+	        mAppThread = new Thread() {
+				public void run() {
+					onSDLCreate();
+				}
+            };
+			mAppThread.start();
 		}
 	};
 	
@@ -63,6 +69,7 @@ public abstract class SDLActivity extends Activity {
 	};
     
 	private ArrayList<Object> mEvents;
+    private Thread mAppThread;
 
 	/**
 	 * @hide

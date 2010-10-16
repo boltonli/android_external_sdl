@@ -175,7 +175,7 @@ public class SDLVideo extends SurfaceView {
     }
 
     private void handleVideoDeviceDelete(SDLVideoDevice device) {
-        Log.d(TAG, "handleVideoDeviceCreate");
+        Log.d(TAG, "handleVideoDeviceDelete");
         Log.d(TAG, "device name: " + device.getName());
         Log.d(TAG, "device title: " + device.getWmTitle());
     }
