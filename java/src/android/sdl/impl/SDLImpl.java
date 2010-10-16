@@ -17,6 +17,7 @@
 
 package android.sdl.impl;
 
+import android.content.Context;
 import android.sdl.SDLSurface;
 import android.sdl.SDLVideo;
 import android.util.Log;
@@ -102,8 +103,8 @@ public final class SDLImpl {
 		return true;
 	}
 	
-	public static SDLVideo registerVideoDriver(SurfaceView surface) {
-		sVideo = new SDLVideo(surface);
+	public static SDLVideo registerVideoDriver(Context context) {
+		sVideo = new SDLVideo(context);
 		return sVideo;
 	}
 	
@@ -113,26 +114,26 @@ public final class SDLImpl {
     *  Unless the SDL_INIT_NOPARACHUTE flag is set, it will install cleanup
     *  signal handlers for some commonly ignored fatal signals (like SIGSEGV)
     */
-    public native static int Init(long flags);
+    public native static int init(long flags);
 
     /** This function initializes specific SDL subsystems */
-    public native static int InitSubSystem(long flags);
+    public native static int initSubSystem(long flags);
 
     /** This function cleans up specific SDL subsystems */
-    public native static void QuitSubSystem(long flags);
+    public native static void quitSubSystem(long flags);
 
     /** 
     *  This function returns mask of the specified subsystems which have
     *  been initialized.
     *  If 'flags' is 0, it returns a mask of all initialized subsystems.
     */
-    public native static long WasInit(long flags);
+    public native static long wasInit(long flags);
 
     /** 
     *  This function cleans up all initialized subsystems and unloads the
     *  dynamically linked library.  You should call it upon all exit conditions.
     */
-    public native static void Quit();
+    public native static void quit();
 
 	/**
 	 * Set up a video mode with the specified width, height and bits-per-pixel.
@@ -192,6 +193,6 @@ public final class SDLImpl {
 	 * available. SDL will fall back to reduced functionality if the exact flags
 	 * you wanted are not available.
 	 */
-     public native static SDLSurface SetVideoMode(int width, int height, int bpp, long flags);
+     public native static SDLSurface setVideoMode(int width, int height, int bpp, long flags);
 
 }

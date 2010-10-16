@@ -36,49 +36,49 @@ android_sdl_SDLSurface_create(SDL_Surface* surface);
 // ----------------------------------------------------------------------------
 
 static jint
-android_sdl_SDLImpl_Init(JNIEnv *env, jobject thiz, jlong value)
+android_sdl_SDLImpl_init(JNIEnv *env, jobject thiz, jlong value)
 {
     return SDL_Init((Uint32)value);
 }
 
 static jint
-android_sdl_SDLImpl_InitSubSystem(JNIEnv *env, jobject thiz, jlong value)
+android_sdl_SDLImpl_initSubSystem(JNIEnv *env, jobject thiz, jlong value)
 {
     return SDL_InitSubSystem((Uint32)value);
 }
 
 static void
-android_sdl_SDLImpl_QuitSubSystem(JNIEnv *env, jobject thiz, jlong value)
+android_sdl_SDLImpl_quitSubSystem(JNIEnv *env, jobject thiz, jlong value)
 {
     SDL_QuitSubSystem((Uint32)value);
 }
 
 static jlong
-android_sdl_SDLImpl_WasInit(JNIEnv *env, jobject thiz, jlong value)
+android_sdl_SDLImpl_wasInit(JNIEnv *env, jobject thiz, jlong value)
 {
     return (jlong)SDL_WasInit((Uint32)value);
 }
 
 static void
-android_sdl_SDLImpl_Quit(JNIEnv *env, jobject thiz)
+android_sdl_SDLImpl_quit(JNIEnv *env, jobject thiz)
 {
     SDL_Quit();
 }
 
 static jobject
-android_sdl_SDLImpl_SetVideoMode(JNIEnv *env, jobject thiz, jint width, jint height, jint bpp, jlong flags)
+android_sdl_SDLImpl_setVideoMode(JNIEnv *env, jobject thiz, jint width, jint height, jint bpp, jlong flags)
 {
     SDL_Surface* surface = SDL_SetVideoMode(width, height, bpp, (Uint32)flags);
     return android_sdl_SDLSurface_create(surface);
 }
 
 static JNINativeMethod gMethods[] = {
-    {"Init",                 "(J)I",                              (void *)android_sdl_SDLImpl_Init},
-    {"InitSubSystem",        "(J)I",                              (void *)android_sdl_SDLImpl_InitSubSystem},
-    {"QuitSubSystem",        "(J)V",                              (void *)android_sdl_SDLImpl_QuitSubSystem},
-    {"WasInit",              "(J)J",                              (void *)android_sdl_SDLImpl_WasInit},
-    {"Quit",                 "()V",                               (void *)android_sdl_SDLImpl_Quit},
-    {"SetVideoMode",         "(IIIJ)Landroid/sdl/SDLSurface;",    (void *)android_sdl_SDLImpl_SetVideoMode},
+    {"init",                 "(J)I",                              (void *)android_sdl_SDLImpl_init},
+    {"initSubSystem",        "(J)I",                              (void *)android_sdl_SDLImpl_initSubSystem},
+    {"quitSubSystem",        "(J)V",                              (void *)android_sdl_SDLImpl_quitSubSystem},
+    {"wasInit",              "(J)J",                              (void *)android_sdl_SDLImpl_wasInit},
+    {"quit",                 "()V",                               (void *)android_sdl_SDLImpl_quit},
+    {"setVideoMode",         "(IIIJ)Landroid/sdl/SDLSurface;",    (void *)android_sdl_SDLImpl_setVideoMode},
 };
 
 namespace android {

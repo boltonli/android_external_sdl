@@ -138,7 +138,7 @@ void JNISDLVideoDriverListener::updateScreen(SkBitmap* bitmap)
 void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
 {
     JNIEnv *env;
-    jobject obj;
+    jobject obj = NULL;
 	
     if (what == SDL_NATIVE_VIDEO_UPDATE_RECTS) {
         updateScreen((SkBitmap*) data);
@@ -150,6 +150,7 @@ void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
     // we create java representation of native structs
     switch (what) {
         case SDL_NATIVE_VIDEO_CREATE_DEVICE:
+		case SDL_NATIVE_VIDEO_DELETE_DEVICE:
             obj = android_sdl_SDLVideoDevice_create((SDL_VideoDevice*) data);
             break;
         case SDL_NATIVE_VIDEO_INIT:

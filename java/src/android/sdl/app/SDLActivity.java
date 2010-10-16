@@ -72,12 +72,21 @@ public abstract class SDLActivity extends Activity {
 	    super.onCreate(bundle);
 		
 		mEvents = new ArrayList<Object>();
-		SurfaceView view = new SurfaceView(this);
-		SDLVideo vdriver = SDLImpl.registerVideoDriver(view);
+		SDLVideo vdriver = SDLImpl.registerVideoDriver(this);
 		vdriver.registerCallback(mSDLPreparedClb);
 		vdriver.registerCallback(mSDLPumpEvents);
 		vdriver.registerCallback(mSDLSetCaptionClb);
-		setContentView(view);
+		setContentView(vdriver);
+    }
+
+    /**
+     * @hide
+     */
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        SDLImpl.quit();
     }
 	
 	private boolean addEvent(Object event) {

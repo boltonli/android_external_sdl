@@ -17,6 +17,7 @@
 
 package android.sdl;
 
+import android.content.Context;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -24,7 +25,7 @@ import android.view.SurfaceView;
 
 import java.lang.ref.WeakReference;
 
-public class SDLVideo {
+public class SDLVideo extends SurfaceView {
     private static final String TAG = "SDLVideo";
 	
     // must equals with libsdl/src/video/android/SDL_androidvideo.h -> sdl_native_events
@@ -96,9 +97,10 @@ public class SDLVideo {
     	}
     };
 	
-    public SDLVideo(SurfaceView surface) {
-    	SurfaceHolder holder = surface.getHolder();
-	holder.addCallback(mSurfaceHClb);
+    public SDLVideo(Context context) {
+        super(context);
+    	SurfaceHolder holder = getHolder();
+	    holder.addCallback(mSurfaceHClb);
     }
 
     @Override
@@ -123,12 +125,17 @@ public class SDLVideo {
     private void handleNativeMessage(int what, Object obj) {
 	    switch(what) {
 	    case SDLNativeEvents.SDL_NATIVE_VIDEO_CREATE_DEVICE:
+        {
+            SDLVideoDevice device = (SDLVideoDevice) obj;
+            handleVideoDeviceCreate(device);
+            break;
+		}
+        case SDLNativeEvents.SDL_NATIVE_VIDEO_DELETE_DEVICE:
+        {
 		    SDLVideoDevice device = (SDLVideoDevice) obj;
-		    handleVideoDeviceCreate(device);
+            handleVideoDeviceDelete(device);
 		    break;
-	    case SDLNativeEvents.SDL_NATIVE_VIDEO_DELETE_DEVICE:
-		    handleVideoDeviceDelete();
-		    break;
+        }
 	    case SDLNativeEvents.SDL_NATIVE_VIDEO_INIT:
 		    SDLPixelFormat pformat = (SDLPixelFormat) obj;
 		    handleVideoDeviceInit(pformat);
@@ -163,8 +170,14 @@ public class SDLVideo {
 
     private void handleVideoDeviceCreate(SDLVideoDevice device) {
 	    Log.d(TAG, "handleVideoDeviceCreate");
-            Log.d(TAG, "device name: " + device.getName());
-            Log.d(TAG, "device title: " + device.getWmTitle());
+        Log.d(TAG, "device name: " + device.getName());
+        Log.d(TAG, "device title: " + device.getWmTitle());
+    }
+
+    private void handleVideoDeviceDelete(SDLVideoDevice device) {
+        Log.d(TAG, "handleVideoDeviceCreate");
+        Log.d(TAG, "device name: " + device.getName());
+        Log.d(TAG, "device title: " + device.getWmTitle());
     }
 	
     private void handleVideoDeviceDelete() {
