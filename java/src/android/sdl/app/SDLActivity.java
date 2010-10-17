@@ -47,7 +47,7 @@ public abstract class SDLActivity extends Activity {
 		public void onPrepared(Surface surface) {
 	        mAppThread = new Thread() {
 				public void run() {
-					onSDLCreate();
+					onSDLCreate(mBundle);
 				}
             };
 			mAppThread.start();
@@ -70,6 +70,7 @@ public abstract class SDLActivity extends Activity {
     
 	private ArrayList<Object> mEvents;
     private Thread mAppThread;
+    private Bundle mBundle;
 
 	/**
 	 * @hide
@@ -78,6 +79,7 @@ public abstract class SDLActivity extends Activity {
     protected void onCreate(Bundle bundle) {
 	    super.onCreate(bundle);
 		
+        mBundle = bundle;
 		mEvents = new ArrayList<Object>();
 		SDLVideo vdriver = SDLImpl.registerVideoDriver(this);
 		vdriver.registerCallback(mSDLPreparedClb);
@@ -185,6 +187,6 @@ public abstract class SDLActivity extends Activity {
 	}
 	
 	// called when sdl is prepared
-	public abstract void onSDLCreate();
+	public abstract void onSDLCreate(Bundle bundle);
 	
 }

@@ -44,6 +44,7 @@ public class SDLVideo extends SurfaceView {
     private int mSurfaceFormat;
     private int mSurfaceWidth;
     private int mSurfaceHeight;
+	private SDLSurface mSDLSurface;
     
     /****** Callbacks variables *******/
     private SDLVideoPreparedClb mPreparedClb;
@@ -191,6 +192,7 @@ public class SDLVideo extends SurfaceView {
     }
 
     private void handleVideoDeviceSetSurface(SDLSurface surface) {
+		mSDLSurface = surface;
 	    Log.d(TAG, "handleVideoDeviceSetSurface");
 		Log.d(TAG, "surface w: " + surface.getW());
 		Log.d(TAG, "surface h: " + surface.getH());
