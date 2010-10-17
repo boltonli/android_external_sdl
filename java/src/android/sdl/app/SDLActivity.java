@@ -25,6 +25,7 @@ import android.view.MotionEvent;
 import android.view.SurfaceView;
 
 import android.sdl.SDLVideo;
+import android.sdl.SDLSurface;
 import android.sdl.events.SDLEvents;
 import android.sdl.events.SDLKeySym;
 import android.sdl.events.SDLKeySym.SDLMod;
@@ -45,7 +46,7 @@ public abstract class SDLActivity extends Activity {
     private SDLVideo.SDLVideoPreparedClb mSDLPreparedClb = new SDLVideo.SDLVideoPreparedClb() {
 		
 		public void onPrepared(Surface surface) {
-	        mAppThread = new Thread() {
+			mAppThread = new Thread() {
 				public void run() {
 					onSDLCreate(mBundle);
 				}
@@ -67,10 +68,30 @@ public abstract class SDLActivity extends Activity {
 			setTitle(caption);
 		}
 	};
+
+	private SDLVideo.SDLVideoSetSurfaceClb mSDLSetSurfaceClb = new SDLVideo.SDLVideoSetSurfaceClb() {
+
+		public void onSetSurface(SDLSurface surface) {
+			mSDLSurfaceWidth = surface.getW();
+			mSDLSurfaceHeight = surface.getH();
+		}
+	};
+
+	private SDLVideo.SDLVideoSurfaceChangedClb mSDLSurfaceChangedClb = new SDLVideo.SDLVideoSurfaceChangedClb() {
+
+		public void onSurfaceChanged(int format, int width,	int height) {
+			mSurfaceWidth = width;
+			mSurfaceHeight = height;
+		}
+	};
     
 	private ArrayList<Object> mEvents;
     private Thread mAppThread;
     private Bundle mBundle;
+    private int mSurfaceWidth;
+    private int mSurfaceHeight;
+    private int mSDLSurfaceWidth;
+    private int mSDLSurfaceHeight;
 
 	/**
 	 * @hide
@@ -85,6 +106,8 @@ public abstract class SDLActivity extends Activity {
 		vdriver.registerCallback(mSDLPreparedClb);
 		vdriver.registerCallback(mSDLPumpEvents);
 		vdriver.registerCallback(mSDLSetCaptionClb);
+		vdriver.registerCallback(mSDLSetSurfaceClb);
+		vdriver.registerCallback(mSDLSurfaceChangedClb);
 		setContentView(vdriver);
     }
 
@@ -130,20 +153,20 @@ public abstract class SDLActivity extends Activity {
 					case MotionEvent.ACTION_DOWN:
 						SDLEvents.MouseButton((short)SDLEvents.SDL_PRESSED, 
 											  (short)0, 
-											  (int)e.getX(), 
-											  (int)e.getY());
+											  (int) ((mSDLSurfaceWidth * e.getX()) / mSurfaceWidth), 
+											  (int) ((mSDLSurfaceHeight * e.getY()) / mSurfaceHeight));
 						break;
 					case MotionEvent.ACTION_UP:
 						SDLEvents.MouseButton((short)SDLEvents.SDL_RELEASED, 
 											  (short)0, 
-											  (int)e.getX(), 
-											  (int)e.getY());
+											  (int) ((mSDLSurfaceWidth * e.getX()) / mSurfaceWidth), 
+											  (int) ((mSDLSurfaceHeight * e.getY()) / mSurfaceHeight));
 						break;
 					case MotionEvent.ACTION_MOVE:
 						SDLEvents.MouseMotion((short)0, 
 											  0, 
-											  (int)e.getX(), 
-											  (int)e.getY());
+											  (int) ((mSDLSurfaceWidth * e.getX()) / mSurfaceWidth), 
+											  (int) ((mSDLSurfaceHeight * e.getY()) / mSurfaceHeight));
 						break;
 					default:
 						break;
@@ -187,6 +210,6 @@ public abstract class SDLActivity extends Activity {
 	}
 	
 	// called when sdl is prepared
-	public abstract void onSDLCreate(Bundle bundle);
+	protected abstract void onSDLCreate(Bundle bundle);
 	
 }

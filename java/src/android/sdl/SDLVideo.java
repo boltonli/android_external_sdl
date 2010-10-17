@@ -44,7 +44,6 @@ public class SDLVideo extends SurfaceView {
     private int mSurfaceFormat;
     private int mSurfaceWidth;
     private int mSurfaceHeight;
-	private SDLSurface mSDLSurface;
     
     /****** Callbacks variables *******/
     private SDLVideoPreparedClb mPreparedClb;
@@ -52,6 +51,7 @@ public class SDLVideo extends SurfaceView {
     private SDLVideoPumpEventsClb mEventsClb;
     private SDLVideoUpdateRectsClb mUpdateClb;
     private SDLVideoSetCaptionClb mCaptionClb;
+	private SDLVideoSurfaceChangedClb mSurfaceChangedClb;
 	
     // registers fields and methods
     private static native final void native_init();
@@ -95,6 +95,9 @@ public class SDLVideo extends SurfaceView {
             mSurfaceFormat = format;
             mSurfaceWidth = width;
             mSurfaceHeight = height;
+			if(mSurfaceChangedClb != null) {
+				mSurfaceChangedClb.onSurfaceChanged(format, width, height);
+			}
     	}
     };
 	
@@ -192,7 +195,6 @@ public class SDLVideo extends SurfaceView {
     }
 
     private void handleVideoDeviceSetSurface(SDLSurface surface) {
-		mSDLSurface = surface;
 	    Log.d(TAG, "handleVideoDeviceSetSurface");
 		Log.d(TAG, "surface w: " + surface.getW());
 		Log.d(TAG, "surface h: " + surface.getH());
@@ -245,6 +247,10 @@ public class SDLVideo extends SurfaceView {
  	    mCaptionClb = clb;
     }
 
+	public void registerCallback(SDLVideoSurfaceChangedClb clb) {
+		mSurfaceChangedClb = clb;
+	}
+
     // callbacks definitions
     //---------------------------------------------------------------
     public interface SDLVideoPreparedClb {
@@ -258,6 +264,10 @@ public class SDLVideo extends SurfaceView {
     public interface SDLVideoSetSurfaceClb {
 	    public void onSetSurface(SDLSurface surface);
     }
+
+	public interface SDLVideoSurfaceChangedClb {
+		public void onSurfaceChanged(int format, int width,	int height);
+	}
 
     public interface SDLVideoDeviceCreateClb {
 	    public void onDeviceCreate(SDLVideoDevice device);
