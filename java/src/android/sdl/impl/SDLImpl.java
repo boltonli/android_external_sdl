@@ -23,6 +23,9 @@ import android.sdl.SDLVideo;
 import android.util.Log;
 import android.view.SurfaceView;
 
+import android.sdl.SDLSurface;
+import android.sdl.SDLVersion;
+
 import java.lang.SecurityException;
 import java.lang.UnsatisfiedLinkError;
 
@@ -193,6 +196,26 @@ public final class SDLImpl {
 	 * available. SDL will fall back to reduced functionality if the exact flags
 	 * you wanted are not available.
 	 */
-     public native static SDLSurface setVideoMode(int width, int height, int bpp, long flags);
+	public native static SDLSurface setVideoMode(int width, int height, int bpp, long flags);
+	
+	//public native static int pollEvent();
+	
+	/**
+	 * On hardware that supports double-buffering, this function sets up a flip
+	 * and returns.  The hardware will wait for vertical retrace, and then swap
+	 * video buffers before the next video surface blit or lock will return.
+	 * On hardware that doesn not support double-buffering, this is equivalent
+	 * to calling SDL_UpdateRect(screen, 0, 0, 0, 0);
+	 * The SDL_DOUBLEBUF flag must have been passed to SDL_SetVideoMode() when
+	 * setting the video mode for this function to perform hardware flipping.
+	 * This function returns 0 if successful, or -1 if there was an error.
+	 */
+	public native static int flip(SDLSurface screen);
+	
+	/** This function gets the version of the dynamically linked SDL library.
+	 *  it should NOT be used to fill a version structure, instead you should
+	 *  use the SDL_Version() macro.
+	 */
+	public native static SDLVersion getLinkedVersion();
 
 }

@@ -164,17 +164,21 @@ void SDLVideoDriver::onVideoQuit(_THIS) {
 
 /* Hardware surface functions */
 int SDLVideoDriver::onAllocHWSurface(_THIS, SDL_Surface *surface) {
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_ALLOC_HW_SURFACE, 0, 0, (void*) surface);
     return(-1);
 }
 
 int SDLVideoDriver::onLockHWSurface(_THIS, SDL_Surface *surface) {
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_LOCK_HW_SURFACE, 0, 0, (void*) surface);
     return 0;
 }
 
 void SDLVideoDriver::onUnlockHWSurface(_THIS, SDL_Surface *surface) {
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_UNLOCK_HW_SURFACE, 0, 0, (void*) surface);
 }
 
 void SDLVideoDriver::onFreeHWSurface(_THIS, SDL_Surface *surface) {
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_FREE_HW_SURFACE, 0, 0, (void*) surface);
 }
 
 /* on set window caption */
