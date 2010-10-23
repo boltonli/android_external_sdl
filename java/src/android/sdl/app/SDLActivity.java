@@ -152,13 +152,13 @@ public abstract class SDLActivity extends Activity {
 				switch (e.getAction()) {
 					case MotionEvent.ACTION_DOWN:
 						SDLEvents.MouseButton((short)SDLEvents.SDL_PRESSED, 
-											  (short)0, 
+											  SDLEvents.SDLMouseButton.SDL_BUTTON_LEFT, 
 											  (int) ((mSDLSurfaceWidth * e.getX()) / mSurfaceWidth), 
 											  (int) ((mSDLSurfaceHeight * e.getY()) / mSurfaceHeight));
 						break;
 					case MotionEvent.ACTION_UP:
 						SDLEvents.MouseButton((short)SDLEvents.SDL_RELEASED, 
-											  (short)0, 
+											  SDLEvents.SDLMouseButton.SDL_BUTTON_LEFT,
 											  (int) ((mSDLSurfaceWidth * e.getX()) / mSurfaceWidth), 
 											  (int) ((mSDLSurfaceHeight * e.getY()) / mSurfaceHeight));
 						break;
