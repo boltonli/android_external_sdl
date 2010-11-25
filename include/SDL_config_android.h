@@ -48,11 +48,28 @@
 
 #define HAVE_STDIO_H 1
 
-#define NO_SDL_GLEXT 1
+#undef NO_SDL_GLEXT
 
 /* FireSlash found that SDL native memcpy crashes sometimes, these defines fix it */
 #define HAVE_MEMSET 1
 #define HAVE_MEMCPY 1
 #define HAVE_MEMMOVE 1
+
+/* Enable OpenGL support */
+#define SDL_VIDEO_OPENGL 1
+
+#define GL_ALL_ATTRIB_BITS                  0x000fffff
+#define GL_UNPACK_ROW_LENGTH                0x0CF2
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef double GLdouble;
+typedef double GLclampd;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _SDL_config_minimal_h */

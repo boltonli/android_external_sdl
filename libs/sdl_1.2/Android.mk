@@ -37,7 +37,8 @@ LOCAL_C_INCLUDES := \
 	$(LOCAL_PATH)/../../include \
 	external/skia/src/core \
 	external/skia/include/core \
-	frameworks/base/include
+	frameworks/base/include \
+        frameworks/base/opengl/include
 
 LOCAL_STATIC_LIBRARIES := libsdlmixer
 
