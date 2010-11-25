@@ -1,6 +1,10 @@
 LOCAL_PATH := $(call my-dir)
-
 include $(CLEAR_VARS)
+
+#include our sdl config
+include $(LOCAL_PATH)/../../config.mk
+
+ifeq ($(SDL_BUILD_MIXER), true)
 
 LOCAL_MODULE := libsdlmixer
 
@@ -19,3 +23,4 @@ LOCAL_SRC_FILES := $(notdir $(wildcard $(LOCAL_PATH)/*.c))
 
 include $(BUILD_STATIC_LIBRARY)
 
+endif
