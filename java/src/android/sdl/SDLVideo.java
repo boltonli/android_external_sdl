@@ -38,6 +38,10 @@ public class SDLVideo extends SurfaceView {
 	    private static final int SDL_NATIVE_VIDEO_UPDATE_RECTS = 6;
 		private static final int SDL_NATIVE_VIDEO_SET_CAPTION = 7;
 		private static final int SDL_NATIVE_VIDEO_INIT_OS_KEYMAP = 8;
+		private static final int SDL_NATIVE_VIDEO_ALLOC_HW_SURFACE = 9;
+		private static final int SDL_NATIVE_VIDEO_LOCK_HW_SURFACE = 10;
+		private static final int SDL_NATIVE_VIDEO_UNLOCK_HW_SURFACE = 11;
+		private static final int SDL_NATIVE_VIDEO_FREE_HW_SURFACE = 12;
     }
     
     /****** Android surface information *******/

@@ -28,6 +28,59 @@ public class SDLEvents {
 	
 	public static int[] keymap = new int[KeyEvent.getMaxKeyCode() + 1];
 	
+
+	/** Event enumerations */
+	public static class SDLEventType {
+		public static final int SDL_NOEVENT = 0;				/**< Unused (do not remove) */
+		public static final int SDL_ACTIVEEVENT = 1;			/**< Application loses/gains visibility */
+		public static final int SDL_KEYDOWN = 2;				/**< Keys pressed */
+		public static final int SDL_KEYUP = 3;					/**< Keys released */
+		public static final int SDL_MOUSEMOTION = 4;			/**< Mouse moved */
+		public static final int SDL_MOUSEBUTTONDOWN = 5;		/**< Mouse button pressed */
+		public static final int SDL_MOUSEBUTTONUP = 6;			/**< Mouse button released */
+		public static final int SDL_JOYAXISMOTION = 7;			/**< Joystick axis motion */
+		public static final int SDL_JOYBALLMOTION = 8;			/**< Joystick trackball motion */
+		public static final int SDL_JOYHATMOTION = 9;			/**< Joystick hat position change */
+		public static final int SDL_JOYBUTTONDOWN = 10;			/**< Joystick button pressed */
+		public static final int SDL_JOYBUTTONUP = 11;			/**< Joystick button released */
+		public static final int SDL_QUI = 12;					/**< User-requested quit */
+		public static final int SDL_SYSWMEVENT = 13;			/**< System specific event */
+		public static final int SDL_EVENT_RESERVEDA = 14;		/**< Reserved for future use.. */
+		public static final int SDL_EVENT_RESERVEDB = 15;		/**< Reserved for future use.. */
+		public static final int SDL_VIDEORESIZE = 16;			/**< User resized video mode */
+		public static final int SDL_VIDEOEXPOSE = 17;			/**< Screen needs to be redrawn */
+		public static final int SDL_EVENT_RESERVED2 = 18;		/**< Reserved for future use.. */
+		public static final int SDL_EVENT_RESERVED3 = 19;		/**< Reserved for future use.. */
+		public static final int SDL_EVENT_RESERVED4 = 20;		/**< Reserved for future use.. */
+		public static final int SDL_EVENT_RESERVED5 = 21;		/**< Reserved for future use.. */
+		public static final int SDL_EVENT_RESERVED6 = 22;		/**< Reserved for future use.. */
+		public static final int SDL_EVENT_RESERVED7 = 23;		/**< Reserved for future use.. */
+		/** Events SDL_USEREVENT through SDL_MAXEVENTS-1 are for your use */
+		public static final int SDL_USEREVENT = 24;
+		/** This last event is only for bounding internal arrays
+		 *  It is the number of bits in the event mask datatype -- Uint32
+		 */
+		public static final int SDL_NUMEVENTS = 32;
+	}
+
+	/*@{*/
+	/** Used as a mask when testing buttons in buttonstate
+	 *  Button 1:	Left mouse button
+	 *  Button 2:	Middle mouse button
+	 *  Button 3:	Right mouse button
+	 *  Button 4:	Mouse wheel up	 (may also be a real button)
+	 *  Button 5:	Mouse wheel down (may also be a real button)
+	 */
+	public static class SDLMouseButton {
+		public static final short SDL_BUTTON_LEFT =	1;
+		public static final short SDL_BUTTON_MIDDLE = 2;
+		public static final short SDL_BUTTON_RIGHT = 3;
+		public static final short SDL_BUTTON_WHEELUP = 4;
+		public static final short SDL_BUTTON_WHEELDOWN = 5;
+		public static final short SDL_BUTTON_X1	= 6;
+		public static final short SDL_BUTTON_X2	= 7;
+	}
+
 	public native static void native_init();
 	static {
 		native_init();
