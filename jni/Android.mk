@@ -1,6 +1,9 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
+#include our sdl config
+include $(LOCAL_PATH)/../config.mk
+
 LOCAL_CPP_EXTENSION := .cpp
 
 LOCAL_SRC_FILES := \
@@ -21,11 +24,19 @@ LOCAL_MODULE := libsdl_jni
 LOCAL_C_INCLUDES := \
         $(JNI_H_INCLUDE) \
         external/sdl/include \
-        external/sdl/libs/sdl_1.2/src/audio/android \
-        external/sdl/libs/sdl_1.2/src/video/android \
 	external/skia/src/core \
 	external/skia/include/core \
 	frameworks/base/include
+
+ifeq ($(SDL_BUILD_VERSION), 1.2)
+LOCAL_C_INCLUDES += \
+        external/sdl/libs/sdl_1.2.0/src/audio/android \
+        external/sdl/libs/sdl_1.2.0/src/video/android
+else
+LOCAL_C_INCLUDES += \
+        external/sdl/libs/sdl_1.3.0/src/audio/android \
+        external/sdl/libs/sdl_1.3.0/src/video/android
+endif
         
 LOCAL_SHARED_LIBRARIES := \
 	libskia \

@@ -1,6 +1,11 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
+#include our sdl config
+include $(LOCAL_PATH)/../../config.mk
+
+ifeq ($(SDL_BUILD_VERSION), 1.3)
+
 # Makefile to build the SDL library
 # based on Makefile.minimal
 SDL_SRCS := \
@@ -53,3 +58,5 @@ LOCAL_SHARED_LIBRARIES := \
 TARGET_PRELINK_MODULE := false
 
 include $(BUILD_SHARED_LIBRARY)
+
+endif
