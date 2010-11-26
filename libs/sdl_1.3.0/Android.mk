@@ -16,19 +16,22 @@ SDL_SRCS := \
 	src/events/*.c \
 	src/file/*.c \
 	src/joystick/*.c \
+        src/haptic/*.c \
 	src/stdlib/*.c \
 	src/thread/*.c \
 	src/timer/*.c \
 	src/video/*.c \
-	src/audio/android/*.cpp \
+        src/libm/*.c \
+	src/audio/android/*.c \
 	src/video/android/*.cpp \
-	src/joystick/dummy/*.c \
+        src/video/android/*.c \
+	src/joystick/android/*.c \
 	src/cdrom/dummy/*.c \
+        src/haptic/dummy/*.c \
+	src/atomic/dummy/*.c \
 	src/thread/pthread/*.c \
 	src/timer/unix/*.c \
 	src/loadso/dlopen/*.c \
- 
-LOCAL_CPP_EXTENSION := .cpp
  
 # Note this simple makefile var substitution, you can find even simpler examples in different Android projects
 LOCAL_SRC_FILES := $(foreach F, $(SDL_SRCS), $(addprefix $(dir $(F)),$(notdir $(wildcard $(LOCAL_PATH)/$(F)))))
@@ -39,7 +42,7 @@ LOCAL_CFLAGS := \
 	-DNO_MALLINFO=1 -DANDROID=1 -DDEBUG_ERROR=1 -DSDL_LOADSO_DLOPEN
 
 LOCAL_C_INCLUDES := \
-	$(LOCAL_PATH)/../../include \
+	$(LOCAL_PATH)/include \
 	external/skia/src/core \
 	external/skia/include/core \
 	frameworks/base/include \
@@ -53,7 +56,8 @@ LOCAL_SHARED_LIBRARIES := \
 	libutils \
 	libbinder \
 	liblog \
-	libdl
+	libdl \
+        libGLESv1_CM
 
 TARGET_PRELINK_MODULE := false
 

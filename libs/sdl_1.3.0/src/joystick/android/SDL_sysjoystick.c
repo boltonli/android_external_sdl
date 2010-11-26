@@ -33,7 +33,7 @@
 #include "../SDL_sysjoystick.h"
 #include "../SDL_joystick_c.h"
 
-extern float fLastAccelerometer[3];
+//extern float fLastAccelerometer[3];
 
 const char *accelerometerName = "Android accelerometer";
 
@@ -82,13 +82,15 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick)
  * but instead should call SDL_PrivateJoystick*() to deliver events
  * and update joystick device state.
  */
-    void
+void
 SDL_SYS_JoystickUpdate(SDL_Joystick * joystick)
 {
+/*
     int i=0; 
     for(i=0;i<3;i++){
         SDL_PrivateJoystickAxis(joystick, i, fLastAccelerometer[i]);
     }
+*/
 }
 
 /* Function to close a joystick after use */

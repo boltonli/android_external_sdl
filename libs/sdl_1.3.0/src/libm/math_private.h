@@ -24,7 +24,9 @@
 #define libm_hidden_proto(x)
 #define libm_hidden_def(x)
 
+#ifndef ANDROID
 typedef unsigned int u_int32_t;
+#endif
 
 /* The original fdlibm code used statements like:
 	n0 = ((*(int*)&one)>>29)^1;		* index of high word *

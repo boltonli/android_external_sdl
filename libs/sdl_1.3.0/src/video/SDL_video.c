@@ -100,7 +100,7 @@ static VideoBootStrap *bootstrap[] = {
     &PND_bootstrap,
 #endif
 #if SDL_VIDEO_DRIVER_ANDROID
-    &Android_bootstrap,
+    &ANDROID_bootstrap,
 #endif
     NULL
 };

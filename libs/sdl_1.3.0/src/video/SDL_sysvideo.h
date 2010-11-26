@@ -451,7 +451,7 @@ extern VideoBootStrap NDS_bootstrap;
 extern VideoBootStrap PND_bootstrap;
 #endif
 #if SDL_VIDEO_DRIVER_ANDROID
-extern VideoBootStrap Android_bootstrap;
+extern VideoBootStrap ANDROID_bootstrap;
 #endif
 
 #define SDL_CurrentDisplay	(&_this->displays[_this->current_display])
