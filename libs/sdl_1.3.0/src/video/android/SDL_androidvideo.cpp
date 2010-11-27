@@ -113,7 +113,7 @@ SDL_VideoDevice *SDLVideoDriver::onCreateDevice(int devindex) {
     return thiz->device;
 }
 
-int SDLVideoDriver::onVideoInit(_THIS/*, SDL_PixelFormat *vformat*/) {
+int SDLVideoDriver::onVideoInit(_THIS) {
     SDL_DisplayMode mode;
 
     /* Use a fake 32-bpp desktop mode */
@@ -122,15 +122,15 @@ int SDLVideoDriver::onVideoInit(_THIS/*, SDL_PixelFormat *vformat*/) {
     mode.h = iScreenHeight;
     mode.refresh_rate = 0;
     mode.driverdata = NULL;
+	
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_INIT, 0, 0, (void*) &mode);
+	
     if (SDL_AddBasicVideoDisplay(&mode) < 0) {
         return -1;
     }
     SDL_AddRenderDriver(&self->displays[0], &Android_RenderDriver);
-
     SDL_zero(mode);
     SDL_AddDisplayMode(&self->displays[0], &mode);
-	
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_INIT, 0, 0, (void*) &mode);
 
     /* We're done! */
     return 0;	
@@ -179,7 +179,6 @@ int *Android_GL_GetVisual(_THIS, Display * display, int screen){
 */
 
 SDL_GLContext SDLVideoDriver::GLCreateContext(_THIS, SDL_Window * window){
-    //Android_CreateContext();
 	thiz->mListener->notify(SDL_NATIVE_VIDEO_GL_CREATE_CONTEXT, 0, 0, (void*) window);
     return (void *) NULL;
 }

@@ -51,6 +51,11 @@ android_sdl_SDLVideoDevice_create(SDL_VideoDevice* device);
 extern jobject
 android_sdl_SDLSurface_create(SDL_Surface* surface);
 
+#if SDL_BUILD_VERSION == 2
+extern jobject
+android_sdl_SDLDisplayMode_create(SDL_DisplayMode* mode);
+#endif
+
 // ----------------------------------------------------------------------------
 
 // ----------------------------------------------------------------------------
@@ -154,7 +159,11 @@ void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
             obj = android_sdl_SDLVideoDevice_create((SDL_VideoDevice*) data);
             break;
         case SDL_NATIVE_VIDEO_INIT:
+#if SDL_BUILD_VERSION == 1
             obj = android_sdl_SDLPixelFormat_create((SDL_PixelFormat*) data);
+#else
+			obj = android_sdl_SDLDisplayMode_create((SDL_DisplayMode*) data);
+#endif
             break;
         case SDL_NATIVE_VIDEO_SET_SURFACE:
             obj = android_sdl_SDLSurface_create((SDL_Surface*) data);

@@ -82,12 +82,11 @@ android_sdl_events_SDLEvents_Keyboard(JNIEnv *env, jobject thiz,
 									  jshort state, 
 									  jobject key)
 {
-	SDL_scancode scancode = (SDL_scancode)env->GetIntField(key, fields.scancode);
 #if SDL_BUILD_VERSION == 1
 	SDL_keysym keysym;
 	
     /* Set the keysym information */
-    keysym.scancode = scancode;
+    keysym.scancode = env->GetIntField(key, fields.scancode);;
     keysym.sym = (SDLKey)env->GetIntField(key, fields.sym);
     keysym.mod = (SDLMod)env->GetIntField(key, fields.mod);
 	
@@ -96,6 +95,7 @@ android_sdl_events_SDLEvents_Keyboard(JNIEnv *env, jobject thiz,
 	
     return SDL_PrivateKeyboard((Uint8)state, &keysym);
 #else
+	SDL_scancode scancode = (SDL_scancode)env->GetIntField(key, fields.scancode);
 	return SDL_SendKeyboardKey((Uint8)state, scancode);
 #endif
 }
