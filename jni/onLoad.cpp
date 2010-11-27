@@ -14,6 +14,7 @@ extern int register_android_sdl_SDLRect(JNIEnv *env);
 extern int register_android_sdl_SDLPalette(JNIEnv *env);
 extern int register_android_sdl_impl_SDLImpl(JNIEnv *env);
 extern int register_android_sdl_events_SDLEvents(JNIEnv *env);
+extern int register_android_sdl_SDLDisplayMode(JNIEnv *env);
 };
 
 using namespace android;
@@ -64,6 +65,10 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 	}
 	if(register_android_sdl_events_SDLEvents(env) != JNI_OK) {
 		LOGE("can't load android_sdl_SDLEvents");
+		return JNI_ERR;
+	}
+	if(register_android_sdl_SDLDisplayMode(env) != JNI_OK) {
+		LOGE("can't load android_sdl_SDLDisplayMode");
 		return JNI_ERR;
 	}
 	
