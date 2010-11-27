@@ -4,7 +4,7 @@ include $(CLEAR_VARS)
 #include our sdl config
 include $(LOCAL_PATH)/../../config.mk
 
-ifeq ($(SDL_BUILD_VERSION), 1.2)
+ifeq ($(SDL_BUILD_VERSION), 1)
 
 # Makefile to build the SDL library
 # based on Makefile.minimal
