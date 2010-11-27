@@ -110,22 +110,34 @@ android_sdl_SDLVideoDevice_getName(JNIEnv *env, jobject thiz)
 static jstring
 android_sdl_SDLVideoDevice_getWmTitle(JNIEnv *env, jobject thiz)
 {
+#if SDL_BUILD_VERSION == 1
     SDL_VideoDevice* dev = getNativeStruct(env, thiz);
     return env->NewStringUTF(dev->wm_title);
+#else
+	return env->NewStringUTF("none");
+#endif
 }
 
 static jstring
 android_sdl_SDLVideoDevice_getWmIcon(JNIEnv *env, jobject thiz)
 {
+#if SDL_BUILD_VERSION == 1
     SDL_VideoDevice* dev = getNativeStruct(env, thiz);
     return env->NewStringUTF(dev->wm_icon);
+#else
+	return env->NewStringUTF("none");
+#endif
 }
 
 static jint
 android_sdl_SDLVideoDevice_getGamma(JNIEnv *env, jobject thiz)
 {
+#if SDL_BUILD_VERSION == 1
     SDL_VideoDevice* dev = getNativeStruct(env, thiz);
     return (jint)dev->gamma;
+#else
+	return -1;
+#endif
 }
 
 static jint

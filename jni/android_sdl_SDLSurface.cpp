@@ -132,8 +132,12 @@ android_sdl_SDLSurface_getH(JNIEnv *env, jobject thiz)
 static jint
 android_sdl_SDLSurface_getOffset(JNIEnv *env, jobject thiz)
 {
+#if SDL_BUILD_VERSION == 1
     SDL_Surface* surface = android_sdl_SDLSurface_getNativeStruct(env, thiz);
     return (jint)surface->offset;
+#else
+	return -1;
+#endif
 }
 
 static jint

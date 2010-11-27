@@ -55,8 +55,12 @@ android_sdl_events_SDLEvents_MouseMotion(JNIEnv *env, jobject thiz,
 										 jint x, 
 										 jint y)
 {
+#if SDL_BUILD_VERSION == 1
     return SDL_PrivateMouseMotion((Uint8) buttonstate, relative,
 								  (Sint16) x, (Sint16) y);
+#else
+	return SDL_SendMouseMotion(NULL, relative, x, y); 
+#endif
 }
 
 static jint
@@ -66,7 +70,11 @@ android_sdl_events_SDLEvents_MouseButton(JNIEnv *env, jobject thiz,
 										 jint x, 
 										 jint y)
 {
+#if SDL_BUILD_VERSION == 1
     return SDL_PrivateMouseButton((Uint8) state, (Uint8) button,(Sint16) x,(Sint16) y);
+#else
+	return SDL_SendMouseButton(NULL, (Uint8) state, (Uint8) button);
+#endif
 }
 
 static jint
@@ -74,10 +82,12 @@ android_sdl_events_SDLEvents_Keyboard(JNIEnv *env, jobject thiz,
 									  jshort state, 
 									  jobject key)
 {
+	SDL_scancode scancode = (SDL_scancode)env->GetIntField(key, fields.scancode);
+#if SDL_BUILD_VERSION == 1
 	SDL_keysym keysym;
 	
     /* Set the keysym information */
-    keysym.scancode = env->GetIntField(key, fields.scancode);;
+    keysym.scancode = scancode;
     keysym.sym = (SDLKey)env->GetIntField(key, fields.sym);
     keysym.mod = (SDLMod)env->GetIntField(key, fields.mod);
 	
@@ -85,6 +95,9 @@ android_sdl_events_SDLEvents_Keyboard(JNIEnv *env, jobject thiz,
     keysym.unicode = env->GetIntField(key, fields.unicode);
 	
     return SDL_PrivateKeyboard((Uint8)state, &keysym);
+#else
+	return SDL_SendKeyboardKey((Uint8)state, scancode);
+#endif
 }
 
 //(SDL_Color*)env->GetIntField(thiz, fields.mNativePointer);

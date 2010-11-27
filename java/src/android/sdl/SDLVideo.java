@@ -42,6 +42,17 @@ public class SDLVideo extends SurfaceView {
 		private static final int SDL_NATIVE_VIDEO_LOCK_HW_SURFACE = 10;
 		private static final int SDL_NATIVE_VIDEO_UNLOCK_HW_SURFACE = 11;
 		private static final int SDL_NATIVE_VIDEO_FREE_HW_SURFACE = 12;
+		
+		/**** GL implementation *****/
+		private static final int SDL_NATIVE_VIDEO_GL_LOAD_LIBRARY = 13;
+		private static final int SDL_NATIVE_VIDEO_GL_GET_PROC_ADDRESS = 14;
+		private static final int SDL_NATIVE_VIDEO_GL_UNLOAD_LIBRARY = 15;
+		private static final int SDL_NATIVE_VIDEO_GL_CREATE_CONTEXT = 16;
+		private static final int SDL_NATIVE_VIDEO_GL_MAKE_CURRENT = 17;
+		private static final int SDL_NATIVE_VIDEO_GL_SET_SWAP_INTERVAL = 18;
+		private static final int SDL_NATIVE_VIDEO_GL_GET_SWAP_INTERVAL = 19;
+		private static final int SDL_NATIVE_VIDEO_GL_SWAP_WINDOW = 20;
+		private static final int SDL_NATIVE_VIDEO_GL_DELETE_CONTEXT = 21;
     }
     
     /****** Android surface information *******/
@@ -56,6 +67,9 @@ public class SDLVideo extends SurfaceView {
     private SDLVideoUpdateRectsClb mUpdateClb;
     private SDLVideoSetCaptionClb mCaptionClb;
 	private SDLVideoSurfaceChangedClb mSurfaceChangedClb;
+	
+	/****** EGL private objects *******/
+    private SDLGLRenderer mGLRenderer;
 	
     // registers fields and methods
     private static native final void native_init();
@@ -163,10 +177,29 @@ public class SDLVideo extends SurfaceView {
 			String caption = (String) obj; 
 			handleVideoDeviceSetCaption(caption);
 			break;
+		case SDLNativeEvents.SDL_NATIVE_VIDEO_GL_CREATE_CONTEXT:
+			handleVideoDeviceGLCreateContext();
+			break;
+		case SDLNativeEvents.SDL_NATIVE_VIDEO_GL_SWAP_WINDOW:
+			handleVideoDeviceGLSwapWindow();
+			break;
 	    default:
 		    Log.e(TAG, "undefined event");
         }
     }
+
+	private void handleVideoDeviceGLCreateContext() {
+		mGLRenderer = SDLGLRenderer.getRenderer();
+		mGLRenderer.initEGL();
+	}
+
+	private void handleVideoDeviceGLSwapWindow() {
+		if(mGLRenderer == null) {
+			Log.e(TAG, "handleVideoDeviceGLSwapWindow: mGLRenderer is null!");
+			return;
+		}
+		mGLRenderer.flipEGL();
+	}
 	
 	private void handleVideoDeviceSetCaption(String caption) {
 	    Log.d(TAG, "handleVideoDeviceSetCaption");
