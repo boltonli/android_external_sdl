@@ -29,7 +29,7 @@
 #include "../SDL_audio_c.h"
 #include "SDL_androidaudio.h"
 
-extern void Android_UpdateAudioBuffer(unsigned char *buf, int len);
+//extern void Android_UpdateAudioBuffer(unsigned char *buf, int len);
 
 #include <android/log.h>
 
@@ -87,14 +87,11 @@ AndroidAUD_PlayDevice(_THIS)
 static Uint8 *
 AndroidAUD_GetDeviceBuf(_THIS)
 {
-     //__android_log_print(ANDROID_LOG_INFO, "SDL", "****** get device buf\n");
+	//__android_log_print(ANDROID_LOG_INFO, "SDL", "****** get device buf\n");
+    //sound->data = this->hidden->mixbuf;/* pointer to raw audio data */
+	//sound->len = this->hidden->mixlen; /* size of raw data pointed to above */
 
-     
-    //    sound->data = this->hidden->mixbuf;/* pointer to raw audio data */
-//    sound->len = this->hidden->mixlen; /* size of raw data pointed to above */
-
-
-    Android_UpdateAudioBuffer(this->hidden->mixbuf, this->hidden->mixlen);
+    //Android_UpdateAudioBuffer(this->hidden->mixbuf, this->hidden->mixlen);
     
     return this->hidden->mixbuf;        /* is this right? */
 }
