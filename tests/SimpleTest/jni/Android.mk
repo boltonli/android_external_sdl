@@ -1,9 +1,6 @@
 LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
-#include our sdl config
-include $(LOCAL_PATH)/../../../config.mk
-
 LOCAL_MODULE_TAGS := optional
 
 LOCAL_CFLAGS := -DANDROID
@@ -11,22 +8,19 @@ LOCAL_CFLAGS := -DANDROID
 LOCAL_MODULE := libsimplesdltest
 
 LOCAL_C_INCLUDES := \
-	$(JNI_H_INCLUDE)
+	$(JNI_H_INCLUDE) \
+	$(SDL_INCLUDE)
 
 LOCAL_SHARED_LIBRARIES := libsdl libutils liblog
 
 ifeq ($(SDL_BUILD_VERSION), 2)
 LOCAL_C_INCLUDES += \
-	external/sdl/libs/sdl_1.3.0/include \
 	frameworks/base/opengl/include
 
 LOCAL_SRC_FILES := lesson05.cpp
 
 LOCAL_SHARED_LIBRARIES += libGLESv1_CM
 else
-LOCAL_C_INCLUDES += \
-	external/sdl/include
-
 LOCAL_SRC_FILES := native_pixel.cpp
 endif
 

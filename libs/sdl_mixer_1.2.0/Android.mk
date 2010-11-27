@@ -11,7 +11,7 @@ LOCAL_MODULE := libsdlmixer
 LOCAL_CFLAGS := -DANDROID -DWAV_MUSIC -DOGG_USE_TREMOR -DOGG_MUSIC
 
 LOCAL_C_INCLUDES := \
-	$(LOCAL_PATH)/../../include \
+	$(SDL_INCLUDE) \
 	external/tremolo
 		
 LOCAL_CPP_EXTENSION := .cpp

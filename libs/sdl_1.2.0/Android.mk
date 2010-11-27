@@ -1,9 +1,6 @@
 LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
-#include our sdl config
-include $(LOCAL_PATH)/../../config.mk
-
 ifeq ($(SDL_BUILD_VERSION), 1)
 
 # Makefile to build the SDL library
@@ -39,7 +36,7 @@ LOCAL_CFLAGS := \
 	-DNO_MALLINFO=1 -DANDROID=1 -DDEBUG_ERROR=1 -DSDL_LOADSO_DLOPEN
 
 LOCAL_C_INCLUDES := \
-	$(LOCAL_PATH)/../../include \
+	$(SDL_INCLUDE) \
 	external/skia/src/core \
 	external/skia/include/core \
 	frameworks/base/include \
