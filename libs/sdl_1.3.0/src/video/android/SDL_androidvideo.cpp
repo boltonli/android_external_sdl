@@ -90,31 +90,7 @@ SDL_VideoDevice *SDLVideoDriver::onCreateDevice(int devindex) {
 	
     /* Set the function pointers */
     thiz->device->VideoInit = SDLVideoDriver::onVideoInit;
-/*
-    thiz->device->ListModes = SDLVideoDriver::onListModes;
-    thiz->device->SetVideoMode = SDLVideoDriver::onSetVideoMode;
-    thiz->device->CreateYUVOverlay = NULL;
-    thiz->device->SetColors = SDLVideoDriver::onSetColors;
-    thiz->device->UpdateRects = SDLVideoDriver::onUpdateRects;
-*/
     thiz->device->VideoQuit = SDLVideoDriver::onVideoQuit;
-/*
-    thiz->device->AllocHWSurface = SDLVideoDriver::onAllocHWSurface;
-    thiz->device->CheckHWBlit = NULL;
-    thiz->device->FillHWRect = NULL;
-    thiz->device->SetHWColorKey = NULL;
-    thiz->device->SetHWAlpha = NULL;
-    thiz->device->LockHWSurface = SDLVideoDriver::onLockHWSurface;
-    thiz->device->UnlockHWSurface = SDLVideoDriver::onUnlockHWSurface;
-    thiz->device->FlipHWSurface = NULL;
-    thiz->device->FreeHWSurface = SDLVideoDriver::onFreeHWSurface;
-    thiz->device->SetCaption = SDLVideoDriver::onSetCaption;
-    thiz->device->SetIcon = NULL;
-    thiz->device->IconifyWindow = NULL;
-    thiz->device->GrabInput = NULL;
-    thiz->device->GetWMInfo = NULL;
-    thiz->device->InitOSKeymap = SDLVideoDriver::onInitOSKeymap;
-*/
     //thiz->device->SetDisplayMode = SDLVideoDriver::SetDisplayMode;
     thiz->device->PumpEvents = SDLVideoDriver::onPumpEvents;
 
@@ -153,81 +129,14 @@ int SDLVideoDriver::onVideoInit(_THIS/*, SDL_PixelFormat *vformat*/) {
 
     SDL_zero(mode);
     SDL_AddDisplayMode(&self->displays[0], &mode);
-
-    /* TODO: we only support RGB565 for now *
-    vformat->BitsPerPixel = 16;
-    vformat->BytesPerPixel = 2;
 	
-    thiz->mListener->notify(SDL_NATIVE_VIDEO_INIT, 0, 0, (void*) vformat);
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_INIT, 0, 0, (void*) &mode);
+
     /* We're done! */
     return 0;	
 }
 
-SDL_Rect **SDLVideoDriver::onListModes(_THIS, SDL_PixelFormat *format, Uint32 flags) {
-    return (SDL_Rect **) -1;
-}
-
-SDL_Surface *SDLVideoDriver::onSetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags) {
-    if(self == NULL) {
-        SDL_SetError("onSetVideoMode: self is NULL");
-        return NULL;
-    }
-
-    // create bitmap where will sdl render pixels for android
-    thiz->initBitmap(PIXEL_FORMAT_RGB_565, width, height);
-	
-    /* Set up the new mode framebuffer */
-    current->flags = flags;
-    current->w = thiz->mBitmap.width();
-    current->h = thiz->mBitmap.height();
-    current->pitch = current->w * (bpp / 8);
-    current->pixels = thiz->mBitmap.getPixels();
-	
-    thiz->mListener->notify(SDL_NATIVE_VIDEO_SET_SURFACE, 0, 0, (void*) current);
-    /* We're done */
-    return current;
-}
-
-int SDLVideoDriver::onSetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors) {
-        return 1;
-}
-
 void SDLVideoDriver::onVideoQuit(_THIS) {
-}
-
-/* Hardware surface functions */
-int SDLVideoDriver::onAllocHWSurface(_THIS, SDL_Surface *surface) {
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_ALLOC_HW_SURFACE, 0, 0, (void*) surface);
-    return(-1);
-}
-
-int SDLVideoDriver::onLockHWSurface(_THIS, SDL_Surface *surface) {
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_LOCK_HW_SURFACE, 0, 0, (void*) surface);
-    return 0;
-}
-
-void SDLVideoDriver::onUnlockHWSurface(_THIS, SDL_Surface *surface) {
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_UNLOCK_HW_SURFACE, 0, 0, (void*) surface);
-}
-
-void SDLVideoDriver::onFreeHWSurface(_THIS, SDL_Surface *surface) {
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_FREE_HW_SURFACE, 0, 0, (void*) surface);
-}
-
-/* on set window caption */
-void SDLVideoDriver::onSetCaption(_THIS, const char *title, const char *icon) {
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_SET_CAPTION, 0, 0, (void*) title);
-}
-
-/* etc. */
-void SDLVideoDriver::onUpdateRects(_THIS, int numrects, SDL_Rect *rects) {
-    if(thiz->mBitmap.width() == 0 || thiz->mBitmap.height() == 0) {
-        __android_log_print(ANDROID_LOG_ERROR, CLASS_PATH, "Bitmap is too small %ix%i",
-                thiz->mBitmap.width(), thiz->mBitmap.height());
-        return;
-    }
-
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_UPDATE_RECTS, 0, 0, (void*) &thiz->mBitmap);
 }
 
 /* ANDROID driver bootstrap functions */
@@ -244,23 +153,22 @@ void SDLVideoDriver::onPumpEvents(_THIS) {
     thiz->mListener->notify(SDL_NATIVE_VIDEO_PUMP_EVENTS, 0, 0, NULL);
 }
 
-void SDLVideoDriver::onInitOSKeymap(_THIS) {
-    //thiz->mListener->notify(SDL_NATIVE_VIDEO_INIT_OS_KEYMAP, 0, 0, NULL);
-}
-
 /* Opengl impl */
 int SDLVideoDriver::GLLoadLibrary(_THIS, const char *path){
     __android_log_print(ANDROID_LOG_INFO, "SDL", "[STUB] GL_LoadLibrary\n");
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_GL_LOAD_LIBRARY, 0, 0, (void*) path);
     return 0;
 }
 
 void* SDLVideoDriver::GLGetProcAddress(_THIS, const char *proc){
     __android_log_print(ANDROID_LOG_INFO, "SDL", "[STUB] GL_GetProcAddress\n");
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_GL_GET_PROC_ADDRESS, 0, 0, (void*) proc);
     return 0;
 }
 
 void SDLVideoDriver::GLUnloadLibrary(_THIS){
     __android_log_print(ANDROID_LOG_INFO, "SDL", "[STUB] GL_UnloadLibrary\n");
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_GL_UNLOAD_LIBRARY, 0, 0, (void*) NULL);
 }
 
 /*
@@ -272,30 +180,36 @@ int *Android_GL_GetVisual(_THIS, Display * display, int screen){
 
 SDL_GLContext SDLVideoDriver::GLCreateContext(_THIS, SDL_Window * window){
     //Android_CreateContext();
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_GL_CREATE_CONTEXT, 0, 0, (void*) window);
     return (void *) NULL;
 }
 
 int SDLVideoDriver::GLMakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context){
     __android_log_print(ANDROID_LOG_INFO, "SDL", "[STUB] GL_MakeCurrent\n");
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_GL_MAKE_CURRENT, 0, 0, (void*) context);
     return 0;
 }
 
 int SDLVideoDriver::GLSetSwapInterval(_THIS, int interval){
     __android_log_print(ANDROID_LOG_INFO, "SDL", "[STUB] GL_SetSwapInterval\n");
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_GL_SET_SWAP_INTERVAL, 0, 0, (void*) interval);
     return 0;
 }
 
 int SDLVideoDriver::GLGetSwapInterval(_THIS){
     __android_log_print(ANDROID_LOG_INFO, "SDL", "[STUB] GL_GetSwapInterval\n");
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_GL_GET_SWAP_INTERVAL, 0, 0, (void*) NULL);
     return 0;
 }
 
 void SDLVideoDriver::GLSwapWindow(_THIS, SDL_Window * window){
     //Android_Render();
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_GL_SWAP_WINDOW, 0, 0, (void*) window);
 }
 
 void SDLVideoDriver::GLDeleteContext(_THIS, SDL_GLContext context){
     __android_log_print(ANDROID_LOG_INFO, "SDL", "[STUB] GL_DeleteContext\n");
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_GL_DELETE_CONTEXT, 0, 0, (void*) context);
 }
 
 extern "C" {

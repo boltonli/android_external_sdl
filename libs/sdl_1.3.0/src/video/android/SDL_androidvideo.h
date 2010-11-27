@@ -31,6 +31,17 @@ enum sdl_native_events {
 	SDL_NATIVE_VIDEO_LOCK_HW_SURFACE = 10,
 	SDL_NATIVE_VIDEO_UNLOCK_HW_SURFACE = 11,
 	SDL_NATIVE_VIDEO_FREE_HW_SURFACE = 12,
+	
+	/**** GL implementation *****/
+	SDL_NATIVE_VIDEO_GL_LOAD_LIBRARY = 13,
+	SDL_NATIVE_VIDEO_GL_GET_PROC_ADDRESS = 14,
+	SDL_NATIVE_VIDEO_GL_UNLOAD_LIBRARY = 15,
+	SDL_NATIVE_VIDEO_GL_CREATE_CONTEXT = 16,
+	SDL_NATIVE_VIDEO_GL_MAKE_CURRENT = 17,
+	SDL_NATIVE_VIDEO_GL_SET_SWAP_INTERVAL = 18,
+	SDL_NATIVE_VIDEO_GL_GET_SWAP_INTERVAL = 19,
+	SDL_NATIVE_VIDEO_GL_SWAP_WINDOW = 20,
+	SDL_NATIVE_VIDEO_GL_DELETE_CONTEXT = 21,
 };
 
 /* Hidden "this" pointer for the video functions */
@@ -74,46 +85,21 @@ private:
 	void initBitmap(int format, int width, int height);
 	
 	/* Initialization/Query functions */
-	static int onVideoInit(_THIS/*, SDL_PixelFormat *vformat*/);
-	static SDL_Rect **onListModes(_THIS, SDL_PixelFormat *format, Uint32 flags);
-	static SDL_Surface *onSetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags);
-	static int onSetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors);
+	static int onVideoInit(_THIS);
 	static void onVideoQuit(_THIS);
-	
-	/* Hardware surface functions */
-	static int onAllocHWSurface(_THIS, SDL_Surface *surface);
-	static int onLockHWSurface(_THIS, SDL_Surface *surface);
-	static void onUnlockHWSurface(_THIS, SDL_Surface *surface);
-	static void onFreeHWSurface(_THIS, SDL_Surface *surface);
-	
-	/* on set window caption */
-	static void onSetCaption(_THIS, const char *title, const char *icon);
-	
-	/* etc. */
-	static void onUpdateRects(_THIS, int numrects, SDL_Rect *rects);
-	
 	static void onDeleteDevice(SDL_VideoDevice *device);
 
 	static void onPumpEvents(_THIS);
-	static void onInitOSKeymap(_THIS);
 
-        static int GLLoadLibrary(_THIS, const char *path);
-
-        static void* GLGetProcAddress(_THIS, const char *proc);
-
-        static void GLUnloadLibrary(_THIS);
-
-        static SDL_GLContext GLCreateContext(_THIS, SDL_Window * window);
-
-        static int GLMakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context);
-
-        static int GLSetSwapInterval(_THIS, int interval);
-
-        static int GLGetSwapInterval(_THIS);
-
-        static void GLSwapWindow(_THIS, SDL_Window * window);
-
-        static void GLDeleteContext(_THIS, SDL_GLContext context);
+	static int GLLoadLibrary(_THIS, const char *path);
+	static void* GLGetProcAddress(_THIS, const char *proc);
+	static void GLUnloadLibrary(_THIS);
+	static SDL_GLContext GLCreateContext(_THIS, SDL_Window * window);
+	static int GLMakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context);
+	static int GLSetSwapInterval(_THIS, int interval);
+	static int GLGetSwapInterval(_THIS);
+	static void GLSwapWindow(_THIS, SDL_Window * window);
+	static void GLDeleteContext(_THIS, SDL_GLContext context);
 };
 
 #endif /* _SDL_androidvideo_h */
