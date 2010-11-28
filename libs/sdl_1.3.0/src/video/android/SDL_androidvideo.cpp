@@ -6,8 +6,8 @@
 static SDLVideoDriver *thiz = NULL;
 //These are filled in with real values in Android_SetScreenResolution on 
 //init (before SDL_Main())
-static int iScreenWidth = 480;
-static int iScreenHeight = 320;
+static int iScreenWidth = 320;
+static int iScreenHeight = 260;
 
 SDLVideoDriver::SDLVideoDriver() {
 }
@@ -114,23 +114,27 @@ SDL_VideoDevice *SDLVideoDriver::onCreateDevice(int devindex) {
 }
 
 int SDLVideoDriver::onVideoInit(_THIS) {
-    SDL_DisplayMode mode;
+    SDL_DisplayMode* mode = (SDL_DisplayMode*)SDL_malloc(sizeof(SDL_DisplayMode));
 
     /* Use a fake 32-bpp desktop mode */
-    mode.format = SDL_PIXELFORMAT_RGB888;
-    mode.w = iScreenWidth;
-    mode.h = iScreenHeight;
-    mode.refresh_rate = 0;
-    mode.driverdata = NULL;
+    mode->format = SDL_PIXELFORMAT_RGB565;
+    mode->w = iScreenWidth;
+    mode->h = iScreenHeight;
+    mode->refresh_rate = 0;
+    mode->driverdata = NULL;
 	
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_INIT, 0, 0, (void*) &mode);
+//	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "onVideoInit %ix%i", mode->w, mode->h);
 	
-    if (SDL_AddBasicVideoDisplay(&mode) < 0) {
+	thiz->mListener->notify(SDL_NATIVE_VIDEO_INIT, 0, 0, (void*) mode);
+	
+//	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "onVideoInit %ix%i", mode->w, mode->h);
+	
+    if (SDL_AddBasicVideoDisplay(mode) < 0) {
         return -1;
     }
     SDL_AddRenderDriver(&self->displays[0], &Android_RenderDriver);
-    SDL_zero(mode);
-    SDL_AddDisplayMode(&self->displays[0], &mode);
+    //SDL_zero(mode);
+    SDL_AddDisplayMode(&self->displays[0], mode);
 
     /* We're done! */
     return 0;	
@@ -180,7 +184,7 @@ int *Android_GL_GetVisual(_THIS, Display * display, int screen){
 
 SDL_GLContext SDLVideoDriver::GLCreateContext(_THIS, SDL_Window * window){
 	thiz->mListener->notify(SDL_NATIVE_VIDEO_GL_CREATE_CONTEXT, 0, 0, (void*) window);
-    return (void *) NULL;
+    return (void*)1;
 }
 
 int SDLVideoDriver::GLMakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context){
@@ -202,7 +206,6 @@ int SDLVideoDriver::GLGetSwapInterval(_THIS){
 }
 
 void SDLVideoDriver::GLSwapWindow(_THIS, SDL_Window * window){
-    //Android_Render();
 	thiz->mListener->notify(SDL_NATIVE_VIDEO_GL_SWAP_WINDOW, 0, 0, (void*) window);
 }
 
