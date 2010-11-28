@@ -19,8 +19,6 @@ package android.sdl;
 
 import android.content.Context;
 import android.util.Log;
-import android.os.Handler;
-import android.os.Message;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -29,8 +27,6 @@ import java.lang.ref.WeakReference;
 
 public class SDLVideo extends SurfaceView {
     private static final String TAG = "SDLVideo";
-	
-	private static final double VERSION = 1.2;
 	
     // must equals with libsdl/src/video/android/SDL_androidvideo.h -> sdl_native_events
     private static class SDLNativeEvents {
@@ -87,13 +83,6 @@ public class SDLVideo extends SurfaceView {
 		
 	    Log.d(TAG, "java SDLVideo loaded");
     }
-	
-	private Handler mHandler = new Handler() {
-		@Override                                                                                                                                           
-		public void handleMessage(Message msg) {
-			handleNativeMessage(msg.what, msg.obj);
-		}  
-	};
     
     /**
      * Surface holder callback handler
@@ -151,11 +140,7 @@ public class SDLVideo extends SurfaceView {
             Log.e(TAG, "SDLVideo ref is null");
             return;
         }
-
-		Message msg = ref.mHandler.obtainMessage(what);
-		msg.obj = obj;
-		ref.mHandler.sendMessage(msg);
-        //ref.handleNativeMessage(what, obj);
+		ref.handleNativeMessage(what, obj);
     }
 
     private void handleNativeMessage(int what, Object obj) {
@@ -173,10 +158,10 @@ public class SDLVideo extends SurfaceView {
 		    break;
         }
 	    case SDLNativeEvents.SDL_NATIVE_VIDEO_INIT:
-			if(VERSION == 1.2) {
+			if(obj instanceof SDLPixelFormat) {
 				SDLPixelFormat pformat = (SDLPixelFormat) obj;
 				handleVideoDeviceInit(pformat);
-			} else if(VERSION == 1.3) {
+			} else if(obj instanceof SDLDisplayMode) {
 				SDLDisplayMode pformat = (SDLDisplayMode) obj;
 				handleVideoDeviceInit(pformat);
 			}
@@ -210,11 +195,11 @@ public class SDLVideo extends SurfaceView {
 	private void handleVideoDeviceGLCreateContext() {
 		Log.d(TAG, "handleVideoDeviceGLCreateContext");
 		mGLRenderer = SDLGLRenderer.getRenderer();
-		mGLRenderer.initEGL();
+		mGLRenderer.initEGL(this);
 	}
 
 	private void handleVideoDeviceGLSwapWindow() {
-		Log.d(TAG, "handleVideoDeviceGLSwapWindow");
+		//Log.d(TAG, "handleVideoDeviceGLSwapWindow");
 		if(mGLRenderer == null) {
 			Log.e(TAG, "handleVideoDeviceGLSwapWindow: mGLRenderer is null!");
 			return;

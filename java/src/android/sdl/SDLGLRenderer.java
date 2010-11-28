@@ -21,6 +21,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.egl.*;
 
+import android.view.SurfaceView;
 import android.util.Log;
 
 import java.lang.Exception;
@@ -44,9 +45,7 @@ public class SDLGLRenderer {
 	}
 	
     //EGL functions
-    public boolean initEGL(){
-        Log.v(TAG, "Starting up");
-		
+    public boolean initEGL(SurfaceView view){
 		try{
 			EGL10 egl = (EGL10)EGLContext.getEGL();
 			EGLDisplay dpy = egl.eglGetDisplay(EGL10.EGL_DEFAULT_DISPLAY);
@@ -63,7 +62,7 @@ public class SDLGLRenderer {
 			EGLConfig config = configs[0];
 			
 			EGLContext ctx = egl.eglCreateContext(dpy, config, EGL10.EGL_NO_CONTEXT, null);
-			EGLSurface surface = egl.eglCreateWindowSurface(dpy, config, this, null);
+			EGLSurface surface = egl.eglCreateWindowSurface(dpy, config, view, null);
 			
 			egl.eglMakeCurrent(dpy, surface, surface, ctx);
 			
@@ -75,14 +74,13 @@ public class SDLGLRenderer {
 			for(StackTraceElement s : e.getStackTrace()){
 				Log.e(TAG, s.toString());
 			}
+			return false;
 		}
-		Log.v(TAG, "Done making!");
-		
 		return true;
 	}
 	
 	//EGL buffer flip
-	public void flipEGL(){      
+	public boolean flipEGL(){      
 		try{
 			EGL10 egl = (EGL10)EGLContext.getEGL();
 			GL10 gl = (GL10)mEGLContext.getGL();
@@ -99,7 +97,9 @@ public class SDLGLRenderer {
 			for(StackTraceElement s : e.getStackTrace()) {
 				Log.e(TAG, s.toString());
 			}
+			return false;
 		}
+		return true;
 	}
 	
 }
