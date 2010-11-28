@@ -53,6 +53,9 @@ android_sdl_SDLSurface_create(SDL_Surface* surface);
 
 #if SDL_BUILD_VERSION == 2
 extern jobject
+android_sdl_SDLWindow_create(SDLWindow* win)
+
+extern jobject
 android_sdl_SDLDisplayMode_create(SDL_DisplayMode* mode);
 #endif
 

@@ -15,6 +15,7 @@ extern int register_android_sdl_SDLPalette(JNIEnv *env);
 extern int register_android_sdl_impl_SDLImpl(JNIEnv *env);
 extern int register_android_sdl_events_SDLEvents(JNIEnv *env);
 #if SDL_BUILD_VERSION == 2
+extern int register_android_sdl_SDLWindow(JNIEnv *env);
 extern int register_android_sdl_SDLDisplayMode(JNIEnv *env);
 #endif
 };
@@ -70,6 +71,10 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 		return JNI_ERR;
 	}
 #if SDL_BUILD_VERSION == 2
+	if(register_android_sdl_SDLWindow(env) != JNI_OK) {
+		LOGE("can't load android_sdl_SDLWindow");
+		return JNI_ERR;
+	}
 	if(register_android_sdl_SDLDisplayMode(env) != JNI_OK) {
 		LOGE("can't load android_sdl_SDLDisplayMode");
 		return JNI_ERR;
