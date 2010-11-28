@@ -6,5 +6,5 @@ SDL_BUILD_MIXER := true
 ifeq ($(SDL_BUILD_VERSION), 2)
 SDL_INCLUDE := external/sdl/libs/sdl_1.3.0/include
 else
-SDL_INCLUDE := external/sdl/include
+SDL_INCLUDE := external/sdl/libs/sdl_1.2.0/include
 endif
