@@ -92,7 +92,8 @@ static void
 android_sdl_SDLDisplayMode_native_finalize(JNIEnv *env, jobject thiz)
 {
     LOGV("native_finalize");
-    //android_sdl_SDLColor_release(env, thiz);
+	SDL_DisplayMode* mode = getNativeStruct(env, thiz);
+	SDL_free(mode);
 }
 
 // ----------------------------------------------------------------------------
