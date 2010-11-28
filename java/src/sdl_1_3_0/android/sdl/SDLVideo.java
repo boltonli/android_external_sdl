@@ -64,8 +64,6 @@ public class SDLVideo extends SurfaceView {
     private SDLVideoPreparedClb mPreparedClb;
     private SDLVideoSetSurfaceClb mSurfaceClb;
     private SDLVideoPumpEventsClb mEventsClb;
-    private SDLVideoUpdateRectsClb mUpdateClb;
-    private SDLVideoSetCaptionClb mCaptionClb;
 	private SDLVideoSurfaceChangedClb mSurfaceChangedClb;
 	
 	/****** EGL private objects *******/
@@ -158,13 +156,8 @@ public class SDLVideo extends SurfaceView {
 		    break;
         }
 	    case SDLNativeEvents.SDL_NATIVE_VIDEO_INIT:
-			if(obj instanceof SDLPixelFormat) {
-				SDLPixelFormat pformat = (SDLPixelFormat) obj;
-				handleVideoDeviceInit(pformat);
-			} else if(obj instanceof SDLDisplayMode) {
-				SDLDisplayMode pformat = (SDLDisplayMode) obj;
-				handleVideoDeviceInit(pformat);
-			}
+			SDLDisplayMode pformat = (SDLDisplayMode) obj;
+			handleVideoDeviceInit(pformat);
 		    break;
 	    case SDLNativeEvents.SDL_NATIVE_VIDEO_SET_SURFACE:
 		    SDLSurface surface = (SDLSurface) obj;
@@ -172,14 +165,6 @@ public class SDLVideo extends SurfaceView {
 			break;
 	    case SDLNativeEvents.SDL_NATIVE_VIDEO_PUMP_EVENTS:
 		    handleVideoDevicePumpEvents();
-			break;
-	    case SDLNativeEvents.SDL_NATIVE_VIDEO_UPDATE_RECTS:
-		    SDLRect[] rects = (SDLRect[]) obj; 
-		    handleVideoDeviceUpdateRects(rects);
-		    break;
-		case SDLNativeEvents.SDL_NATIVE_VIDEO_SET_CAPTION:
-			String caption = (String) obj; 
-			handleVideoDeviceSetCaption(caption);
 			break;
 		case SDLNativeEvents.SDL_NATIVE_VIDEO_GL_CREATE_CONTEXT:
 			handleVideoDeviceGLCreateContext();
@@ -206,14 +191,6 @@ public class SDLVideo extends SurfaceView {
 		}
 		mGLRenderer.flipEGL();
 	}
-	
-	private void handleVideoDeviceSetCaption(String caption) {
-	    Log.d(TAG, "handleVideoDeviceSetCaption");
-		Log.d(TAG, "caption: " + caption);
-		if (mCaptionClb != null) {
-			mCaptionClb.onSetCaption(caption);
-		}
-    }
 
     private void handleVideoDeviceCreate(SDLVideoDevice device) {
 	    Log.d(TAG, "handleVideoDeviceCreate");
@@ -226,10 +203,6 @@ public class SDLVideo extends SurfaceView {
         Log.d(TAG, "device name: " + device.getName());
         Log.d(TAG, "device title: " + device.getWmTitle());
     }
-	
-    private void handleVideoDeviceDelete() {
-	    Log.d(TAG, "handleVideoDeviceDelete");
-    }
 
     private void handleVideoDeviceInit(SDLDisplayMode mode) {
 		Log.d(TAG, "handleVideoDeviceInit from version 1.3");
@@ -238,12 +211,6 @@ public class SDLVideo extends SurfaceView {
 		mode.setH(getHeight());
 		Log.d(TAG, "after -> width:" + mode.getW() + ", height:" + mode.getH());
 	}
-
-    private void handleVideoDeviceInit(SDLPixelFormat pformat) {
-	    Log.d(TAG, "handleVideoDeviceInit");
-        Log.d(TAG, "bits per pixel: " + pformat.getBitsPerPixel());
-        Log.d(TAG, "bytes per pixel: " + pformat.getBytesPerPixel());
-    }
 
     private void handleVideoDeviceSetSurface(SDLSurface surface) {
 	    Log.d(TAG, "handleVideoDeviceSetSurface");
@@ -268,14 +235,6 @@ public class SDLVideo extends SurfaceView {
 	    }
     }
 
-    // this event isn't invoked into java and drawing is written in c++
-    private void handleVideoDeviceUpdateRects(SDLRect[] rects) {
-		Log.d(TAG, "handleVideoDeviceUpdateRects");
-	    if(mUpdateClb != null) {
-	        mUpdateClb.onUpdateRects(rects);
-	    }
-    }
-
     // methods for registering callbacks
     //---------------------------------------------------------------
     public void registerCallback(SDLVideoSetSurfaceClb clb) {
@@ -285,17 +244,9 @@ public class SDLVideo extends SurfaceView {
     public void registerCallback(SDLVideoPumpEventsClb clb) {
  	    mEventsClb = clb;
     }
-
-    public void registerCallback(SDLVideoUpdateRectsClb clb) {
- 	    mUpdateClb = clb;
-    }
     
     public void registerCallback(SDLVideoPreparedClb clb) {
  	    mPreparedClb = clb;
-    }
-    
-    public void registerCallback(SDLVideoSetCaptionClb clb) {
- 	    mCaptionClb = clb;
     }
 
 	public void registerCallback(SDLVideoSurfaceChangedClb clb) {
@@ -306,10 +257,6 @@ public class SDLVideo extends SurfaceView {
     //---------------------------------------------------------------
     public interface SDLVideoPreparedClb {
 	    public void onPrepared(Surface surface);
-    }
-    
-	public interface SDLVideoSetCaptionClb {
-	    public void onSetCaption(String caption);
     }
 	
     public interface SDLVideoSetSurfaceClb {
@@ -334,10 +281,6 @@ public class SDLVideo extends SurfaceView {
 
     public interface SDLVideoPumpEventsClb {
 	    public void onPumpEvents();
-    }
-
-    public interface SDLVideoUpdateRectsClb {
-	    public void onUpdateRects(SDLRect[] rects);
     }
 
 }

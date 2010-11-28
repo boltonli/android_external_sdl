@@ -37,7 +37,7 @@ public class SDLSurface {
     private native final void native_finalize();
     @Override
     protected void finalize() {
-	native_finalize(); 
+	    native_finalize(); 
     }
 
     public native int getFlags();

@@ -1,8 +1,20 @@
 LOCAL_PATH:= $(call my-dir)
-
 include $(CLEAR_VARS)
 
-LOCAL_SRC_FILES := $(call all-subdir-java-files)
+COMMON := src/common
+VERSION_1_2 := src/sdl_1_2_0
+VERSION_1_3 := src/sdl_1_3_0
+
+LOCAL_SRC_FILES := \
+	$(call find-other-java-files, $(COMMON))
+
+ifeq ($(SDL_BUILD_VERSION), 2)
+LOCAL_SRC_FILES += \
+ 	$(call find-other-java-files, $(VERSION_1_3))
+else
+LOCAL_SRC_FILES += \
+	$(call find-other-java-files, $(VERSION_1_2))
+endif
 
 LOCAL_MODULE:= cz.havlena.sdl
 

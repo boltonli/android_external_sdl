@@ -20,9 +20,13 @@
 
 #include "SDLRuntime.h"
 #include <SDL_androidvideo.h>
+
+#if SDL_BUILD_VERSION == 1
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkMatrix.h>
+#endif
+
 #include <utils/Log.h>
 
 // ----------------------------------------------------------------------------
@@ -53,7 +57,7 @@ android_sdl_SDLSurface_create(SDL_Surface* surface);
 
 #if SDL_BUILD_VERSION == 2
 extern jobject
-android_sdl_SDLWindow_create(SDLWindow* win)
+android_sdl_SDLWindow_create(SDL_Window* win);
 
 extern jobject
 android_sdl_SDLDisplayMode_create(SDL_DisplayMode* mode);
@@ -70,7 +74,9 @@ public:
     ~JNISDLVideoDriverListener();
     void                    notify(int what, int arg1, int arg2, void* data);
 private:
+#if SDL_BUILD_VERSION == 1
     void                    updateScreen(SkBitmap *bitmap);
+#endif
     jclass                  mClass;     // Reference to MediaPlayer class
     jobject                 mObject;    // Weak ref to MediaPlayer Java object to call on
     Surface*                mSurface;   // Android surface class
@@ -103,6 +109,7 @@ JNISDLVideoDriverListener::~JNISDLVideoDriverListener()
     env->DeleteGlobalRef(mClass);
 }
 
+#if SDL_BUILD_VERSION == 1
 /**
   * Method which handles native redrawing screen
   */
@@ -141,6 +148,7 @@ void JNISDLVideoDriverListener::updateScreen(SkBitmap* bitmap)
         __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Failed to unlock surface");
     }
 }
+#endif
 
 // callback from libsdl which notify us about situation in sdl video driver
 void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
@@ -148,10 +156,12 @@ void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
     JNIEnv *env;
     jobject obj = NULL;
 	
+#if SDL_BUILD_VERSION == 1
     if (what == SDL_NATIVE_VIDEO_UPDATE_RECTS) {
         updateScreen((SkBitmap*) data);
         return;
     }
+#endif
 	
     env = SDLRuntime::getJNIEnv();
 	
@@ -171,13 +181,17 @@ void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
         case SDL_NATIVE_VIDEO_SET_SURFACE:
             obj = android_sdl_SDLSurface_create((SDL_Surface*) data);
             break;
-		case SDL_NATIVE_VIDEO_ALLOC_HW_SURFACE:
-		case SDL_NATIVE_VIDEO_LOCK_HW_SURFACE:
-		case SDL_NATIVE_VIDEO_UNLOCK_HW_SURFACE:
-		case SDL_NATIVE_VIDEO_FREE_HW_SURFACE:
+#if SDL_BUILD_VERSION == 1
 		case SDL_NATIVE_VIDEO_SET_CAPTION:
 			obj = (jobject)env->NewStringUTF((const char *)data);
             break;
+#endif
+#if SDL_BUILD_VERSION == 2
+		case SDL_NATIVE_VIDEO_GL_SWAP_WINDOW:
+		case SDL_NATIVE_VIDEO_GL_CREATE_CONTEXT:
+			obj = android_sdl_SDLWindow_create((SDL_Window*)data);
+			break;
+#endif
     }
 
     // than call java to process class represents sdl struct
