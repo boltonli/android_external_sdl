@@ -18,6 +18,7 @@
 #define LOG_TAG "SDLColor-JNI"
 
 #include "SDLRuntime.h"
+#include <SDL.h>
 #include <utils/Log.h>
 
 // ----------------------------------------------------------------------------
@@ -43,13 +44,13 @@ jfieldID checkFieldId(JNIEnv* env, jfieldID fieldId)
 
 
 static 
-SDLWindow* getNativeStruct(JNIEnv* env, jobject thiz)
+SDL_Window* getNativeStruct(JNIEnv* env, jobject thiz)
 {
-    return (SDLWindow*)env->GetIntField(thiz, fields.mNativePointer);
+    return (SDL_Window*)env->GetIntField(thiz, fields.mNativePointer);
 }
 
 jobject
-android_sdl_SDLWindow_create(SDLWindow* win)
+android_sdl_SDLWindow_create(SDL_Window* win)
 {
     jobject obj;
     JNIEnv* env = SDLRuntime::getJNIEnv();
@@ -99,56 +100,56 @@ android_sdl_SDLWindow_native_finalize(JNIEnv *env, jobject thiz)
 static jlong
 android_sdl_SDLWindow_getId(JNIEnv *env, jobject thiz)
 {
-    SDLWindow* win = getNativeStruct(env, thiz);
+    SDL_Window* win = getNativeStruct(env, thiz);
     return (jlong)win->id;
 }
 
 static jlong
 android_sdl_SDLWindow_getFlags(JNIEnv *env, jobject thiz)
 {
-    SDLWindow* win = getNativeStruct(env, thiz);
+    SDL_Window* win = getNativeStruct(env, thiz);
     return (jlong)win->flags;
 }
 
 static jint
 android_sdl_SDLWindow_getX(JNIEnv *env, jobject thiz)
 {
-    SDLWindow* win = getNativeStruct(env, thiz);
+    SDL_Window* win = getNativeStruct(env, thiz);
     return (jint)win->x;
 }
 
 static jint
 android_sdl_SDLWindow_getY(JNIEnv *env, jobject thiz)
 {
-    SDLWindow* win = getNativeStruct(env, thiz);
+    SDL_Window* win = getNativeStruct(env, thiz);
     return (jint)win->y;
 }
 
 static jint
 android_sdl_SDLWindow_getW(JNIEnv *env, jobject thiz)
 {
-    SDLWindow* win = getNativeStruct(env, thiz);
+    SDL_Window* win = getNativeStruct(env, thiz);
     return (jint)win->w;
 }
 
 static jint
 android_sdl_SDLWindow_getH(JNIEnv *env, jobject thiz)
 {
-    SDLWindow* win = getNativeStruct(env, thiz);
+    SDL_Window* win = getNativeStruct(env, thiz);
     return (jint)win->h;
 }
 
 static jobject
 android_sdl_SDLWindow_getPrev(JNIEnv *env, jobject thiz)
 {
-    SDLWindow* win = getNativeStruct(env, thiz);
+    SDL_Window* win = getNativeStruct(env, thiz);
     return android_sdl_SDLWindow_create(win->prev);
 }
 
 static jobject
 android_sdl_SDLWindow_getNext(JNIEnv *env, jobject thiz)
 {
-    SDLWindow* win = getNativeStruct(env, thiz);
+	SDL_Window* win = getNativeStruct(env, thiz);
     return android_sdl_SDLWindow_create(win->next);
 }
 
