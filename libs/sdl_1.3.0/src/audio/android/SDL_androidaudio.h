@@ -37,6 +37,18 @@ struct SDL_PrivateAudioData
     Uint32 write_delay;
     Uint32 initial_calls;
 };
+/*
+enum sdl_native_events {
+    SDL_NATIVE_AUDIO_UPDATE_BUFFER = 1,
+};
 
+// ----------------------------------------------------------------------------
+// ref-counted object for callbacks
+class SDLVideoDriverListener : virtual public RefBase
+{
+public:
+    virtual void notify(int what, int arg1, int arg2, void* data) = 0;
+};
+*/
 #endif /* _SDL_androidaudio_h */
 /* vi: set ts=4 sw=4 expandtab: */
