@@ -13,35 +13,33 @@ extern "C" {
 }
 
 #include <binder/IMemory.h>
-#include <surfaceflinger/Surface.h>
-#include <SkBitmap.h>
 
 using namespace android;
 
 enum sdl_native_events {
     SDL_NATIVE_VIDEO_CREATE_DEVICE = 1,
-	SDL_NATIVE_VIDEO_DELETE_DEVICE = 2,
-	SDL_NATIVE_VIDEO_PUMP_EVENTS = 3,
-	SDL_NATIVE_VIDEO_INIT = 4,
-	SDL_NATIVE_VIDEO_SET_SURFACE = 5,
-	SDL_NATIVE_VIDEO_UPDATE_RECTS = 6,
-	SDL_NATIVE_VIDEO_SET_CAPTION = 7,
-	SDL_NATIVE_VIDEO_INIT_OS_KEYMAP = 8,
-	SDL_NATIVE_VIDEO_ALLOC_HW_SURFACE = 9,
-	SDL_NATIVE_VIDEO_LOCK_HW_SURFACE = 10,
-	SDL_NATIVE_VIDEO_UNLOCK_HW_SURFACE = 11,
-	SDL_NATIVE_VIDEO_FREE_HW_SURFACE = 12,
-	
-	/**** GL implementation *****/
-	SDL_NATIVE_VIDEO_GL_LOAD_LIBRARY = 13,
-	SDL_NATIVE_VIDEO_GL_GET_PROC_ADDRESS = 14,
-	SDL_NATIVE_VIDEO_GL_UNLOAD_LIBRARY = 15,
-	SDL_NATIVE_VIDEO_GL_CREATE_CONTEXT = 16,
-	SDL_NATIVE_VIDEO_GL_MAKE_CURRENT = 17,
-	SDL_NATIVE_VIDEO_GL_SET_SWAP_INTERVAL = 18,
-	SDL_NATIVE_VIDEO_GL_GET_SWAP_INTERVAL = 19,
-	SDL_NATIVE_VIDEO_GL_SWAP_WINDOW = 20,
-	SDL_NATIVE_VIDEO_GL_DELETE_CONTEXT = 21,
+    SDL_NATIVE_VIDEO_DELETE_DEVICE = 2,
+    SDL_NATIVE_VIDEO_PUMP_EVENTS = 3,
+    SDL_NATIVE_VIDEO_INIT = 4,
+    SDL_NATIVE_VIDEO_SET_SURFACE = 5,
+    SDL_NATIVE_VIDEO_UPDATE_RECTS = 6,
+    SDL_NATIVE_VIDEO_SET_CAPTION = 7,
+    SDL_NATIVE_VIDEO_INIT_OS_KEYMAP = 8,
+    SDL_NATIVE_VIDEO_ALLOC_HW_SURFACE = 9,
+    SDL_NATIVE_VIDEO_LOCK_HW_SURFACE = 10,
+    SDL_NATIVE_VIDEO_UNLOCK_HW_SURFACE = 11,
+    SDL_NATIVE_VIDEO_FREE_HW_SURFACE = 12,
+
+    /**** GL implementation *****/
+    SDL_NATIVE_VIDEO_GL_LOAD_LIBRARY = 13,
+    SDL_NATIVE_VIDEO_GL_GET_PROC_ADDRESS = 14,
+    SDL_NATIVE_VIDEO_GL_UNLOAD_LIBRARY = 15,
+    SDL_NATIVE_VIDEO_GL_CREATE_CONTEXT = 16,
+    SDL_NATIVE_VIDEO_GL_MAKE_CURRENT = 17,
+    SDL_NATIVE_VIDEO_GL_SET_SWAP_INTERVAL = 18,
+    SDL_NATIVE_VIDEO_GL_GET_SWAP_INTERVAL = 19,
+    SDL_NATIVE_VIDEO_GL_SWAP_WINDOW = 20,
+    SDL_NATIVE_VIDEO_GL_DELETE_CONTEXT = 21,
 };
 
 /* Hidden "this" pointer for the video functions */
@@ -64,7 +62,7 @@ public:
 	void unregisterListener();
 
 	static SDLVideoDriver *getInstance();
-	static void setBitmapConfig(SkBitmap *bitmap, int format, int width, int height);
+
 	/* ANDROID driver bootstrap functions */
 	static SDL_VideoDevice *onCreateDevice(int devindex);
 	static int onAvailable();
@@ -79,10 +77,7 @@ public:
 
 private:
 	SDL_VideoDevice *device;
-	SkBitmap mBitmap;
 	SDLVideoDriverListener* mListener;
-
-	void initBitmap(int format, int width, int height);
 	
 	/* Initialization/Query functions */
 	static int onVideoInit(_THIS);

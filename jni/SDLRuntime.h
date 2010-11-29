@@ -21,6 +21,7 @@
 
 #include <pthread.h>
 #include <jni.h>
+#include <JNIHelp.h>
 
 namespace android {
     
@@ -34,20 +35,20 @@ public:
      * Register a set of methods in the specified class.
      */
     static int registerNativeMethods(JNIEnv* env,
-        const char* className, const JNINativeMethod* gMethods, int numMethods);
+    const char* className, const JNINativeMethod* gMethods, int numMethods);
+
+    static void doThrow(JNIEnv* env, const char* exc, const char* msg = NULL);
 	
-	static void doThrow(JNIEnv* env, const char* exc, const char* msg = NULL);
+    static jobject createObject(JNIEnv* env, jclass clazz);
 	
-	static jobject createObject(JNIEnv* env, jclass clazz);
-	
-	static int javaDetachThread(void);
-	
-	static int javaAttachThread(const char* threadName, JNIEnv** pEnv);
+    static int javaDetachThread(void);
+
+    static int javaAttachThread(const char* threadName, JNIEnv** pEnv);
 
     /** return a pointer to the VM running in this process */
     static JavaVM* getJavaVM() { return mJavaVM; }
 	
-	static void setJavaVM(JavaVM* vm) { mJavaVM = vm; }
+    static void setJavaVM(JavaVM* vm) { mJavaVM = vm; }
 
     /** return a pointer to the JNIEnv pointer for this thread */
     static JNIEnv* getJNIEnv();

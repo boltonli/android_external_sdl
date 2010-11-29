@@ -18,7 +18,7 @@
 #define LOG_TAG "SDLColor-JNI"
 
 #include "SDLRuntime.h"
-#include <SDL.h>
+#include "../libs/sdl_1.3.0/src/video/SDL_sysvideo.h"
 #include <utils/Log.h>
 
 // ----------------------------------------------------------------------------
@@ -36,10 +36,10 @@ static const char* const kClassPathName = "android/sdl/SDLWindow";
 static
 jfieldID checkFieldId(JNIEnv* env, jfieldID fieldId)
 {
-	if (fieldId == NULL) {
-		SDLRuntime::doThrow(env, "java/lang/RuntimeException", "SDLColor field id is null");
+    if (fieldId == NULL) {
+        SDLRuntime::doThrow(env, "java/lang/RuntimeException", "SDLColor field id is null");
     }
-	return fieldId;
+    return fieldId;
 }
 
 
@@ -149,7 +149,7 @@ android_sdl_SDLWindow_getPrev(JNIEnv *env, jobject thiz)
 static jobject
 android_sdl_SDLWindow_getNext(JNIEnv *env, jobject thiz)
 {
-	SDL_Window* win = getNativeStruct(env, thiz);
+    SDL_Window* win = getNativeStruct(env, thiz);
     return android_sdl_SDLWindow_create(win->next);
 }
 
@@ -157,13 +157,13 @@ static JNINativeMethod gMethods[] = {
     {"native_init",         "()V",                              (void *)android_sdl_SDLWindow_native_init},
     {"native_finalize",     "()V",                              (void *)android_sdl_SDLWindow_native_finalize},
     {"getId",               "()J",                              (void *)android_sdl_SDLWindow_getId},
-	{"getFlags",            "()J",                              (void *)android_sdl_SDLWindow_getFlags},
-	{"getX",                "()I",                              (void *)android_sdl_SDLWindow_getX},
-	{"getY",                "()I",                              (void *)android_sdl_SDLWindow_getY},
-	{"getW",                "()I",                              (void *)android_sdl_SDLWindow_getW},
-	{"getH",                "()I",                              (void *)android_sdl_SDLWindow_getH},
-	{"getPrev",             "()Landroid/sdl/SDLWindow;",        (void *)android_sdl_SDLWindow_getPrev},
-	{"getNext",             "()Landroid/sdl/SDLWindow;",        (void *)android_sdl_SDLWindow_getNext},
+    {"getFlags",            "()J",                              (void *)android_sdl_SDLWindow_getFlags},
+    {"getX",                "()I",                              (void *)android_sdl_SDLWindow_getX},
+    {"getY",                "()I",                              (void *)android_sdl_SDLWindow_getY},
+    {"getW",                "()I",                              (void *)android_sdl_SDLWindow_getW},
+    {"getH",                "()I",                              (void *)android_sdl_SDLWindow_getH},
+    {"getPrev",             "()Landroid/sdl/SDLWindow;",        (void *)android_sdl_SDLWindow_getPrev},
+    {"getNext",             "()Landroid/sdl/SDLWindow;",        (void *)android_sdl_SDLWindow_getNext},
 };
 
 namespace android {

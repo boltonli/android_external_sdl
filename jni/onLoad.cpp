@@ -62,7 +62,7 @@ jint JNI_OnLoad(JavaVM* vm, void* reserved)
 		LOGE("can't load android_sdl_SDLPalette");
 		return JNI_ERR;
 	}
-    if(register_android_sdl_impl_SDLImpl(env) != JNI_OK) {
+        if(register_android_sdl_impl_SDLImpl(env) != JNI_OK) {
 		LOGE("can't load android_sdl_impl_SDLImpl");
 		return JNI_ERR;
 	}

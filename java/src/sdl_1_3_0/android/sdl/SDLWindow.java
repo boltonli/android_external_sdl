@@ -47,9 +47,9 @@ public class SDLWindow {
     public native int getW();
 	
     public native int getH();
-	
-	public native SDLWindow getPrev();
-	
-	public native SDLWindow getNext();
-	
+
+    public native SDLWindow getPrev();
+
+    public native SDLWindow getNext();
+
 }

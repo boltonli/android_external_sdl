@@ -48,8 +48,6 @@ LOCAL_C_INCLUDES := \
 LOCAL_STATIC_LIBRARIES := libsdlmixer
 
 LOCAL_SHARED_LIBRARIES := \
-	libskia \
-	libmedia \
 	libutils \
 	libbinder \
 	liblog \

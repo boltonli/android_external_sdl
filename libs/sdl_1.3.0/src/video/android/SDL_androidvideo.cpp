@@ -1,6 +1,8 @@
 #include "SDL_androidvideo.h"
 #include "SDL_androidrender.h"
 
+#include <android/log.h>
+
 #define CLASS_PATH "SDL_androidvideo.cpp"
 
 static SDLVideoDriver *thiz = NULL;
@@ -27,45 +29,10 @@ void SDLVideoDriver::registerListener(SDLVideoDriverListener *listener) {
 }
 
 void SDLVideoDriver::unregisterListener() {
-	if(mListener == NULL) {
-		return;
-	}
+    if(mListener == NULL) {
+	return;
+    }
     free(mListener);
-}
-
-void SDLVideoDriver::setBitmapConfig(SkBitmap *bitmap, int format, int width, int height) {
-     switch (format) {
-        case PIXEL_FORMAT_RGBA_8888:
-            bitmap->setConfig(SkBitmap::kARGB_8888_Config, width, height);
-            break;
-
-        case PIXEL_FORMAT_RGBA_4444:
-            bitmap->setConfig(SkBitmap::kARGB_4444_Config, width, height);
-            break;
-
-        case PIXEL_FORMAT_RGB_565:
-            bitmap->setConfig(SkBitmap::kRGB_565_Config, width, height);
-            break;
-
-        case PIXEL_FORMAT_A_8:
-            bitmap->setConfig(SkBitmap::kA8_Config, width, height);
-            break;
-
-        default:
-            bitmap->setConfig(SkBitmap::kNo_Config, width, height);
-            break;
-    }
-}
-
-void SDLVideoDriver::initBitmap(int format, int width, int height) {
-    //-- set screen bitmap(sdl) config based on format
-    setBitmapConfig(&mBitmap, format, width, height);
-    mBitmap.setIsOpaque(true);
-
-    //-- alloc array of pixels
-    if(!mBitmap.allocPixels()) {
-        SDL_SetError("Failed to alloc bitmap pixels");
-    }
 }
 
 /* Initialization/Query functions */
@@ -123,11 +90,11 @@ int SDLVideoDriver::onVideoInit(_THIS) {
     mode->refresh_rate = 0;
     mode->driverdata = NULL;
 	
-//	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "onVideoInit %ix%i", mode->w, mode->h);
+//  __android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "onVideoInit %ix%i", mode->w, mode->h);
 	
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_INIT, 0, 0, (void*) mode);
+    thiz->mListener->notify(SDL_NATIVE_VIDEO_INIT, 0, 0, (void*) mode);
 	
-//	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "onVideoInit %ix%i", mode->w, mode->h);
+//  __android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "onVideoInit %ix%i", mode->w, mode->h);
 	
     if (SDL_AddBasicVideoDisplay(mode) < 0) {
         return -1;

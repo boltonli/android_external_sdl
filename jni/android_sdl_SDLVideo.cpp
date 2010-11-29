@@ -15,7 +15,6 @@
 ** limitations under the License.
 */
 
-//#define LOG_NDEBUG 0
 #define LOG_TAG "SDLImpl-JNI"
 
 #include "SDLRuntime.h"
@@ -75,11 +74,11 @@ public:
     void                    notify(int what, int arg1, int arg2, void* data);
 private:
 #if SDL_BUILD_VERSION == 1
+    Surface*                mSurface;   // Android surface class
     void                    updateScreen(SkBitmap *bitmap);
 #endif
     jclass                  mClass;     // Reference to MediaPlayer class
     jobject                 mObject;    // Weak ref to MediaPlayer Java object to call on
-    Surface*                mSurface;   // Android surface class
 };
 
 JNISDLVideoDriverListener::JNISDLVideoDriverListener(JNIEnv* env, jobject thiz, jobject weak_thiz, jobject surface)
@@ -97,8 +96,9 @@ JNISDLVideoDriverListener::JNISDLVideoDriverListener(JNIEnv* env, jobject thiz, 
     // We use a weak reference so the MediaPlayer object can be garbage collected.
     // The reference is only used as a proxy for callbacks.
     mObject = env->NewGlobalRef(weak_thiz);
-	
-	mSurface = (Surface *) env->GetIntField(surface, fields.surface_native);
+#if SDL_BUILD_VERSION == 1
+    mSurface = (Surface *) env->GetIntField(surface, fields.surface_native);
+#endif
 }
 
 JNISDLVideoDriverListener::~JNISDLVideoDriverListener()
@@ -115,7 +115,7 @@ JNISDLVideoDriverListener::~JNISDLVideoDriverListener()
   */
 void JNISDLVideoDriverListener::updateScreen(SkBitmap* bitmap)
 {
-	SkBitmap screen;
+    SkBitmap screen;
     Surface::SurfaceInfo surfaceInfo;
 
     if (!mSurface || !mSurface->isValid()) {
@@ -206,7 +206,7 @@ void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
 static void
 android_sdl_SDLVideo_native_init(JNIEnv *env)
 {
-	LOGV("native_init");
+    LOGV("native_init");
 	
     jclass clazz = env->FindClass(kClassPathName);
     if (clazz == NULL) {
@@ -223,17 +223,17 @@ android_sdl_SDLVideo_native_init(JNIEnv *env)
         return;
     }
 	
-	jclass surface_clazz = env->FindClass("android/view/Surface");
-	if (surface_clazz == NULL) {
-		__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Can't find android/view/Surface");
-		return;
-	}
+    jclass surface_clazz = env->FindClass("android/view/Surface");
+    if (surface_clazz == NULL) {
+	__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Can't find android/view/Surface");
+	return;
+    }
 	
-	fields.surface_native = env->GetFieldID(surface_clazz, "mSurface", "I");
-	if (fields.surface_native == NULL) {
-		__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Can't find Surface.mSurface");
-		return;
-	}
+    fields.surface_native = env->GetFieldID(surface_clazz, "mSurface", "I");
+    if (fields.surface_native == NULL) {
+	__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Can't find Surface.mSurface");
+	return;
+    }
 }
 
 // Register us into sdl video driver, so we can handle sdl video driver statuses

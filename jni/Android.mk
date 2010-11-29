@@ -29,28 +29,31 @@ LOCAL_MODULE := libsdl_jni
 LOCAL_C_INCLUDES := \
         $(JNI_H_INCLUDE) \
         $(SDL_INCLUDE) \
-	external/skia/src/core \
-	external/skia/include/core \
-	frameworks/base/include
+        dalvik/libnativehelper/include/nativehelper
+
+LOCAL_SHARED_LIBRARIES := \
+	liblog \
+        libsdl \
+        libnativehelper \
+        libutils
 
 ifeq ($(SDL_BUILD_VERSION), 1)
 LOCAL_C_INCLUDES += \
         external/sdl/libs/sdl_1.2.0/src/audio/android \
-        external/sdl/libs/sdl_1.2.0/src/video/android
+        external/sdl/libs/sdl_1.2.0/src/video/android \
+        external/skia/src/core \
+	external/skia/include/core \
+	frameworks/base/include
+
+LOCAL_SHARED_LIBRARIES += \
+        libskia \
+	libsurfaceflinger_client \
+	libmedia
 else
 LOCAL_C_INCLUDES += \
         external/sdl/libs/sdl_1.3.0/src/audio/android \
         external/sdl/libs/sdl_1.3.0/src/video/android
 endif
-        
-LOCAL_SHARED_LIBRARIES := \
-	libskia \
-	libsurfaceflinger_client \
-	libmedia \
-	liblog \
-        libsdl \
-        libnativehelper \
-        libutils
 
 TARGET_PRELINK_MODULE := false
 
