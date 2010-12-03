@@ -187,7 +187,7 @@ void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
             break;
 #endif
 #if SDL_BUILD_VERSION == 2
-		case SDL_NATIVE_VIDEO_GL_SWAP_WINDOW:
+//		case SDL_NATIVE_VIDEO_GL_SWAP_WINDOW:
 		case SDL_NATIVE_VIDEO_GL_CREATE_CONTEXT:
 			obj = android_sdl_SDLWindow_create((SDL_Window*)data);
 			break;
