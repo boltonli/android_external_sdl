@@ -92,26 +92,25 @@ android_sdl_impl_SDLImpl_flip(JNIEnv *env, jobject thiz, jobject surface)
 static jobject
 android_sdl_impl_SDLImpl_getLinkedVersion(JNIEnv *env, jobject thiz)
 {
-	jobject obj = NULL;
-	const SDL_version* version;
+    jobject obj = NULL;
+    const SDL_version* version;
 	
-	jclass clazz = env->FindClass("android/sdl/SDLVersion");
+    jclass clazz = env->FindClass("android/sdl/SDLVersion");
     if (clazz == NULL) {
         goto end;
     }
 	
-	if((obj = SDLRuntime::createObject(env, clazz)) == NULL) {
-	    goto end;
+    if((obj = SDLRuntime::createObject(env, clazz)) == NULL) {
+	goto end;
     }
 	
-	version = SDL_Linked_Version();
+    version = SDL_Linked_Version();
 	
     env->SetShortField(obj, version_fields.mMajor, (jshort)version->major);
-	env->SetShortField(obj, version_fields.mMinor, (jshort)version->minor);
-	env->SetShortField(obj, version_fields.mPatch, (jshort)version->patch);
+    env->SetShortField(obj, version_fields.mMinor, (jshort)version->minor);
+    env->SetShortField(obj, version_fields.mPatch, (jshort)version->patch);
 	
-	free((void *)version);
-	
+//    free((void *)version);
 end:
     return obj;
 }
@@ -123,8 +122,8 @@ static JNINativeMethod gMethods[] = {
     {"wasInit",              "(J)J",                              (void *)android_sdl_impl_SDLImpl_wasInit},
     {"quit",                 "()V",                               (void *)android_sdl_impl_SDLImpl_quit},
     {"setVideoMode",         "(IIIJ)Landroid/sdl/SDLSurface;",    (void *)android_sdl_impl_SDLImpl_setVideoMode},
-	{"flip",                 "(Landroid/sdl/SDLSurface;)I",       (void *)android_sdl_impl_SDLImpl_flip},
-	{"getLinkedVersion",     "()Landroid/sdl/SDLVersion;",        (void *)android_sdl_impl_SDLImpl_getLinkedVersion},
+    {"flip",                 "(Landroid/sdl/SDLSurface;)I",       (void *)android_sdl_impl_SDLImpl_flip},
+    {"getLinkedVersion",     "()Landroid/sdl/SDLVersion;",        (void *)android_sdl_impl_SDLImpl_getLinkedVersion},
 };
 
 namespace android {
