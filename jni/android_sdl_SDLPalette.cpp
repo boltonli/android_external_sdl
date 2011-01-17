@@ -19,7 +19,6 @@
 
 #include "SDLRuntime.h"
 #include <SDL_androidvideo.h>
-#include <utils/Log.h>
 
 // ----------------------------------------------------------------------------
 
@@ -78,8 +77,6 @@ android_sdl_SDLPalette_create(SDL_Palette* palette)
 static void
 android_sdl_SDLPalette_native_init(JNIEnv *env)
 {
-    LOGV("native_init");
-	
     jclass clazz = env->FindClass(kClassPathName);
     if (clazz == NULL) {
         SDLRuntime::doThrow(env, "java/lang/RuntimeException", 
@@ -93,7 +90,6 @@ android_sdl_SDLPalette_native_init(JNIEnv *env)
 static void
 android_sdl_SDLPalette_native_finalize(JNIEnv *env, jobject thiz)
 {
-    LOGV("native_finalize");
     //android_sdl_SDLPalette_release(env, thiz);
 }
 

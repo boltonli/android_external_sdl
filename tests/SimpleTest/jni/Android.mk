@@ -11,7 +11,13 @@ LOCAL_C_INCLUDES := \
 	$(JNI_H_INCLUDE) \
 	$(SDL_INCLUDE)
 
-LOCAL_SHARED_LIBRARIES := libsdl libutils liblog
+LOCAL_SHARED_LIBRARIES := libsdl
+
+ifeq ($(IN_NDK),true)
+LOCAL_LDLIBS := -llog
+else
+LOCAL_SHARED_LIBRARIES += liblog
+endif
 
 ifeq ($(SDL_BUILD_VERSION), 2)
 LOCAL_C_INCLUDES += \

@@ -20,13 +20,14 @@
 #include "SDLRuntime.h"
 #include <SDL_androidvideo.h>
 
-#if SDL_BUILD_VERSION == 1
+#if SDL_BUILD_VERSION == 1 && IN_NDK != true
 #include <SkBitmap.h>
 #include <SkCanvas.h>
 #include <SkMatrix.h>
 #endif
 
-#include <utils/Log.h>
+#include <android/log.h>
+#include <android/android_nio_utils.h>
 
 // ----------------------------------------------------------------------------
 
@@ -37,6 +38,7 @@ using namespace android;
 struct fields_t {
     /* actually in android.view.Surface XXX */
     jfieldID    surface_native;
+    jfieldID    mNativePointer;
     jmethodID   post_event;
 };
 static fields_t fields;
@@ -72,11 +74,13 @@ public:
     JNISDLVideoDriverListener(JNIEnv* env, jobject thiz, jobject weak_thiz, jobject surface);
     ~JNISDLVideoDriverListener();
     void                    notify(int what, int arg1, int arg2, void* data);
+    bool                    copyPixelsToJavaBuffer(JNIEnv* env, jobject jbuffer, jint size);
 private:
-#if SDL_BUILD_VERSION == 1
+#if SDL_BUILD_VERSION == 1 && IN_NDK != true
     Surface*                mSurface;   // Android surface class
     void                    updateScreen(SkBitmap *bitmap);
 #endif
+    void*                   mPixels;
     jclass                  mClass;     // Reference to MediaPlayer class
     jobject                 mObject;    // Weak ref to MediaPlayer Java object to call on
 };
@@ -87,7 +91,7 @@ JNISDLVideoDriverListener::JNISDLVideoDriverListener(JNIEnv* env, jobject thiz, 
     // that posts events to the application thread.
     jclass clazz = env->GetObjectClass(thiz);
     if (clazz == NULL) {
-        LOGE("Can't find android/sdl/SDLVideo");
+        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Can't find android/sdl/SDLVideo");
 		SDLRuntime::doThrow(env, "java/lang/Exception", NULL);
         return;
     }
@@ -96,7 +100,7 @@ JNISDLVideoDriverListener::JNISDLVideoDriverListener(JNIEnv* env, jobject thiz, 
     // We use a weak reference so the MediaPlayer object can be garbage collected.
     // The reference is only used as a proxy for callbacks.
     mObject = env->NewGlobalRef(weak_thiz);
-#if SDL_BUILD_VERSION == 1
+#if SDL_BUILD_VERSION == 1 && IN_NDK != true
     mSurface = (Surface *) env->GetIntField(surface, fields.surface_native);
 #endif
 }
@@ -109,7 +113,7 @@ JNISDLVideoDriverListener::~JNISDLVideoDriverListener()
     env->DeleteGlobalRef(mClass);
 }
 
-#if SDL_BUILD_VERSION == 1
+#if SDL_BUILD_VERSION == 1 && IN_NDK != true
 /**
   * Method which handles native redrawing screen
   */
@@ -128,7 +132,7 @@ void JNISDLVideoDriverListener::updateScreen(SkBitmap* bitmap)
         return;
     }
 	
-	//__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "updating screen: %ix%i", surfaceInfo.w, surfaceInfo.h);
+    //__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "updating screen: %ix%i", surfaceInfo.w, surfaceInfo.h);
 
     //bitmap which is drawed on android surfaceview
     SDLVideoDriver::setBitmapConfig(&screen, surfaceInfo.format, surfaceInfo.w, surfaceInfo.h);
@@ -156,49 +160,72 @@ void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
     JNIEnv *env;
     jobject obj = NULL;
 	
-#if SDL_BUILD_VERSION == 1
+#if SDL_BUILD_VERSION == 1 && IN_NDK != true
     if (what == SDL_NATIVE_VIDEO_UPDATE_RECTS) {
         updateScreen((SkBitmap*) data);
         return;
     }
 #endif
-	
+
     env = SDLRuntime::getJNIEnv();
 	
     // we create java representation of native structs
     switch (what) {
         case SDL_NATIVE_VIDEO_CREATE_DEVICE:
-		case SDL_NATIVE_VIDEO_DELETE_DEVICE:
+        case SDL_NATIVE_VIDEO_DELETE_DEVICE:
             obj = android_sdl_SDLVideoDevice_create((SDL_VideoDevice*) data);
             break;
         case SDL_NATIVE_VIDEO_INIT:
 #if SDL_BUILD_VERSION == 1
             obj = android_sdl_SDLPixelFormat_create((SDL_PixelFormat*) data);
 #else
-			obj = android_sdl_SDLDisplayMode_create((SDL_DisplayMode*) data);
+            obj = android_sdl_SDLDisplayMode_create((SDL_DisplayMode*) data);
 #endif
             break;
         case SDL_NATIVE_VIDEO_SET_SURFACE:
             obj = android_sdl_SDLSurface_create((SDL_Surface*) data);
             break;
 #if SDL_BUILD_VERSION == 1
-		case SDL_NATIVE_VIDEO_SET_CAPTION:
-			obj = (jobject)env->NewStringUTF((const char *)data);
+        case SDL_NATIVE_VIDEO_SET_CAPTION:
+            obj = (jobject)env->NewStringUTF((const char *)data);
             break;
 #endif
 #if SDL_BUILD_VERSION == 2
-//		case SDL_NATIVE_VIDEO_GL_SWAP_WINDOW:
-		case SDL_NATIVE_VIDEO_GL_CREATE_CONTEXT:
-			obj = android_sdl_SDLWindow_create((SDL_Window*)data);
-			break;
+//      case SDL_NATIVE_VIDEO_GL_SWAP_WINDOW:
+        case SDL_NATIVE_VIDEO_GL_CREATE_CONTEXT:
+            obj = android_sdl_SDLWindow_create((SDL_Window*)data);
+            break;
 #endif
+        case SDL_NATIVE_VIDEO_UPDATE_RECTS:
+            mPixels = (void *) data;
+            break;
+    }
+    // than call java to process class represents sdl struct
+    env->CallStaticVoidMethod(mClass, fields.post_event, mObject, what, arg1, arg2, obj);
+}
+
+bool JNISDLVideoDriverListener::copyPixelsToJavaBuffer(JNIEnv* env, jobject jbuffer, jint size) {
+    if(mPixels == NULL) {
+        return false;
     }
 
-    // than call java to process class represents sdl struct
-	env->CallStaticVoidMethod(mClass, fields.post_event, mObject, what, arg1, arg2, obj);
+    android::AutoBufferPointer abp(env, jbuffer, JNI_TRUE);
+    // the java side has already checked that buffer is large enough
+    memcpy(abp.pointer(), mPixels, size);
+    return true;
 }
 
 // ----------------------------------------------------------------------------
+
+static void
+android_sdl_SDLVideo_nativeCopyPixelsToBuffer(JNIEnv* env, jobject obj, JNISDLVideoDriverListener* listener, jobject jbuffer, jint size) {
+    if (listener == NULL) {
+        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "nativeCopyPixelsToBuffer listener is NULL");
+    }
+    if(!listener->copyPixelsToJavaBuffer(env, jbuffer, size)) {
+        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "nativeCopyPixelsToBuffer couldn't copy pixels to java buffer");
+    }
+}
 
 // This function gets some field IDs, which in turn causes class initialization.
 // It is called from a static block, which won't run until the
@@ -206,7 +233,7 @@ void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
 static void
 android_sdl_SDLVideo_native_init(JNIEnv *env)
 {
-    LOGV("native_init");
+    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "native_init");
 	
     jclass clazz = env->FindClass(kClassPathName);
     if (clazz == NULL) {
@@ -234,13 +261,19 @@ android_sdl_SDLVideo_native_init(JNIEnv *env)
 	__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Can't find Surface.mSurface");
 	return;
     }
+
+    fields.mNativePointer = env->GetFieldID(clazz, "mNativePointer", "I");
+    if (fields.mNativePointer == NULL) {
+	__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Can't find mNativePointer");
+	return;
+    }
 }
 
 // Register us into sdl video driver, so we can handle sdl video driver statuses
 static void
 android_sdl_SDLVideo_native_setup(JNIEnv *env, jobject thiz, jobject weak_this, jobject surface)
 {
-    LOGV("native_setup");
+    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "native_setup");
 
     SDLVideoDriver* vd = SDLVideoDriver::getInstance();
     if (vd == NULL) {
@@ -251,12 +284,14 @@ android_sdl_SDLVideo_native_setup(JNIEnv *env, jobject thiz, jobject weak_this, 
     // create new listener and give it to MediaPlayer
     JNISDLVideoDriverListener* listener = new JNISDLVideoDriverListener(env, thiz, weak_this, surface);
     vd->registerListener(listener);
+
+    env->SetIntField(thiz, fields.mNativePointer, (jint)listener);
 }
 
 static void
 android_sdl_SDLVideo_native_finalize(JNIEnv *env, jobject thiz)
 {
-    LOGV("native_finalize");
+    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "native_finalize");
     //android_sdl_SDLVideo_release(env, thiz);
 }
 
@@ -266,6 +301,7 @@ static JNINativeMethod gMethods[] = {
     {"native_init",         "()V",                                                    (void *)android_sdl_SDLVideo_native_init},
     {"native_setup",        "(Ljava/lang/Object;Landroid/view/Surface;)V",            (void *)android_sdl_SDLVideo_native_setup},
     {"native_finalize",     "()V",                                                    (void *)android_sdl_SDLVideo_native_finalize},
+    {"nativeCopyPixelsToBuffer", "(ILjava/nio/Buffer;I)V",                            (void *)android_sdl_SDLVideo_nativeCopyPixelsToBuffer}
 };
 
 namespace android {

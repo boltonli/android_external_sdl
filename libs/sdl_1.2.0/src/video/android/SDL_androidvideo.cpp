@@ -1,4 +1,6 @@
 #include "SDL_androidvideo.h"
+#include <android/log.h>
+#include <stdlib.h>
 
 #define CLASS_PATH "SDL_androidvideo.cpp"
 
@@ -8,7 +10,7 @@ SDLVideoDriver::SDLVideoDriver() {
 }
 
 SDLVideoDriver::~SDLVideoDriver() {
-	unregisterListener();
+    unregisterListener();
 }
 
 SDLVideoDriver *SDLVideoDriver::getInstance() {
@@ -18,16 +20,17 @@ SDLVideoDriver *SDLVideoDriver::getInstance() {
 
 void SDLVideoDriver::registerListener(SDLVideoDriverListener *listener) {
     mListener = listener;
-	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "listener registred");
+    __android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "listener registred");
 }
 
 void SDLVideoDriver::unregisterListener() {
-	if(mListener == NULL) {
-		return;
-	}
+    if(mListener == NULL) {
+        return;
+    }
     free(mListener);
 }
 
+/*
 void SDLVideoDriver::setBitmapConfig(SkBitmap *bitmap, int format, int width, int height) {
      switch (format) {
         case PIXEL_FORMAT_RGBA_8888:
@@ -62,6 +65,7 @@ void SDLVideoDriver::initBitmap(int format, int width, int height) {
         SDL_SetError("Failed to alloc bitmap pixels");
     }
 }
+*/
 
 /* Initialization/Query functions */
 SDL_VideoDevice *SDLVideoDriver::onCreateDevice(int devindex) {
@@ -109,10 +113,9 @@ SDL_VideoDevice *SDLVideoDriver::onCreateDevice(int devindex) {
     thiz->device->PumpEvents = SDLVideoDriver::onPumpEvents;
     thiz->device->free = SDLVideoDriver::onDeleteDevice;
 	
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_CREATE_DEVICE, 0, 0, (void*) thiz->device);
+    thiz->mListener->notify(SDL_NATIVE_VIDEO_CREATE_DEVICE, 0, 0, (void*) thiz->device);
 
     __android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "device created");
-	
     return thiz->device;
 }
 
@@ -121,7 +124,7 @@ int SDLVideoDriver::onVideoInit(_THIS, SDL_PixelFormat *vformat) {
     vformat->BitsPerPixel = 16;
     vformat->BytesPerPixel = 2;
 	
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_INIT, 0, 0, (void*) vformat);
+    thiz->mListener->notify(SDL_NATIVE_VIDEO_INIT, 0, 0, (void*) vformat);
     /* We're done! */
     return 0;	
 }
@@ -140,23 +143,33 @@ SDL_Surface *SDLVideoDriver::onSetVideoMode(_THIS, SDL_Surface *current, int wid
         return NULL;
     }
 
+    if(thiz->mPixelBuffer)
+        SDL_free(thiz->mPixelBuffer);
+
+    thiz->mPixelBuffer = SDL_malloc(width * height * (bpp / 8));
+    if (!thiz->mPixelBuffer) {
+        SDL_SetError("Couldn't allocate buffer for requested mode");
+        return(NULL);
+    }
+    SDL_memset(thiz->mPixelBuffer, 0, width * height * (bpp / 8));
+
     // create bitmap where will sdl render pixels for android
-    thiz->initBitmap(PIXEL_FORMAT_RGB_565, width, height);
+    //thiz->initBitmap(PIXEL_FORMAT_RGB_565, width, height);
 	
     /* Set up the new mode framebuffer */
     current->flags = (flags & SDL_FULLSCREEN) | (flags & SDL_DOUBLEBUF);
-    current->w = thiz->mBitmap.width();
-    current->h = thiz->mBitmap.height();
+    current->w = width;
+    current->h = height;
     current->pitch = current->w * (bpp / 8);
-    current->pixels = thiz->mBitmap.getPixels();
+    current->pixels = thiz->mPixelBuffer;
 	
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_SET_SURFACE, 0, 0, (void*) current);
+    thiz->mListener->notify(SDL_NATIVE_VIDEO_SET_SURFACE, 0, 0, (void*) current);
     /* We're done */
     return current;
 }
 
 int SDLVideoDriver::onSetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors) {
-        return 1;
+    return 1;
 }
 
 void SDLVideoDriver::onVideoQuit(_THIS) {
@@ -164,37 +177,38 @@ void SDLVideoDriver::onVideoQuit(_THIS) {
 
 /* Hardware surface functions */
 int SDLVideoDriver::onAllocHWSurface(_THIS, SDL_Surface *surface) {
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_ALLOC_HW_SURFACE, 0, 0, (void*) surface);
+    thiz->mListener->notify(SDL_NATIVE_VIDEO_ALLOC_HW_SURFACE, 0, 0, (void*) surface);
     return(-1);
 }
 
 int SDLVideoDriver::onLockHWSurface(_THIS, SDL_Surface *surface) {
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_LOCK_HW_SURFACE, 0, 0, (void*) surface);
+    thiz->mListener->notify(SDL_NATIVE_VIDEO_LOCK_HW_SURFACE, 0, 0, (void*) surface);
     return 0;
 }
 
 void SDLVideoDriver::onUnlockHWSurface(_THIS, SDL_Surface *surface) {
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_UNLOCK_HW_SURFACE, 0, 0, (void*) surface);
+    thiz->mListener->notify(SDL_NATIVE_VIDEO_UNLOCK_HW_SURFACE, 0, 0, (void*) surface);
 }
 
 void SDLVideoDriver::onFreeHWSurface(_THIS, SDL_Surface *surface) {
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_FREE_HW_SURFACE, 0, 0, (void*) surface);
+    thiz->mListener->notify(SDL_NATIVE_VIDEO_FREE_HW_SURFACE, 0, 0, (void*) surface);
 }
 
 /* on set window caption */
 void SDLVideoDriver::onSetCaption(_THIS, const char *title, const char *icon) {
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_SET_CAPTION, 0, 0, (void*) title);
+    thiz->mListener->notify(SDL_NATIVE_VIDEO_SET_CAPTION, 0, 0, (void*) title);
 }
 
 /* etc. */
 void SDLVideoDriver::onUpdateRects(_THIS, int numrects, SDL_Rect *rects) {
+/*
     if(thiz->mBitmap.width() == 0 || thiz->mBitmap.height() == 0) {
         __android_log_print(ANDROID_LOG_ERROR, CLASS_PATH, "Bitmap is too small %ix%i",
                 thiz->mBitmap.width(), thiz->mBitmap.height());
         return;
     }
-
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_UPDATE_RECTS, 0, 0, (void*) &thiz->mBitmap);
+*/
+    thiz->mListener->notify(SDL_NATIVE_VIDEO_UPDATE_RECTS, 0, 0, (void*) &thiz->mPixelBuffer);
 }
 
 /* ANDROID driver bootstrap functions */
@@ -203,16 +217,16 @@ int SDLVideoDriver::onAvailable() {
 }
 
 void SDLVideoDriver::onDeleteDevice(SDL_VideoDevice *device) {
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_DELETE_DEVICE, 0, 0, (void*) device);
+    thiz->mListener->notify(SDL_NATIVE_VIDEO_DELETE_DEVICE, 0, 0, (void*) device);
     SDL_free(thiz->device);
 }
 
 void SDLVideoDriver::onPumpEvents(_THIS) {
-	thiz->mListener->notify(SDL_NATIVE_VIDEO_PUMP_EVENTS, 0, 0, NULL);
+    thiz->mListener->notify(SDL_NATIVE_VIDEO_PUMP_EVENTS, 0, 0, NULL);
 }
 
 void SDLVideoDriver::onInitOSKeymap(_THIS) {
-	//thiz->mListener->notify(SDL_NATIVE_VIDEO_INIT_OS_KEYMAP, 0, 0, NULL);
+    //thiz->mListener->notify(SDL_NATIVE_VIDEO_INIT_OS_KEYMAP, 0, 0, NULL);
 }
 
 extern "C" {

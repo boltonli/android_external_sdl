@@ -23,6 +23,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+import java.nio.Buffer;
 import java.lang.ref.WeakReference;
 
 public class SDLVideo extends SurfaceView {
@@ -30,29 +31,29 @@ public class SDLVideo extends SurfaceView {
 	
     // must equals with libsdl/src/video/android/SDL_androidvideo.h -> sdl_native_events
     private static class SDLNativeEvents {
-	    private static final int SDL_NATIVE_VIDEO_CREATE_DEVICE = 1;
-	    private static final int SDL_NATIVE_VIDEO_DELETE_DEVICE = 2;
-	    private static final int SDL_NATIVE_VIDEO_PUMP_EVENTS = 3;
-	    private static final int SDL_NATIVE_VIDEO_INIT = 4;
-	    private static final int SDL_NATIVE_VIDEO_SET_SURFACE = 5;
-	    private static final int SDL_NATIVE_VIDEO_UPDATE_RECTS = 6;
-		private static final int SDL_NATIVE_VIDEO_SET_CAPTION = 7;
-		private static final int SDL_NATIVE_VIDEO_INIT_OS_KEYMAP = 8;
-		private static final int SDL_NATIVE_VIDEO_ALLOC_HW_SURFACE = 9;
-		private static final int SDL_NATIVE_VIDEO_LOCK_HW_SURFACE = 10;
-		private static final int SDL_NATIVE_VIDEO_UNLOCK_HW_SURFACE = 11;
-		private static final int SDL_NATIVE_VIDEO_FREE_HW_SURFACE = 12;
+        private static final int SDL_NATIVE_VIDEO_CREATE_DEVICE = 1;
+        private static final int SDL_NATIVE_VIDEO_DELETE_DEVICE = 2;
+        private static final int SDL_NATIVE_VIDEO_PUMP_EVENTS = 3;
+        private static final int SDL_NATIVE_VIDEO_INIT = 4;
+        private static final int SDL_NATIVE_VIDEO_SET_SURFACE = 5;
+        private static final int SDL_NATIVE_VIDEO_UPDATE_RECTS = 6;
+        private static final int SDL_NATIVE_VIDEO_SET_CAPTION = 7;
+        private static final int SDL_NATIVE_VIDEO_INIT_OS_KEYMAP = 8;
+        private static final int SDL_NATIVE_VIDEO_ALLOC_HW_SURFACE = 9;
+        private static final int SDL_NATIVE_VIDEO_LOCK_HW_SURFACE = 10;
+        private static final int SDL_NATIVE_VIDEO_UNLOCK_HW_SURFACE = 11;
+        private static final int SDL_NATIVE_VIDEO_FREE_HW_SURFACE = 12;
 		
-		/**** GL implementation *****/
-		private static final int SDL_NATIVE_VIDEO_GL_LOAD_LIBRARY = 13;
-		private static final int SDL_NATIVE_VIDEO_GL_GET_PROC_ADDRESS = 14;
-		private static final int SDL_NATIVE_VIDEO_GL_UNLOAD_LIBRARY = 15;
-		private static final int SDL_NATIVE_VIDEO_GL_CREATE_CONTEXT = 16;
-		private static final int SDL_NATIVE_VIDEO_GL_MAKE_CURRENT = 17;
-		private static final int SDL_NATIVE_VIDEO_GL_SET_SWAP_INTERVAL = 18;
-		private static final int SDL_NATIVE_VIDEO_GL_GET_SWAP_INTERVAL = 19;
-		private static final int SDL_NATIVE_VIDEO_GL_SWAP_WINDOW = 20;
-		private static final int SDL_NATIVE_VIDEO_GL_DELETE_CONTEXT = 21;
+        /**** GL implementation *****/
+        private static final int SDL_NATIVE_VIDEO_GL_LOAD_LIBRARY = 13;
+        private static final int SDL_NATIVE_VIDEO_GL_GET_PROC_ADDRESS = 14;
+        private static final int SDL_NATIVE_VIDEO_GL_UNLOAD_LIBRARY = 15;
+        private static final int SDL_NATIVE_VIDEO_GL_CREATE_CONTEXT = 16;
+        private static final int SDL_NATIVE_VIDEO_GL_MAKE_CURRENT = 17;
+        private static final int SDL_NATIVE_VIDEO_GL_SET_SWAP_INTERVAL = 18;
+        private static final int SDL_NATIVE_VIDEO_GL_GET_SWAP_INTERVAL = 19;
+        private static final int SDL_NATIVE_VIDEO_GL_SWAP_WINDOW = 20;
+        private static final int SDL_NATIVE_VIDEO_GL_DELETE_CONTEXT = 21;
     }
     
     /****** Android surface information *******/
@@ -66,19 +67,20 @@ public class SDLVideo extends SurfaceView {
     private SDLVideoPumpEventsClb mEventsClb;
     private SDLVideoUpdateRectsClb mUpdateClb;
     private SDLVideoSetCaptionClb mCaptionClb;
-	private SDLVideoSurfaceChangedClb mSurfaceChangedClb;
+    private SDLVideoSurfaceChangedClb mSurfaceChangedClb;
 	
     // registers fields and methods
     private static native final void native_init();
     private native final void native_setup(Object mediaplayer_this, Surface surface);
     private native final void native_finalize();
-	
+    private native void nativeCopyPixelsToBuffer(int native_listener, Buffer buffer, int buffer_size);
+
+    private int mNativePointer;
+
     static {
-	    Log.d(TAG, "loading java SDLVideo");
-		
-	    native_init();
-		
-	    Log.d(TAG, "java SDLVideo loaded");
+        Log.d(TAG, "loading java SDLVideo");
+        native_init();
+        Log.d(TAG, "java SDLVideo loaded");
     }
     
     /**
@@ -110,22 +112,22 @@ public class SDLVideo extends SurfaceView {
             mSurfaceFormat = format;
             mSurfaceWidth = width;
             mSurfaceHeight = height;
-			if(mSurfaceChangedClb != null) {
-				mSurfaceChangedClb.onSurfaceChanged(format, width, height);
-			}
+            if(mSurfaceChangedClb != null) {
+                mSurfaceChangedClb.onSurfaceChanged(format, width, height);
+            }
     	}
     };
 	
     public SDLVideo(Context context) {
         super(context);
     	SurfaceHolder holder = getHolder();
-	    holder.addCallback(mSurfaceHClb);
+        holder.addCallback(mSurfaceHClb);
     }
 
     @Override
     protected void finalize() {
-	    Log.d(TAG, "finalizing");
-	    native_finalize(); 
+        Log.d(TAG, "finalizing");
+        native_finalize(); 
     }
 	
     /**
@@ -137,7 +139,7 @@ public class SDLVideo extends SurfaceView {
             Log.e(TAG, "SDLVideo ref is null");
             return;
         }
-		ref.handleNativeMessage(what, obj);
+        ref.handleNativeMessage(what, obj);
     }
 
     private void handleNativeMessage(int what, Object obj) {

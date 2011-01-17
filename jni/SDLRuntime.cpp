@@ -21,7 +21,7 @@
 #include "SDLRuntime.h"
 #include "JNIHelp.h"
 
-#include <utils/Log.h>
+#include <android/log.h>
 
 #include <stdio.h>
 #include <signal.h>
@@ -118,7 +118,7 @@ JNIEnv* SDLRuntime::getJNIEnv()
 
     result = vm->AttachCurrentThread(pEnv, (void*) &args);
     if (result != JNI_OK)
-        LOGI("NOTE: attach of thread '%s' failed\n", threadName);
+        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "NOTE: attach of thread '%s' failed\n", threadName);
 
     return result;
 }
@@ -136,7 +136,7 @@ JNIEnv* SDLRuntime::getJNIEnv()
 
     result = vm->DetachCurrentThread();
     if (result != JNI_OK)
-        LOGE("ERROR: thread detach failed\n");
+        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "ERROR: thread detach failed\n");
     return result;
 }
 

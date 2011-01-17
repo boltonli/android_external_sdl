@@ -12,25 +12,25 @@ extern "C" {
 #include "../../events/SDL_events_c.h"
 }
 
-#include <binder/IMemory.h>
-#include <surfaceflinger/Surface.h>
-#include <SkBitmap.h>
+//#include <binder/IMemory.h>
+//#include <surfaceflinger/Surface.h>
+//#include <SkBitmap.h>
 
-using namespace android;
+//using namespace android;
 
 enum sdl_native_events {
     SDL_NATIVE_VIDEO_CREATE_DEVICE = 1,
-	SDL_NATIVE_VIDEO_DELETE_DEVICE = 2,
-	SDL_NATIVE_VIDEO_PUMP_EVENTS = 3,
-	SDL_NATIVE_VIDEO_INIT = 4,
-	SDL_NATIVE_VIDEO_SET_SURFACE = 5,
-	SDL_NATIVE_VIDEO_UPDATE_RECTS = 6,
-	SDL_NATIVE_VIDEO_SET_CAPTION = 7,
-	SDL_NATIVE_VIDEO_INIT_OS_KEYMAP = 8,
-	SDL_NATIVE_VIDEO_ALLOC_HW_SURFACE = 9,
-	SDL_NATIVE_VIDEO_LOCK_HW_SURFACE = 10,
-	SDL_NATIVE_VIDEO_UNLOCK_HW_SURFACE = 11,
-	SDL_NATIVE_VIDEO_FREE_HW_SURFACE = 12,
+    SDL_NATIVE_VIDEO_DELETE_DEVICE = 2,
+    SDL_NATIVE_VIDEO_PUMP_EVENTS = 3,
+    SDL_NATIVE_VIDEO_INIT = 4,
+    SDL_NATIVE_VIDEO_SET_SURFACE = 5,
+    SDL_NATIVE_VIDEO_UPDATE_RECTS = 6,
+    SDL_NATIVE_VIDEO_SET_CAPTION = 7,
+    SDL_NATIVE_VIDEO_INIT_OS_KEYMAP = 8,
+    SDL_NATIVE_VIDEO_ALLOC_HW_SURFACE = 9,
+    SDL_NATIVE_VIDEO_LOCK_HW_SURFACE = 10,
+    SDL_NATIVE_VIDEO_UNLOCK_HW_SURFACE = 11,
+    SDL_NATIVE_VIDEO_FREE_HW_SURFACE = 12,
 };
 
 /* Hidden "this" pointer for the video functions */
@@ -38,7 +38,7 @@ enum sdl_native_events {
 
 // ----------------------------------------------------------------------------
 // ref-counted object for callbacks
-class SDLVideoDriverListener : virtual public RefBase
+class SDLVideoDriverListener/* : virtual public RefBase*/
 {
 public:
     virtual void notify(int what, int arg1, int arg2, void* data) = 0;
@@ -53,7 +53,7 @@ public:
 	void unregisterListener();
 
 	static SDLVideoDriver *getInstance();
-	static void setBitmapConfig(SkBitmap *bitmap, int format, int width, int height);
+//	static void setBitmapConfig(SkBitmap *bitmap, int format, int width, int height);
 	/* ANDROID driver bootstrap functions */
 	static SDL_VideoDevice *onCreateDevice(int devindex);
 	static int onAvailable();
@@ -68,7 +68,8 @@ public:
 
 private:
 	SDL_VideoDevice *device;
-	SkBitmap mBitmap;
+//	SkBitmap mBitmap;
+        void *mPixelBuffer;
 	SDLVideoDriverListener* mListener;
 
 	void initBitmap(int format, int width, int height);

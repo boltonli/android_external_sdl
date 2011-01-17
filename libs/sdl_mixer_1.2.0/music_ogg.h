@@ -27,11 +27,11 @@
 /* This file supports Ogg Vorbis music streams */
 
 #ifdef OGG_USE_TREMOR
-#ifdef ANDROID
-#include <Tremolo/ivorbisfile.h>
-#else
-#include <tremor/ivorbisfile.h>
-#endif
+//#ifdef ANDROID
+//#include <Tremolo/ivorbisfile.h>
+//#else
+#include <ivorbisfile.h>
+//#endif
 #else
 #include <vorbis/vorbisfile.h>
 #endif

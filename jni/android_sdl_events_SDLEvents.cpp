@@ -21,7 +21,6 @@
 #include <SDL_androidvideo.h>
 #include <SDL.h>
 #include <SDL_video.h>
-#include <utils/Log.h>
 
 // ----------------------------------------------------------------------------
 
@@ -41,25 +40,21 @@ static const char* const kClassPathName = "android/sdl/events/SDLEvents";
 static
 jfieldID checkFieldId(JNIEnv* env, jfieldID fieldId)
 {
-	if (fieldId == NULL) {
-		SDLRuntime::doThrow(env, "java/lang/RuntimeException", "SDLEvents field id is null");
+    if (fieldId == NULL) {
+        SDLRuntime::doThrow(env, "java/lang/RuntimeException", "SDLEvents field id is null");
     }
-	return fieldId;
+    return fieldId;
 }
 // ----------------------------------------------------------------------------
 
 static jint
-android_sdl_events_SDLEvents_MouseMotion(JNIEnv *env, jobject thiz, 
-										 jshort buttonstate, 
-										 jint relative, 
-										 jint x, 
-										 jint y)
+android_sdl_events_SDLEvents_MouseMotion(JNIEnv *env, jobject thiz, jshort buttonstate, jint relative, jint x, jint y)
 {
 #if SDL_BUILD_VERSION == 1
     return SDL_PrivateMouseMotion((Uint8) buttonstate, relative,
 								  (Sint16) x, (Sint16) y);
 #else
-	return SDL_SendMouseMotion(NULL, relative, x, y); 
+    return SDL_SendMouseMotion(NULL, relative, x, y); 
 #endif
 }
 
@@ -73,17 +68,15 @@ android_sdl_events_SDLEvents_MouseButton(JNIEnv *env, jobject thiz,
 #if SDL_BUILD_VERSION == 1
     return SDL_PrivateMouseButton((Uint8) state, (Uint8) button,(Sint16) x,(Sint16) y);
 #else
-	return SDL_SendMouseButton(NULL, (Uint8) state, (Uint8) button);
+    return SDL_SendMouseButton(NULL, (Uint8) state, (Uint8) button);
 #endif
 }
 
 static jint
-android_sdl_events_SDLEvents_Keyboard(JNIEnv *env, jobject thiz,
-									  jshort state, 
-									  jobject key)
+android_sdl_events_SDLEvents_Keyboard(JNIEnv *env, jobject thiz, jshort state, jobject key)
 {
 #if SDL_BUILD_VERSION == 1
-	SDL_keysym keysym;
+    SDL_keysym keysym;
 	
     /* Set the keysym information */
     keysym.scancode = env->GetIntField(key, fields.scancode);;
@@ -95,8 +88,8 @@ android_sdl_events_SDLEvents_Keyboard(JNIEnv *env, jobject thiz,
 	
     return SDL_PrivateKeyboard((Uint8)state, &keysym);
 #else
-	SDL_scancode scancode = (SDL_scancode)env->GetIntField(key, fields.scancode);
-	return SDL_SendKeyboardKey((Uint8)state, scancode);
+    SDL_scancode scancode = (SDL_scancode)env->GetIntField(key, fields.scancode);
+    return SDL_SendKeyboardKey((Uint8)state, scancode);
 #endif
 }
 
@@ -105,8 +98,6 @@ android_sdl_events_SDLEvents_Keyboard(JNIEnv *env, jobject thiz,
 static void
 android_sdl_events_SDLEvents_native_init(JNIEnv *env)
 {
-    LOGV("native_init");
-	
     jclass clazz = env->FindClass("android/sdl/events/SDLKeySym");
     if (clazz == NULL) {
         SDLRuntime::doThrow(env, "java/lang/RuntimeException", 
@@ -115,13 +106,13 @@ android_sdl_events_SDLEvents_native_init(JNIEnv *env)
     }
 	
     fields.scancode = checkFieldId(env, env->GetFieldID(clazz, "scancode", "I"));
-	fields.sym = checkFieldId(env, env->GetFieldID(clazz, "sym", "I"));
-	fields.mod = checkFieldId(env, env->GetFieldID(clazz, "mod", "I"));
-	fields.unicode = checkFieldId(env, env->GetFieldID(clazz, "unicode", "I"));
+    fields.sym = checkFieldId(env, env->GetFieldID(clazz, "sym", "I"));
+    fields.mod = checkFieldId(env, env->GetFieldID(clazz, "mod", "I"));
+    fields.unicode = checkFieldId(env, env->GetFieldID(clazz, "unicode", "I"));
 }
 
 static JNINativeMethod gMethods[] = {
-	{"native_init",     "()V",                                  (void *)android_sdl_events_SDLEvents_native_init},
+    {"native_init",     "()V",                                  (void *)android_sdl_events_SDLEvents_native_init},
     {"MouseMotion",     "(SIII)I",                              (void *)android_sdl_events_SDLEvents_MouseMotion},
     {"MouseButton",     "(SSII)I",                              (void *)android_sdl_events_SDLEvents_MouseButton},
     {"Keyboard",        "(SLandroid/sdl/events/SDLKeySym;)I",   (void *)android_sdl_events_SDLEvents_Keyboard},

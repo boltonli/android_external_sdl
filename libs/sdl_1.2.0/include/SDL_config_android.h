@@ -31,7 +31,7 @@
 #include <stdint.h>
 
 
-#define SDL_AUDIO_DRIVER_ANDROID 1
+//#define SDL_AUDIO_DRIVER_ANDROID 0
 
 #define SDL_CDROM_DISABLED 1
 

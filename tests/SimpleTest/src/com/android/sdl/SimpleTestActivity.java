@@ -21,8 +21,6 @@ import android.os.Bundle;
 
 import android.sdl.app.SDLActivity;
 
-import java.lang.Thread;
-
 public class SimpleTestActivity extends SDLActivity {
 
     private static final String TAG = "SimpleTestActivity";

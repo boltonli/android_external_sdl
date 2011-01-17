@@ -19,7 +19,7 @@
 
 #include "SDLRuntime.h"
 #include <SDL_androidvideo.h>
-#include <utils/Log.h>
+#include <android/log.h>
 
 // ----------------------------------------------------------------------------
 
@@ -73,9 +73,7 @@ android_sdl_SDLPixelFormat_create(SDL_PixelFormat* pformat)
 // first time an instance of this class is used.
 static void
 android_sdl_SDLPixelFormat_native_init(JNIEnv *env)
-{
-    LOGV("native_init");
-	
+{	
     jclass clazz = env->FindClass(kClassPathName);
     if (clazz == NULL) {
         SDLRuntime::doThrow(env, "java/lang/RuntimeException", 
@@ -89,7 +87,6 @@ android_sdl_SDLPixelFormat_native_init(JNIEnv *env)
 static void
 android_sdl_SDLPixelFormat_native_finalize(JNIEnv *env, jobject thiz)
 {
-    LOGV("native_finalize");
     //android_sdl_SDLPixelFormat_release(env, thiz);
 }
 

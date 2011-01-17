@@ -79,8 +79,6 @@ android_sdl_SDLVideoDevice_create(SDL_VideoDevice* device)
 static void
 android_sdl_SDLVideoDevice_native_init(JNIEnv *env)
 {
-    LOGV("native_init");
-	
     jclass clazz = env->FindClass(kClassPathName);
     if (clazz == NULL) {
         SDLRuntime::doThrow(env, "java/lang/RuntimeException", 
@@ -94,7 +92,6 @@ android_sdl_SDLVideoDevice_native_init(JNIEnv *env)
 static void
 android_sdl_SDLVideoDevice_native_finalize(JNIEnv *env, jobject thiz)
 {
-    LOGV("native_finalize");
     //android_sdl_SDLVideoDevice_release(env, thiz);
 }
 
