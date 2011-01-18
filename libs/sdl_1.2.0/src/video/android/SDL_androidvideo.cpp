@@ -146,7 +146,7 @@ SDL_Surface *SDLVideoDriver::onSetVideoMode(_THIS, SDL_Surface *current, int wid
     if(thiz->mPixelBuffer)
         SDL_free(thiz->mPixelBuffer);
 
-    thiz->mPixelBuffer = SDL_malloc(width * height * (bpp / 8));
+    thiz->mPixelBuffer = (unsigned char *) SDL_malloc(width * height * (bpp / 8));
     if (!thiz->mPixelBuffer) {
         SDL_SetError("Couldn't allocate buffer for requested mode");
         return(NULL);

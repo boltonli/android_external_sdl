@@ -69,7 +69,7 @@ public:
 private:
 	SDL_VideoDevice *device;
 //	SkBitmap mBitmap;
-        void *mPixelBuffer;
+        unsigned char *mPixelBuffer;
 	SDLVideoDriverListener* mListener;
 
 	void initBitmap(int format, int width, int height);

@@ -48,12 +48,13 @@ LOCAL_C_INCLUDES += \
         $(LOCAL_PATH)/libnativehelper/include/nativehelper
 LOCAL_STATIC_LIBRARIES += \
         libnativehelper_static
-LOCAL_LDLIBS := -llog
+LOCAL_LDLIBS := -llog -ljnigraphics
 else
 LOCAL_C_INCLUDES += \
         dalvik/libnativehelper/include/nativehelper
 LOCAL_SHARED_LIBRARIES += \
         libnativehelper \
+        libjnigraphics \
         liblog
 endif
 

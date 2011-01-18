@@ -11,7 +11,11 @@ LOCAL_C_INCLUDES := \
 	$(JNI_H_INCLUDE) \
 	$(SDL_INCLUDE)
 
+ifeq ($(SDL_BUILD_STATIC),true)
+LOCAL_SHARED_LIBRARIES := libsdl_jni
+else
 LOCAL_SHARED_LIBRARIES := libsdl
+endif
 
 ifeq ($(IN_NDK),true)
 LOCAL_LDLIBS := -llog
