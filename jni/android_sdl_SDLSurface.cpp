@@ -20,6 +20,8 @@
 #include "SDLRuntime.h"
 #include <SDL_androidvideo.h>
 
+#include <android/android_nio_utils.h>
+
 // ----------------------------------------------------------------------------
 
 using namespace android;
@@ -47,7 +49,7 @@ jfieldID checkFieldId(JNIEnv* env, jfieldID fieldId)
     return fieldId;
 }
 
-SDL_Surface* 
+SDL_Surface*
 android_sdl_SDLSurface_getNativeStruct(JNIEnv* env, jobject thiz)
 {
     return (SDL_Surface*)env->GetIntField(thiz, fields.mNativePointer);
@@ -164,6 +166,19 @@ android_sdl_SDLSurface_getClipRect(JNIEnv *env, jobject thiz)
     return android_sdl_SDLRect_create(&surface->clip_rect);
 }
 
+static jboolean
+android_sdl_SDLSurface_getPixels(JNIEnv* env, jobject thiz, jobject jbuffer, jint size) {
+	SDL_Surface* surface = android_sdl_SDLSurface_getNativeStruct(env, thiz);
+    if(surface == NULL) {
+        return JNI_FALSE;
+    }
+
+    android::AutoBufferPointer abp(env, jbuffer, JNI_TRUE);
+    // the java side has already checked that buffer is large enough
+    memcpy(abp.pointer(), surface->pixels, size);
+    return JNI_TRUE;
+}
+
 static JNINativeMethod gMethods[] = {
     {"native_init",         "()V",                              (void *)android_sdl_SDLSurface_native_init},
     {"native_finalize",     "()V",                              (void *)android_sdl_SDLSurface_native_finalize},
@@ -176,6 +191,7 @@ static JNINativeMethod gMethods[] = {
     {"getClipRect",         "()Landroid/sdl/SDLRect;",          (void *)android_sdl_SDLSurface_getClipRect},
     {"getRefCount",         "()I",                              (void *)android_sdl_SDLSurface_getRefCount},
     {"getFormatVersion",    "()J",                              (void *)android_sdl_SDLSurface_getFormatVersion},
+    {"getPixels",           "(Ljava/nio/ByteBuffer;I)Z",       (void *)android_sdl_SDLSurface_getPixels},
 };
 
 namespace android {

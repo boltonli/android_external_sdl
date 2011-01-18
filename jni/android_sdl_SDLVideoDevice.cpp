@@ -19,7 +19,6 @@
 
 #include "SDLRuntime.h"
 #include <SDL_androidvideo.h>
-#include <utils/Log.h>
 
 // ----------------------------------------------------------------------------
 

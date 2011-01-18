@@ -17,6 +17,8 @@
 
 package android.sdl;
 
+import java.nio.ByteBuffer;
+
 /** This structure should be treated as read-only, except for 'pixels',
  *  which, if not NULL, contains the raw pixel data for the surface.
  */
@@ -59,5 +61,7 @@ public class SDLSurface {
 
     /** format version, bumped at every change to invalidate blit maps */
     public native long getFormatVersion();
-	
+
+    public native boolean getPixels(ByteBuffer buffer, int size);
+
 }

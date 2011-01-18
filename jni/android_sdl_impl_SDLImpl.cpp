@@ -21,7 +21,6 @@
 #include <SDL_androidvideo.h>
 #include <SDL.h>
 #include <SDL_video.h>
-#include <utils/Log.h>
 
 // ----------------------------------------------------------------------------
 
