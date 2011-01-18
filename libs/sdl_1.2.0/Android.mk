@@ -22,7 +22,7 @@ SDL_SRCS := \
 	src/cdrom/dummy/*.c \
 	src/thread/pthread/*.c \
 	src/timer/unix/*.c \
-	src/loadso/dlopen/*.c \
+	src/loadso/dlopen/*.c
 
 ifeq ($(IN_NDK),true)
 SDL_SRCS += \
