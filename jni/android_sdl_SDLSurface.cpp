@@ -167,7 +167,7 @@ android_sdl_SDLSurface_getClipRect(JNIEnv *env, jobject thiz)
 }
 
 static jboolean
-android_sdl_SDLSurface_getPixels(JNIEnv* env, jobject thiz, jobject jbuffer, jint size) {
+android_sdl_SDLSurface_getPixels(JNIEnv* env, jobject thiz, jobject jbuffer) {
 	SDL_Surface* surface = android_sdl_SDLSurface_getNativeStruct(env, thiz);
     if(surface == NULL) {
         return JNI_FALSE;
@@ -175,7 +175,7 @@ android_sdl_SDLSurface_getPixels(JNIEnv* env, jobject thiz, jobject jbuffer, jin
 
     android::AutoBufferPointer abp(env, jbuffer, JNI_TRUE);
     // the java side has already checked that buffer is large enough
-    memcpy(abp.pointer(), surface->pixels, size);
+    memcpy(abp.pointer(), surface->pixels, surface->w * surface->h * (surface->pitch * 8 / surface->w));
     return JNI_TRUE;
 }
 
@@ -191,7 +191,7 @@ static JNINativeMethod gMethods[] = {
     {"getClipRect",         "()Landroid/sdl/SDLRect;",          (void *)android_sdl_SDLSurface_getClipRect},
     {"getRefCount",         "()I",                              (void *)android_sdl_SDLSurface_getRefCount},
     {"getFormatVersion",    "()J",                              (void *)android_sdl_SDLSurface_getFormatVersion},
-    {"getPixels",           "(Ljava/nio/ByteBuffer;I)Z",       (void *)android_sdl_SDLSurface_getPixels},
+    {"nativeGetPixels",     "(Ljava/nio/ByteBuffer;)Z",         (void *)android_sdl_SDLSurface_getPixels},
 };
 
 namespace android {

@@ -18,6 +18,7 @@
 package android.sdl;
 
 import java.nio.ByteBuffer;
+import java.lang.IllegalArgumentException;
 
 /** This structure should be treated as read-only, except for 'pixels',
  *  which, if not NULL, contains the raw pixel data for the surface.
@@ -62,6 +63,15 @@ public class SDLSurface {
     /** format version, bumped at every change to invalidate blit maps */
     public native long getFormatVersion();
 
-    public native boolean getPixels(ByteBuffer buffer, int size);
+    private native boolean nativeGetPixels(ByteBuffer buffer);
+    public boolean getPixels(ByteBuffer buffer) throws IllegalArgumentException {
+        int size = buffer.capacity();
+		int expectedSize = getW() * getH() * (getPitch() * 8 / getW());
+		if(size < expectedSize) {
+            throw new IllegalArgumentException("Buffer is too small![" +
+                size + "<" + expectedSize + "]");
+        }
+        return nativeGetPixels(buffer);
+    }
 
 }
