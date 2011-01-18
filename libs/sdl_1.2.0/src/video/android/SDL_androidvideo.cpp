@@ -2,7 +2,7 @@
 #include <android/log.h>
 #include <stdlib.h>
 
-#define CLASS_PATH "SDL_androidvideo.cpp"
+#define LOG_TAG "SDL_androidvideo.cpp"
 
 static SDLVideoDriver *thiz = NULL;
 
@@ -20,7 +20,7 @@ SDLVideoDriver *SDLVideoDriver::getInstance() {
 
 void SDLVideoDriver::registerListener(SDLVideoDriverListener *listener) {
     mListener = listener;
-    __android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "listener registred");
+    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "listener registred");
 }
 
 void SDLVideoDriver::unregisterListener() {
@@ -85,7 +85,7 @@ SDL_VideoDevice *SDLVideoDriver::onCreateDevice(int devindex) {
         return 0;
     }
 	
-	__android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "device creating");
+    //__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "device creating");
 	
     /* Set the function pointers */
     thiz->device->VideoInit = SDLVideoDriver::onVideoInit;
@@ -115,7 +115,7 @@ SDL_VideoDevice *SDLVideoDriver::onCreateDevice(int devindex) {
 	
     thiz->mListener->notify(SDL_NATIVE_VIDEO_CREATE_DEVICE, 0, 0, (void*) thiz->device);
 
-    __android_log_print(ANDROID_LOG_INFO, CLASS_PATH, "device created");
+    //__android_log_print(ANDROID_LOG_INFO, LOG_TAG, "device created");
     return thiz->device;
 }
 
@@ -134,6 +134,7 @@ SDL_Rect **SDLVideoDriver::onListModes(_THIS, SDL_PixelFormat *format, Uint32 fl
 }
 
 SDL_Surface *SDLVideoDriver::onSetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags) {
+    unsigned char* pixels;
     if(self == NULL)
         return NULL;
 	
@@ -143,15 +144,15 @@ SDL_Surface *SDLVideoDriver::onSetVideoMode(_THIS, SDL_Surface *current, int wid
         return NULL;
     }
 
-    if(thiz->mPixelBuffer)
-        SDL_free(thiz->mPixelBuffer);
+    if(thiz->mSurface)
+        SDL_free(thiz->mSurface);
 
-    thiz->mPixelBuffer = (unsigned char *) SDL_malloc(width * height * (bpp / 8));
-    if (!thiz->mPixelBuffer) {
-        SDL_SetError("Couldn't allocate buffer for requested mode");
-        return(NULL);
+    pixels = (unsigned char *) SDL_malloc(width * height * (bpp / 8));
+    if (!pixels) {
+        SDL_SetError("Couldn't allocate pixels for requested mode");
+        return NULL;
     }
-    SDL_memset(thiz->mPixelBuffer, 0, width * height * (bpp / 8));
+    SDL_memset(pixels, 0, width * height * (bpp / 8));
 
     // create bitmap where will sdl render pixels for android
     //thiz->initBitmap(PIXEL_FORMAT_RGB_565, width, height);
@@ -161,9 +162,11 @@ SDL_Surface *SDLVideoDriver::onSetVideoMode(_THIS, SDL_Surface *current, int wid
     current->w = width;
     current->h = height;
     current->pitch = current->w * (bpp / 8);
-    current->pixels = thiz->mPixelBuffer;
-	
+    current->pixels = pixels;
+
     thiz->mListener->notify(SDL_NATIVE_VIDEO_SET_SURFACE, 0, 0, (void*) current);
+    thiz->mSurface = current;
+
     /* We're done */
     return current;
 }
@@ -208,7 +211,7 @@ void SDLVideoDriver::onUpdateRects(_THIS, int numrects, SDL_Rect *rects) {
         return;
     }
 */
-    thiz->mListener->notify(SDL_NATIVE_VIDEO_UPDATE_RECTS, 0, 0, (void*) &thiz->mPixelBuffer);
+    thiz->mListener->notify(SDL_NATIVE_VIDEO_UPDATE_RECTS, 0, 0, (void*) thiz->mSurface);
 }
 
 /* ANDROID driver bootstrap functions */

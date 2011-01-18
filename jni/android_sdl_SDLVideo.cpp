@@ -82,7 +82,7 @@ private:
     Surface*                mSurface;   // Android surface class
     void                    updateScreen(SkBitmap *bitmap);
 #endif
-    void*                   mPixels;
+    SDL_Surface*            mSdlSurface;
     jclass                  mClass;     // Reference to MediaPlayer class
     jobject                 mObject;    // Weak ref to MediaPlayer Java object to call on
 };
@@ -199,7 +199,7 @@ void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
             break;
 #endif
         case SDL_NATIVE_VIDEO_UPDATE_RECTS:
-            mPixels = (void *) data;
+            mSdlSurface = (SDL_Surface *) data;
             break;
     }
     // than call java to process class represents sdl struct
@@ -207,7 +207,7 @@ void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
 }
 
 bool JNISDLVideoDriverListener::copyPixelsToJavaBuffer(JNIEnv* env, jobject jbuffer, jint size) {
-    if(mPixels == NULL) {
+    if(mSdlSurface == NULL) {
         return false;
     }
 
@@ -215,7 +215,7 @@ bool JNISDLVideoDriverListener::copyPixelsToJavaBuffer(JNIEnv* env, jobject jbuf
 
     android::AutoBufferPointer abp(env, jbuffer, JNI_TRUE);
     // the java side has already checked that buffer is large enough
-    memcpy(abp.pointer(), mPixels, 50);
+    memcpy(abp.pointer(), mSdlSurface->pixels, 50);
 
 //    for(int i=0;i<100;i++)
 //        __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Pixel %i is %i", i, ((unsigned char *)mPixels)[i]);
@@ -230,7 +230,7 @@ bool JNISDLVideoDriverListener::copyPixelsToJavaBitmap(JNIEnv* env, jobject jbit
     int                ret;
     void*              pixels;
 
-    if(mPixels == NULL) {
+    if(mSdlSurface == NULL) {
         return false;
     }
     
@@ -249,8 +249,11 @@ bool JNISDLVideoDriverListener::copyPixelsToJavaBitmap(JNIEnv* env, jobject jbit
         return false;
     }
 
-    memcpy(pixels, mPixels, 10000);
-//    memcpy(pixels, mPixels, info.height * info.width * 2);
+//    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "SdlSurface %ix%i bpp:%i", mSdlSurface->w, mSdlSurface->h, mSdlSurface->pitch);
+//    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Android bitmap %ix%i bpp:%i", info.width, info.height, info.format);
+
+//    memcpy(pixels, mSdlSurface->pixels, 10000);
+    memcpy(pixels, mSdlSurface->pixels, info.height * info.width * 2);
 
     AndroidBitmap_unlockPixels(env, jbitmap);
     return true;

@@ -60,16 +60,13 @@ public class SDLVideo extends SurfaceView {
     }
     
     /****** Android surface information *******/
-    private int mSurfaceFormat;
-    private int mSurfaceWidth;
-    private int mSurfaceHeight;
     private SurfaceHolder mSurfaceHolder;
     
     /****** Callbacks variables *******/
     private SDLVideoPreparedClb mPreparedClb;
     private SDLVideoSetSurfaceClb mSurfaceClb;
     private SDLVideoPumpEventsClb mEventsClb;
-    private SDLVideoUpdateRectsClb mUpdateClb;
+    //private SDLVideoUpdateRectsClb mUpdateClb;
     private SDLVideoSetCaptionClb mCaptionClb;
     private SDLVideoSurfaceChangedClb mSurfaceChangedClb;
     
@@ -118,10 +115,6 @@ public class SDLVideo extends SurfaceView {
     	
     	public void surfaceChanged(SurfaceHolder holder, int format, int width,	int height) {
             Log.d(TAG, "surface changed: format=" + format + ", res=" + width + "x" + height);
-            mSurfaceFormat = format;
-            mSurfaceWidth = width;
-            mSurfaceHeight = height;
-            mSurfaceHolder = holder;
             if(mSurfaceChangedClb != null) {
                 mSurfaceChangedClb.onSurfaceChanged(format, width, height);
             }
@@ -232,9 +225,7 @@ public class SDLVideo extends SurfaceView {
 		SDLPixelFormat pformat = surface.getPixelFormat();
 		Log.d(TAG, "bits per pixel: " + pformat.getBitsPerPixel());
 		Log.d(TAG, "bytes per pixel: " + pformat.getBytesPerPixel());
-		
-		//mPixelBuffer = ByteBuffer.allocate(surface.getW() * 
-		//		surface.getH() * pformat.getBytesPerPixel());
+
 		mSdlBitmap = Bitmap.createBitmap(surface.getW(), surface.getH(), Bitmap.Config.RGB_565);
 		
 		if(mSurfaceClb != null) {
@@ -259,21 +250,27 @@ public class SDLVideo extends SurfaceView {
     	}
     	mFpsCounter++;
     }
-    
-    // this event isn't invoked into java and drawing is written in c++
+
     private void handleVideoDeviceUpdateRects(SDLRect[] rects) {
-    	printFps();
+ //   	printFps();
     	
     	if(mSdlBitmap == null) {
     		return;
     	}
     	
-		//nativeCopyPixelsToBuffer(mNativePointer, mPixelBuffer, mPixelBuffer.capacity());
+    	// copy sdl pixels into our bitmap
     	nativeCopyPixelsToBitmap(mNativePointer, mSdlBitmap);
-		
-		Canvas c = mSurfaceHolder.lockCanvas();
+    	
+    	// draw our bitmap, which is consists from sdl pixels
+    	// into screen
+    	SurfaceHolder holder = getHolder();
+		Canvas c = holder.lockCanvas();
 		c.drawBitmap(mSdlBitmap, 0, 0, null);
-		mSurfaceHolder.unlockCanvasAndPost(c);
+		if(getWidth() != mSdlBitmap.getWidth() || 
+				getHeight() != mSdlBitmap.getHeight()) {
+		    c.scale(getWidth() / mSdlBitmap.getWidth(), getHeight() / mSdlBitmap.getHeight());
+		}
+		holder.unlockCanvasAndPost(c);
 	    //if(mUpdateClb != null) {
 	    //    mUpdateClb.onUpdateRects(rects);
 	    //}
@@ -289,9 +286,9 @@ public class SDLVideo extends SurfaceView {
  	    mEventsClb = clb;
     }
 
-    public void registerCallback(SDLVideoUpdateRectsClb clb) {
- 	    mUpdateClb = clb;
-    }
+    //public void registerCallback(SDLVideoUpdateRectsClb clb) {
+ 	//    mUpdateClb = clb;
+    //}
     
     public void registerCallback(SDLVideoPreparedClb clb) {
  	    mPreparedClb = clb;
@@ -339,8 +336,8 @@ public class SDLVideo extends SurfaceView {
 	    public void onPumpEvents();
     }
 
-    public interface SDLVideoUpdateRectsClb {
-	    public void onUpdateRects(SDLRect[] rects);
-    }
+    //public interface SDLVideoUpdateRectsClb {
+	//    public void onUpdateRects(SDLRect[] rects);
+    //}
 
 }
