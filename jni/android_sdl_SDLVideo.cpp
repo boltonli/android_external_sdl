@@ -43,6 +43,9 @@ static const char* const kClassPathName = "android/sdl/SDLVideo";
 //-- helper methods for creating java classes representing SDL native structs
 
 extern jobject
+android_sdl_SDLRect_create(SDL_Rect* rect);
+
+extern jobject
 android_sdl_SDLPixelFormat_create(SDL_PixelFormat* pformat);
 
 extern jobject
@@ -147,12 +150,31 @@ void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
             obj = android_sdl_SDLWindow_create((SDL_Window*)data);
             break;
 #endif
-//        case SDL_NATIVE_VIDEO_UPDATE_RECTS:
-//            SDL_RECTS *rectangles = (SDL_RECTS *) data;
-//            break;
+/*
+        case SDL_NATIVE_VIDEO_UPDATE_RECTS:
+            SDL_RECTS *rectangles = (SDL_RECTS *) data;
+            obj = (jobjectArray) env->NewObjectArray(rectangles->numrects, 
+                env->FindClass("android/sdl/SDLRect"), NULL);
+
+            for(int i=0;i<rectangles->numrects;i++) {
+                env->SetObjectArrayElement((jobjectArray) obj, i, 
+                    android_sdl_SDLRect_create(&rectangles->rects[i]));
+            }
+            break;
+*/
     }
     // than call java to process class represents sdl struct
     env->CallStaticVoidMethod(mClass, fields.post_event, mObject, what, arg1, arg2, obj);
+
+/*
+    if(what == SDL_NATIVE_VIDEO_UPDATE_RECTS) {
+        SDL_RECTS *rectangles = (SDL_RECTS *) data;
+        for(int i=0;i<rectangles->numrects;i++) {
+            jobject o = (jobject) env->GetObjectArrayElement((jobjectArray)obj, i);
+            SDLRuntime::freeObject(env, o);
+        }
+    }
+*/
 }
 
 /*

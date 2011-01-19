@@ -170,9 +170,8 @@ public class SDLVideo extends SurfaceView {
 		    handleVideoDevicePumpEvents();
 			break;
 	    case SDLNativeEvents.SDL_NATIVE_VIDEO_UPDATE_RECTS:
-		    //SDLRect[] rects = (SDLRect[]) obj;
-	    	//SDLSurface surf = (SDLSurface) obj;
-		    handleVideoDeviceUpdateRects(/*surf*/);
+		    SDLRect[] rects = (SDLRect[]) obj;
+		    handleVideoDeviceUpdateRects(rects);
 		    break;
 		case SDLNativeEvents.SDL_NATIVE_VIDEO_SET_CAPTION:
 			String caption = (String) obj; 
@@ -252,13 +251,19 @@ public class SDLVideo extends SurfaceView {
     	mFpsCounter++;
     }
 
-    private void handleVideoDeviceUpdateRects(/*SDLSurface surface*/) {
+    private void handleVideoDeviceUpdateRects(SDLRect[] rects) {
  //   	printFps();
     	
     	if(mSdlBitmap == null || 
     			mSdlSurface == null) {
     		return;
     	}
+    	
+/*
+    	for(int i=0;i<rects.length;i++) {
+    		Log.d(TAG, "Rectangle " + i + ": x=" + rects[i].getX() + ", y=" + rects[i].getY());
+    	}
+ */
     	
     	// copy sdl pixels into our bitmap
     	nativeCopyPixelsToBitmap(mNativePointer, mSdlSurface, mSdlBitmap);

@@ -69,7 +69,19 @@ SDLRuntime::~SDLRuntime()
 		doThrow(env, "java/lang/RuntimeException", "Can't invoke constructor");
 		return NULL;
 	}
-	return obj;
+	return env->NewLocalRef(obj);
+}
+
+/*static*/ jboolean SDLRuntime::freeObject(JNIEnv* env, jobject obj) 
+{
+        jclass clazz = env->GetObjectClass(obj);
+        if (clazz == NULL) {
+		doThrow(env, "java/lang/RuntimeException", "Can't class for object");
+		return JNI_FALSE;
+	}
+        env->DeleteLocalRef(obj); 
+        env->DeleteLocalRef(clazz);
+	return JNI_TRUE;
 }
 	
 /*

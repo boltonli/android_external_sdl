@@ -49,7 +49,7 @@ SDL_Rect* getNativeStruct(JNIEnv* env, jobject thiz)
 }
 
 jobject
-android_sdl_SDLRect_create(SDL_Rect* color)
+android_sdl_SDLRect_create(SDL_Rect* rect)
 {
     jobject obj;
     JNIEnv* env = SDLRuntime::getJNIEnv();
@@ -64,8 +64,7 @@ android_sdl_SDLRect_create(SDL_Rect* color)
 	return NULL;
     }
 	
-    env->SetIntField(obj, fields.mNativePointer, (jint)color);
-	
+    env->SetIntField(obj, fields.mNativePointer, (jint)rect);
     return obj;
 }
 

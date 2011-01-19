@@ -40,6 +40,8 @@ public:
     static void doThrow(JNIEnv* env, const char* exc, const char* msg = NULL);
 	
     static jobject createObject(JNIEnv* env, jclass clazz);
+
+    static jboolean freeObject(JNIEnv* env, jobject obj);
 	
     static int javaDetachThread(void);
 
