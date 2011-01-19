@@ -33,6 +33,11 @@ enum sdl_native_events {
     SDL_NATIVE_VIDEO_FREE_HW_SURFACE = 12,
 };
 
+typedef struct {
+    SDL_Rect *rects;
+    int numrects;
+} SDL_RECTS;
+
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *self
 
@@ -68,12 +73,8 @@ public:
 
 private:
 	SDL_VideoDevice *device;
-//	SkBitmap mBitmap;
-//      unsigned char *mPixelBuffer;
         SDL_Surface *mSurface;
 	SDLVideoDriverListener* mListener;
-
-	void initBitmap(int format, int width, int height);
 	
 	/* Initialization/Query functions */
 	static int onVideoInit(_THIS, SDL_PixelFormat *vformat);

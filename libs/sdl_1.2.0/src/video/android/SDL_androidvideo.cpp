@@ -30,43 +30,6 @@ void SDLVideoDriver::unregisterListener() {
     free(mListener);
 }
 
-/*
-void SDLVideoDriver::setBitmapConfig(SkBitmap *bitmap, int format, int width, int height) {
-     switch (format) {
-        case PIXEL_FORMAT_RGBA_8888:
-            bitmap->setConfig(SkBitmap::kARGB_8888_Config, width, height);
-            break;
-
-        case PIXEL_FORMAT_RGBA_4444:
-            bitmap->setConfig(SkBitmap::kARGB_4444_Config, width, height);
-            break;
-
-        case PIXEL_FORMAT_RGB_565:
-            bitmap->setConfig(SkBitmap::kRGB_565_Config, width, height);
-            break;
-
-        case PIXEL_FORMAT_A_8:
-            bitmap->setConfig(SkBitmap::kA8_Config, width, height);
-            break;
-
-        default:
-            bitmap->setConfig(SkBitmap::kNo_Config, width, height);
-            break;
-    }
-}
-
-void SDLVideoDriver::initBitmap(int format, int width, int height) {
-    //-- set screen bitmap(sdl) config based on format
-    setBitmapConfig(&mBitmap, format, width, height);
-    mBitmap.setIsOpaque(true);
-
-    //-- alloc array of pixels
-    if(!mBitmap.allocPixels()) {
-        SDL_SetError("Failed to alloc bitmap pixels");
-    }
-}
-*/
-
 /* Initialization/Query functions */
 SDL_VideoDevice *SDLVideoDriver::onCreateDevice(int devindex) {
     // if class isn't yet initzialized, we will do it
@@ -204,14 +167,14 @@ void SDLVideoDriver::onSetCaption(_THIS, const char *title, const char *icon) {
 
 /* etc. */
 void SDLVideoDriver::onUpdateRects(_THIS, int numrects, SDL_Rect *rects) {
-/*
-    if(thiz->mBitmap.width() == 0 || thiz->mBitmap.height() == 0) {
-        __android_log_print(ANDROID_LOG_ERROR, CLASS_PATH, "Bitmap is too small %ix%i",
-                thiz->mBitmap.width(), thiz->mBitmap.height());
-        return;
-    }
-*/
-    thiz->mListener->notify(SDL_NATIVE_VIDEO_UPDATE_RECTS, 0, 0, (void*) thiz->mSurface);
+    //for(int i=0;i<numrects;i++) {
+    //    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, 
+    //        "rect %i: x=%i, y=%i, res:%ix%i", i, rects[i].x, rects[i].y, rects[i].w, rects[i].h);
+    //}
+    SDL_RECTS rectangles;
+    rectangles.rects = rects;
+    rectangles.numrects = numrects;
+    thiz->mListener->notify(SDL_NATIVE_VIDEO_UPDATE_RECTS, 0, 0, (void*) &rectangles);
 }
 
 /* ANDROID driver bootstrap functions */

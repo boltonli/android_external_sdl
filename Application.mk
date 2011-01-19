@@ -1,6 +1,6 @@
 APP_PROJECT_PATH 	:= $(call my-dir)
 IN_NDK 			:= true
-TEST                    := false
+TEST                    := true
 STATIC_BUILD            := true
 APP_PLATFORM            := android-4
 APP_BUILD_SCRIPT        := $(APP_PROJECT_PATH)/Android.mk

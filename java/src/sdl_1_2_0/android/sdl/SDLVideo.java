@@ -25,8 +25,6 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
-import java.nio.Buffer;
-//import java.nio.ByteBuffer;
 import java.lang.ref.WeakReference;
 
 public class SDLVideo extends SurfaceView {
@@ -72,13 +70,14 @@ public class SDLVideo extends SurfaceView {
     
     //private ByteBuffer mPixelBuffer;
     private Bitmap mSdlBitmap;
+    private SDLSurface mSdlSurface;
 	
     // registers fields and methods
     private static native final void native_init(int sdk_version);
     private native final void native_setup(Object mediaplayer_this, Surface surface);
     private native final void native_finalize();
-    private native boolean nativeCopyPixelsToBuffer(int native_listener, Buffer buffer, int buffer_size);
-    private native boolean nativeCopyPixelsToBitmap(int native_listener, Bitmap bitmap);
+    //private native boolean nativeCopyPixelsToBuffer(int native_listener, Buffer buffer, int buffer_size);
+    private native boolean nativeCopyPixelsToBitmap(int native_listener, SDLSurface surface, Bitmap bitmap);
 
     private int mNativePointer;
 
@@ -171,8 +170,9 @@ public class SDLVideo extends SurfaceView {
 		    handleVideoDevicePumpEvents();
 			break;
 	    case SDLNativeEvents.SDL_NATIVE_VIDEO_UPDATE_RECTS:
-		    SDLRect[] rects = (SDLRect[]) obj; 
-		    handleVideoDeviceUpdateRects(rects);
+		    //SDLRect[] rects = (SDLRect[]) obj;
+	    	//SDLSurface surf = (SDLSurface) obj;
+		    handleVideoDeviceUpdateRects(/*surf*/);
 		    break;
 		case SDLNativeEvents.SDL_NATIVE_VIDEO_SET_CAPTION:
 			String caption = (String) obj; 
@@ -226,6 +226,7 @@ public class SDLVideo extends SurfaceView {
 		Log.d(TAG, "bits per pixel: " + pformat.getBitsPerPixel());
 		Log.d(TAG, "bytes per pixel: " + pformat.getBytesPerPixel());
 
+		mSdlSurface = surface;
 		mSdlBitmap = Bitmap.createBitmap(surface.getW(), surface.getH(), Bitmap.Config.RGB_565);
 		
 		if(mSurfaceClb != null) {
@@ -251,15 +252,16 @@ public class SDLVideo extends SurfaceView {
     	mFpsCounter++;
     }
 
-    private void handleVideoDeviceUpdateRects(SDLRect[] rects) {
+    private void handleVideoDeviceUpdateRects(/*SDLSurface surface*/) {
  //   	printFps();
     	
-    	if(mSdlBitmap == null) {
+    	if(mSdlBitmap == null || 
+    			mSdlSurface == null) {
     		return;
     	}
     	
     	// copy sdl pixels into our bitmap
-    	nativeCopyPixelsToBitmap(mNativePointer, mSdlBitmap);
+    	nativeCopyPixelsToBitmap(mNativePointer, mSdlSurface, mSdlBitmap);
     	
     	// draw our bitmap, which is consists from sdl pixels
     	// into screen

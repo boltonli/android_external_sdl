@@ -20,12 +20,6 @@
 #include "SDLRuntime.h"
 #include <SDL_androidvideo.h>
 
-#if SDL_BUILD_VERSION == 1 && IN_NDK != true
-#include <SkBitmap.h>
-#include <SkCanvas.h>
-#include <SkMatrix.h>
-#endif
-
 #include <android/log.h>
 #include <android/bitmap.h>
 #include <android/android_nio_utils.h>
@@ -57,6 +51,9 @@ android_sdl_SDLVideoDevice_create(SDL_VideoDevice* device);
 extern jobject
 android_sdl_SDLSurface_create(SDL_Surface* surface);
 
+extern SDL_Surface* 
+android_sdl_SDLSurface_getNativeStruct(JNIEnv* env, jobject thiz);
+
 #if SDL_BUILD_VERSION == 2
 extern jobject
 android_sdl_SDLWindow_create(SDL_Window* win);
@@ -75,14 +72,9 @@ public:
     JNISDLVideoDriverListener(JNIEnv* env, jobject thiz, jobject weak_thiz, jobject surface);
     ~JNISDLVideoDriverListener();
     void                    notify(int what, int arg1, int arg2, void* data);
-    bool                    copyPixelsToJavaBuffer(JNIEnv* env, jobject jbuffer, jint size);
-    bool                    copyPixelsToJavaBitmap(JNIEnv* env, jobject jbitmap);
+//    bool                    copyPixelsToJavaBuffer(JNIEnv* env, jobject jbuffer, jint size);
+    bool                    copyPixelsToJavaBitmap(JNIEnv* env, jobject jsurface, jobject jbitmap);
 private:
-#if SDL_BUILD_VERSION == 1 && IN_NDK != true
-    Surface*                mSurface;   // Android surface class
-    void                    updateScreen(SkBitmap *bitmap);
-#endif
-    SDL_Surface*            mSdlSurface;
     jclass                  mClass;     // Reference to MediaPlayer class
     jobject                 mObject;    // Weak ref to MediaPlayer Java object to call on
 };
@@ -102,9 +94,6 @@ JNISDLVideoDriverListener::JNISDLVideoDriverListener(JNIEnv* env, jobject thiz, 
     // We use a weak reference so the MediaPlayer object can be garbage collected.
     // The reference is only used as a proxy for callbacks.
     mObject = env->NewGlobalRef(weak_thiz);
-#if SDL_BUILD_VERSION == 1 && IN_NDK != true
-    mSurface = (Surface *) env->GetIntField(surface, fields.surface_native);
-#endif
 }
 
 JNISDLVideoDriverListener::~JNISDLVideoDriverListener()
@@ -115,51 +104,10 @@ JNISDLVideoDriverListener::~JNISDLVideoDriverListener()
     env->DeleteGlobalRef(mClass);
 }
 
-#if SDL_BUILD_VERSION == 1 && IN_NDK != true
-/**
-  * Method which handles native redrawing screen
-  */
-void JNISDLVideoDriverListener::updateScreen(SkBitmap* bitmap)
-{
-    SkBitmap screen;
-    Surface::SurfaceInfo surfaceInfo;
-
-    if (!mSurface || !mSurface->isValid()) {
-        __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "nativeSurface wasn't valid");
-        return;
-    }
-
-    if (mSurface->lock(&surfaceInfo) < 0) {
-        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Failed to lock surface");
-        return;
-    }
-	
-    //__android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "updating screen: %ix%i", surfaceInfo.w, surfaceInfo.h);
-
-    //bitmap which is drawed on android surfaceview
-    SDLVideoDriver::setBitmapConfig(&screen, surfaceInfo.format, surfaceInfo.w, surfaceInfo.h);
-    screen.setPixels(surfaceInfo.bits);
-
-    SkCanvas canvas(screen);
-    SkRect surface_sdl;
-    SkRect surface_android;
-    SkMatrix matrix;
-    surface_android.set(0, 0, screen.width(), screen.height());
-    surface_sdl.set(0, 0, bitmap->width(), bitmap->height());
-    matrix.setRectToRect(surface_sdl, surface_android, SkMatrix::kFill_ScaleToFit);
-
-    canvas.drawBitmapMatrix(*bitmap, matrix);
-
-    if (mSurface->unlockAndPost() < 0) {
-        __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "Failed to unlock surface");
-    }
-}
-#endif
-
 // callback from libsdl which notify us about situation in sdl video driver
 void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
 {
-    JNIEnv *env;
+    JNIEnv *env = NULL;
     jobject obj = NULL;
 	
 #if SDL_BUILD_VERSION == 1 && IN_NDK != true
@@ -185,6 +133,7 @@ void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
 #endif
             break;
         case SDL_NATIVE_VIDEO_SET_SURFACE:
+//        case SDL_NATIVE_VIDEO_UPDATE_RECTS:
             obj = android_sdl_SDLSurface_create((SDL_Surface*) data);
             break;
 #if SDL_BUILD_VERSION == 1
@@ -198,39 +147,33 @@ void JNISDLVideoDriverListener::notify(int what, int arg1, int arg2, void* data)
             obj = android_sdl_SDLWindow_create((SDL_Window*)data);
             break;
 #endif
-        case SDL_NATIVE_VIDEO_UPDATE_RECTS:
-            mSdlSurface = (SDL_Surface *) data;
-            break;
+//        case SDL_NATIVE_VIDEO_UPDATE_RECTS:
+//            SDL_RECTS *rectangles = (SDL_RECTS *) data;
+//            break;
     }
     // than call java to process class represents sdl struct
     env->CallStaticVoidMethod(mClass, fields.post_event, mObject, what, arg1, arg2, obj);
 }
 
+/*
 bool JNISDLVideoDriverListener::copyPixelsToJavaBuffer(JNIEnv* env, jobject jbuffer, jint size) {
     if(mSdlSurface == NULL) {
         return false;
     }
-
-//    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Copying %i pixels into buffer", size);
-
     android::AutoBufferPointer abp(env, jbuffer, JNI_TRUE);
     // the java side has already checked that buffer is large enough
-    memcpy(abp.pointer(), mSdlSurface->pixels, 50);
-
-//    for(int i=0;i<100;i++)
-//        __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Pixel %i is %i", i, ((unsigned char *)mPixels)[i]);
-    
-//    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Pixels copyed into buffer");
-
+    //memcpy(abp.pointer(), mSdlSurface->pixels, 50);
     return true;
 }
+*/
 
-bool JNISDLVideoDriverListener::copyPixelsToJavaBitmap(JNIEnv* env, jobject jbitmap) {
+bool JNISDLVideoDriverListener::copyPixelsToJavaBitmap(JNIEnv* env, jobject jsurface, jobject jbitmap) {
     AndroidBitmapInfo  info;
     int                ret;
     void*              pixels;
 
-    if(mSdlSurface == NULL) {
+    SDL_Surface* surface = android_sdl_SDLSurface_getNativeStruct(env, jsurface);
+    if(surface == NULL) {
         return false;
     }
     
@@ -253,14 +196,14 @@ bool JNISDLVideoDriverListener::copyPixelsToJavaBitmap(JNIEnv* env, jobject jbit
 //    __android_log_print(ANDROID_LOG_INFO, LOG_TAG, "Android bitmap %ix%i bpp:%i", info.width, info.height, info.format);
 
 //    memcpy(pixels, mSdlSurface->pixels, 10000);
-    memcpy(pixels, mSdlSurface->pixels, info.height * info.width * 2);
+    memcpy(pixels, surface->pixels, info.height * info.width * 2);
 
     AndroidBitmap_unlockPixels(env, jbitmap);
     return true;
 }
 
 // ----------------------------------------------------------------------------
-
+/*
 static jboolean
 android_sdl_SDLVideo_nativeCopyPixelsToBuffer(JNIEnv* env, jobject obj, JNISDLVideoDriverListener* listener, jobject jbuffer, jint size) {
     if (listener == NULL) {
@@ -273,14 +216,15 @@ android_sdl_SDLVideo_nativeCopyPixelsToBuffer(JNIEnv* env, jobject obj, JNISDLVi
     }
     return JNI_TRUE;
 }
+*/
 
 static jboolean
-android_sdl_SDLVideo_nativeCopyPixelsToBitmap(JNIEnv* env, jobject obj, JNISDLVideoDriverListener* listener, jobject jbitmap) {
+android_sdl_SDLVideo_nativeCopyPixelsToBitmap(JNIEnv* env, jobject obj, JNISDLVideoDriverListener* listener, jobject jsurface, jobject jbitmap) {
     if (listener == NULL) {
         __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "nativeCopyPixelsToBitmap listener is NULL");
         return JNI_FALSE;
     }
-    if(!listener->copyPixelsToJavaBitmap(env, jbitmap)) {
+    if(!listener->copyPixelsToJavaBitmap(env, jsurface, jbitmap)) {
         __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, "copyPixelsToJavaBitmap couldn't copy pixels to java buffer");
         return JNI_FALSE;
     }
@@ -366,8 +310,8 @@ static JNINativeMethod gMethods[] = {
     {"native_init",                "(I)V",                                            (void *)android_sdl_SDLVideo_native_init},
     {"native_setup",               "(Ljava/lang/Object;Landroid/view/Surface;)V",     (void *)android_sdl_SDLVideo_native_setup},
     {"native_finalize",            "()V",                                             (void *)android_sdl_SDLVideo_native_finalize},
-    {"nativeCopyPixelsToBuffer",   "(ILjava/nio/Buffer;I)Z",                          (void *)android_sdl_SDLVideo_nativeCopyPixelsToBuffer},
-    {"nativeCopyPixelsToBitmap",   "(ILandroid/graphics/Bitmap;)Z",                   (void *)android_sdl_SDLVideo_nativeCopyPixelsToBitmap}
+//    {"nativeCopyPixelsToBuffer",   "(ILjava/nio/Buffer;I)Z",                          (void *)android_sdl_SDLVideo_nativeCopyPixelsToBuffer},
+    {"nativeCopyPixelsToBitmap",   "(ILandroid/sdl/SDLSurface;Landroid/graphics/Bitmap;)Z", (void *)android_sdl_SDLVideo_nativeCopyPixelsToBitmap}
 };
 
 namespace android {
