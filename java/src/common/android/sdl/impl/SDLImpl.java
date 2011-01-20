@@ -21,9 +21,7 @@ import android.content.Context;
 import android.sdl.SDLSurface;
 import android.sdl.SDLVideo;
 import android.util.Log;
-import android.view.SurfaceView;
 
-import android.sdl.SDLSurface;
 import android.sdl.SDLVersion;
 
 import java.lang.SecurityException;
@@ -92,6 +90,7 @@ public final class SDLImpl {
         Log.d(TAG, "loading java sdl library");
 		
 	try {
+		System.loadLibrary("sdl");
 	    System.loadLibrary("sdl_jni");
 	} catch (SecurityException ex) {
 	    Log.e(TAG, "couldn't load sdl native lib due to security exception");
