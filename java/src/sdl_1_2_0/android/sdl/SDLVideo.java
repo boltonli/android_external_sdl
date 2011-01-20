@@ -20,6 +20,7 @@ package android.sdl;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -272,11 +273,11 @@ public class SDLVideo extends SurfaceView {
     	// into screen
     	SurfaceHolder holder = getHolder();
 		Canvas c = holder.lockCanvas();
-		c.drawBitmap(mSdlBitmap, 0, 0, null);
-		if(getWidth() != mSdlBitmap.getWidth() || 
-				getHeight() != mSdlBitmap.getHeight()) {
-		    c.scale(getWidth() / mSdlBitmap.getWidth(), getHeight() / mSdlBitmap.getHeight());
-		}
+		
+		Rect sdlR = new Rect(0, 0, mSdlSurface.getW(), mSdlSurface.getH());
+		Rect androidR = new Rect(0, 0, getWidth(), getHeight());
+		c.drawBitmap(mSdlBitmap, sdlR, androidR, null);
+		
 		holder.unlockCanvasAndPost(c);
 	    //if(mUpdateClb != null) {
 	    //    mUpdateClb.onUpdateRects(rects);
