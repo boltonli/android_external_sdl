@@ -49,6 +49,7 @@ LOCAL_SHARED_LIBRARIES := \
 	libmedia \
 	libutils \
 	libbinder \
+        libsurfaceflinger_client \
 	liblog \
 	libdl
 
